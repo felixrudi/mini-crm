@@ -37,8 +37,8 @@
 
 <!-- Drawer -->
 <div
-  class="fixed inset-y-0 right-0 z-50 w-full sm:w-[480px] bg-surface shadow-2xl flex flex-col"
-  transition:fly={{ x: 480, duration: 250 }}
+  class="fixed inset-y-0 right-0 z-50 w-full sm:w-[640px] bg-surface shadow-2xl flex flex-col"
+  transition:fly={{ x: 640, duration: 250 }}
 >
   <!-- Header -->
   <div class="flex items-center justify-between px-6 py-4 border-b border-line flex-shrink-0">
