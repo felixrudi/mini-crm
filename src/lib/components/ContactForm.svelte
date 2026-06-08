@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Contact, Company } from '$lib/types';
   import { enhance } from '$app/forms';
-  import { toast } from 'svelte-sonner';
+  import { toast } from '$lib/toast';
   import X from '@lucide/svelte/icons/x';
 
   let {

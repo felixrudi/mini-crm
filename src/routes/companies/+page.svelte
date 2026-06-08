@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import { enhance } from '$app/forms';
-  import { toast } from 'svelte-sonner';
+  import { toast } from '$lib/toast';
   import type { Company } from '$lib/types';
   import Building2 from '@lucide/svelte/icons/building-2';
   import Plus from '@lucide/svelte/icons/plus';

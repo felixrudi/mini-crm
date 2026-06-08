@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import { enhance } from '$app/forms';
-  import { toast } from 'svelte-sonner';
+  import { toast } from '$lib/toast';
   import { invalidateAll } from '$app/navigation';
   import { formatDate, isOverdue } from '$lib/utils';
   import TimelineItem from '$lib/components/TimelineItem.svelte';

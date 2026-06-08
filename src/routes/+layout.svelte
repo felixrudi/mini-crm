@@ -2,7 +2,7 @@
   import '../app.css';
   import { page } from '$app/state';
   import { browser } from '$app/environment';
-  import { Toaster } from 'svelte-sonner';
+  import ToastContainer from '$lib/components/ToastContainer.svelte';
   import CommandPalette from '$lib/components/CommandPalette.svelte';
   import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
   import Users from '@lucide/svelte/icons/users';
@@ -30,8 +30,8 @@
   }
 </script>
 
+<ToastContainer />
 {#if browser}
-  <Toaster richColors position="top-right" />
   <CommandPalette bind:open={paletteOpen} />
 {/if}
 

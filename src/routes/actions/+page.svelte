@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import { enhance } from '$app/forms';
-  import { toast } from 'svelte-sonner';
+  import { toast } from '$lib/toast';
   import { formatDate, isOverdue } from '$lib/utils';
   import type { Action } from '$lib/types';
   import CheckSquare from '@lucide/svelte/icons/check-square';

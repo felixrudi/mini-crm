@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import { enhance } from '$app/forms';
-  import { toast } from 'svelte-sonner';
+  import { toast } from '$lib/toast';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import ContactForm from '$lib/components/ContactForm.svelte';

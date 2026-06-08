@@ -16,7 +16,6 @@
     "clsx": "^2.1.1",
     "postgres": "^3.4.5",
     "svelte": "^5.28.0",
-    "svelte-sonner": "^0.3.28",
     "tailwind-merge": "^2.5.4",
     "tailwindcss": "^4.0.0"
   },

@@ -2,7 +2,7 @@
   import type { Action } from '$lib/types';
   import { formatDate, isOverdue } from '$lib/utils';
   import { enhance } from '$app/forms';
-  import { toast } from 'svelte-sonner';
+  import { toast } from '$lib/toast';
   import CheckCircle2 from '@lucide/svelte/icons/check-circle-2';
   import Circle from '@lucide/svelte/icons/circle';
   import CalendarClock from '@lucide/svelte/icons/calendar-clock';
