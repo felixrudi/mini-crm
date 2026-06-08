@@ -42,11 +42,12 @@
 
     <nav class="flex-1 py-3 px-3 space-y-0.5">
       {#each navItems as item}
+        {@const Icon = item.icon}
         <a
           href={item.href}
           class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors {isActive(item.href) ? 'bg-terracotta text-white font-medium' : 'text-ink/70 hover:bg-cream hover:text-ink'}"
         >
-          <item.icon class="w-4 h-4 flex-shrink-0" />
+          <Icon class="w-4 h-4 flex-shrink-0" />
           {item.label}
         </a>
       {/each}
@@ -86,12 +87,13 @@
     <div class="md:hidden fixed inset-0 z-30 bg-ink/20" onclick={() => mobileMenuOpen = false}></div>
     <div class="md:hidden fixed top-[57px] left-0 right-0 z-40 bg-surface border-b border-line py-2 px-3 shadow-lg">
       {#each navItems as item}
+        {@const Icon = item.icon}
         <a
           href={item.href}
           onclick={() => mobileMenuOpen = false}
           class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors {isActive(item.href) ? 'bg-terracotta text-white font-medium' : 'text-ink/70 hover:bg-cream'}"
         >
-          <item.icon class="w-4 h-4" />
+          <Icon class="w-4 h-4" />
           {item.label}
         </a>
       {/each}
