@@ -22,8 +22,49 @@
   let editContact = $state<Contact | null>(null);
   let searchValue = $state(data.q ?? '');
   let deleteConfirm = $state<string | null>(null);
+  let photoCache = $state<Record<string, string>>({});
+  let avatarUploadId = $state<string | null>(null);
+  let avatarFileInput: HTMLInputElement;
 
   let debounceTimer: ReturnType<typeof setTimeout>;
+
+  async function handleAvatarChange(e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file || !avatarUploadId) return;
+    const targetId = avatarUploadId;
+    avatarUploadId = null;
+
+    // Client-side resize to max 400px
+    const resized = await resizeImage(file, 400);
+    const fd = new FormData();
+    fd.append('image', resized, 'photo.jpg');
+    const res = await fetch(`/api/contacts/${targetId}/photo`, { method: 'POST', body: fd });
+    if (res.ok) {
+      const d = await res.json();
+      photoCache[targetId] = d.photo;
+      toast.success('Foto gespeichert');
+    } else {
+      toast.error('Upload fehlgeschlagen');
+    }
+    (e.target as HTMLInputElement).value = '';
+  }
+
+  function resizeImage(file: File, maxSize: number): Promise<Blob> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const ratio = Math.min(maxSize / img.width, maxSize / img.height, 1);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(blob => resolve(blob!), 'image/jpeg', 0.85);
+      };
+      img.src = url;
+    });
+  }
 
   function handleSearch() {
     clearTimeout(debounceTimer);
@@ -99,12 +140,25 @@
             {#each data.contacts as contact}
               <tr class="hover:bg-cream/50 transition-colors">
                 <td class="px-4 py-3">
-                  <a href="/contacts/{contact.id}" class="flex items-center gap-2.5 group">
-                    <div class="w-8 h-8 rounded-full bg-terracotta/10 flex items-center justify-center flex-shrink-0">
-                      <span class="text-sm font-semibold text-terracotta">{contact.name?.charAt(0)?.toUpperCase()}</span>
-                    </div>
-                    <span class="text-sm font-medium text-ink group-hover:text-terracotta transition-colors">{contact.name}</span>
-                  </a>
+                  <div class="flex items-center gap-2.5">
+                    <button
+                      type="button"
+                      title="Foto hinzufügen"
+                      onclick={() => { avatarUploadId = contact.id; avatarFileInput.click(); }}
+                      class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-terracotta/40 transition-all"
+                    >
+                      {#if contact.photo || photoCache[contact.id]}
+                        <img src={contact.photo || photoCache[contact.id]} alt="" class="w-full h-full object-cover" />
+                      {:else}
+                        <div class="w-full h-full bg-terracotta/10 flex items-center justify-center">
+                          <span class="text-sm font-semibold text-terracotta">{contact.name?.charAt(0)?.toUpperCase()}</span>
+                        </div>
+                      {/if}
+                    </button>
+                    <a href="/contacts/{contact.id}" class="text-sm font-medium text-ink hover:text-terracotta transition-colors">
+                      {contact.name}
+                    </a>
+                  </div>
                 </td>
                 <td class="px-4 py-3">
                   {#if contact.company_name}
@@ -184,6 +238,15 @@
     </div>
   {/if}
 </div>
+
+<input
+  bind:this={avatarFileInput}
+  type="file"
+  accept="image/*"
+  capture="environment"
+  class="hidden"
+  onchange={handleAvatarChange}
+/>
 
 {#if showForm}
   <ContactForm

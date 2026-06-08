@@ -38,8 +38,16 @@
 <div class="flex h-screen bg-cream overflow-hidden">
   <!-- Sidebar Desktop -->
   <aside class="hidden md:flex flex-col w-56 bg-surface border-r border-line flex-shrink-0">
-    <div class="px-4 py-5 border-b border-line">
-      <img src="/logo.png" alt="Hirschfeld" class="h-16 w-auto object-contain" />
+    <div class="px-4 py-4 border-b border-line">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-terracotta flex items-center justify-center flex-shrink-0">
+          <span class="text-white font-bold text-sm font-display">H</span>
+        </div>
+        <div>
+          <div class="font-display font-bold text-sm text-ink leading-tight tracking-tight">Hirschfeld</div>
+          <div class="text-[10px] text-ink/40 leading-tight tracking-wide uppercase">CRM</div>
+        </div>
+      </div>
     </div>
 
     <nav class="flex-1 py-3 px-3 space-y-0.5">
@@ -69,7 +77,12 @@
 
   <!-- Mobile Header -->
   <div class="md:hidden fixed top-0 left-0 right-0 z-40 bg-surface border-b border-line flex items-center justify-between px-4 py-3">
-    <img src="/logo.png" alt="Hirschfeld" class="h-8 w-auto object-contain" />
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-md bg-terracotta flex items-center justify-center">
+        <span class="text-white font-bold text-xs font-display">H</span>
+      </div>
+      <span class="font-display font-bold text-sm text-ink">Hirschfeld CRM</span>
+    </div>
     <div class="flex items-center gap-2">
       <button onclick={() => paletteOpen = true} class="p-2 text-ink/60 hover:text-ink">
         <Search class="w-5 h-5" />

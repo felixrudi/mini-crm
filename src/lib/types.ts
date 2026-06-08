@@ -25,6 +25,7 @@ export type Contact = {
   linkedin_url: string | null;
   rolle: string | null;
   notizen: string | null;
+  photo: string | null;
   created_at: string;
   companies?: { name: string } | null;
   company_name?: string | null;
