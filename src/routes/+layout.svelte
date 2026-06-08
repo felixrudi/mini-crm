@@ -1,6 +1,7 @@
 <script lang="ts">
   import '../app.css';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
+  import { browser } from '$app/environment';
   import { Toaster } from 'svelte-sonner';
   import CommandPalette from '$lib/components/CommandPalette.svelte';
   import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
@@ -24,13 +25,15 @@
   ];
 
   function isActive(href: string): boolean {
-    if (href === '/') return $page.url.pathname === '/';
-    return $page.url.pathname.startsWith(href);
+    if (href === '/') return page.url.pathname === '/';
+    return page.url.pathname.startsWith(href);
   }
 </script>
 
-<Toaster richColors position="top-right" />
-<CommandPalette bind:open={paletteOpen} />
+{#if browser}
+  <Toaster richColors position="top-right" />
+  <CommandPalette bind:open={paletteOpen} />
+{/if}
 
 <div class="flex h-screen bg-cream overflow-hidden">
   <!-- Sidebar Desktop -->
