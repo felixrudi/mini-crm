@@ -10,6 +10,14 @@ export type Contact = {
   id: string;
   company_id: string | null;
   name: string;
+  vorname: string | null;
+  nachname: string | null;
+  titel: string | null;
+  anrede: 'Herr' | 'Frau' | null;
+  strasse: string | null;
+  plz: string | null;
+  ort: string | null;
+  geburtstag: string | null;
   email: string | null;
   telefon: string | null;
   whatsapp: string | null;

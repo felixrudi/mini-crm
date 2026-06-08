@@ -50,10 +50,18 @@ export const actions: Actions = {
   },
   update_contact: async ({ request, params }) => {
     const d = await request.formData();
-    await sql`UPDATE contacts SET company_id=${d.get('company_id') || null}, name=${d.get('name')},
-      email=${d.get('email') || null}, telefon=${d.get('telefon') || null}, whatsapp=${d.get('whatsapp') || null},
-      wechat_id=${d.get('wechat_id') || null}, linkedin_url=${d.get('linkedin_url') || null},
-      rolle=${d.get('rolle') || null}, notizen=${d.get('notizen') || null} WHERE id=${params.id}`;
+    const name = (d.get('name') as string)?.trim() || 'Unbekannt';
+    await sql`UPDATE contacts SET
+      company_id=${d.get('company_id') || null}, name=${name},
+      vorname=${d.get('vorname') || null}, nachname=${d.get('nachname') || null},
+      titel=${d.get('titel') || null}, anrede=${d.get('anrede') || null},
+      strasse=${d.get('strasse') || null}, plz=${d.get('plz') || null}, ort=${d.get('ort') || null},
+      geburtstag=${d.get('geburtstag') || null},
+      email=${d.get('email') || null}, telefon=${d.get('telefon') || null},
+      whatsapp=${d.get('whatsapp') || null}, wechat_id=${d.get('wechat_id') || null},
+      linkedin_url=${d.get('linkedin_url') || null}, rolle=${d.get('rolle') || null},
+      notizen=${d.get('notizen') || null}
+      WHERE id=${params.id}`;
     return { success: true };
   }
 };
