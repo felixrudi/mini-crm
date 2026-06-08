@@ -140,7 +140,7 @@
   }
 </script>
 
-<div class="px-4 py-4 md:px-6 md:py-6 max-w-4xl mx-auto">
+<div class="px-4 py-4 md:px-6 md:py-6 max-w-4xl mx-auto overflow-x-hidden">
   <!-- Back -->
   <a href="/contacts" class="inline-flex items-center gap-1.5 text-sm text-ink/50 hover:text-ink transition-colors mb-6">
     <ArrowLeft class="w-4 h-4" />
@@ -287,7 +287,7 @@
   </div>
 
   <!-- Tabs -->
-  <div class="flex gap-1 bg-surface border border-line rounded-lg p-1 mb-6 w-fit max-w-full overflow-x-auto">
+  <div class="flex gap-1 bg-surface border border-line rounded-lg p-1 mb-6 w-full overflow-x-auto">
     {#each [['timeline', 'Timeline'], ['actions', `Aufgaben (${openActions.length})`], ['details', 'Details'], ['dateien', 'Dateien']] as [tab, label]}
       <button
         onclick={() => activeTab = tab as typeof activeTab}
