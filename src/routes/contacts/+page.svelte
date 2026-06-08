@@ -145,13 +145,13 @@
                       type="button"
                       title="Foto hinzufügen"
                       onclick={() => { avatarUploadId = contact.id; avatarFileInput.click(); }}
-                      class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-terracotta/40 transition-all"
+                      class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-terracotta/40 transition-all"
                     >
                       {#if contact.photo || photoCache[contact.id]}
                         <img src={contact.photo || photoCache[contact.id]} alt="" class="w-full h-full object-cover" />
                       {:else}
                         <div class="w-full h-full bg-terracotta/10 flex items-center justify-center">
-                          <span class="text-sm font-semibold text-terracotta">{contact.name?.charAt(0)?.toUpperCase()}</span>
+                          <span class="text-base font-semibold text-terracotta">{contact.name?.charAt(0)?.toUpperCase()}</span>
                         </div>
                       {/if}
                     </button>

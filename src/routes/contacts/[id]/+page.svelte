@@ -75,7 +75,7 @@
   }
 </script>
 
-<div class="p-6 max-w-4xl mx-auto">
+<div class="px-4 py-4 md:px-6 md:py-6 max-w-4xl mx-auto">
   <!-- Back -->
   <a href="/contacts" class="inline-flex items-center gap-1.5 text-sm text-ink/50 hover:text-ink transition-colors mb-6">
     <ArrowLeft class="w-4 h-4" />
@@ -84,8 +84,8 @@
 
   <!-- Header -->
   <div class="bg-surface rounded-xl border border-line p-6 mb-6">
-    <div class="flex items-start justify-between gap-4">
-      <div class="flex items-center gap-4">
+    <div class="flex items-start justify-between gap-3 flex-wrap">
+      <div class="flex items-center gap-3 min-w-0">
         <input
           bind:this={photoFileInput}
           type="file"
@@ -98,18 +98,18 @@
           type="button"
           title="Foto ändern"
           onclick={() => photoFileInput.click()}
-          class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-terracotta/40 transition-all"
+          class="w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-terracotta/40 transition-all"
         >
           {#if photo}
             <img src={photo} alt="" class="w-full h-full object-cover" />
           {:else}
             <div class="w-full h-full bg-terracotta/10 flex items-center justify-center">
-              <span class="text-xl font-display font-bold text-terracotta">{data.contact.name?.charAt(0)?.toUpperCase()}</span>
+              <span class="text-3xl font-display font-bold text-terracotta">{data.contact.name?.charAt(0)?.toUpperCase()}</span>
             </div>
           {/if}
         </button>
-        <div>
-          <h1 class="font-display font-bold text-xl text-ink">{data.contact.name}</h1>
+        <div class="min-w-0">
+          <h1 class="font-display font-bold text-xl text-ink truncate">{data.contact.name}</h1>
           <div class="flex flex-wrap items-center gap-2 mt-1">
             {#if data.contact.rolle}
               <span class="text-sm text-ink/60">{data.contact.rolle}</span>
@@ -165,11 +165,11 @@
   </div>
 
   <!-- Tabs -->
-  <div class="flex gap-1 bg-surface border border-line rounded-lg p-1 mb-6 w-fit">
+  <div class="flex gap-1 bg-surface border border-line rounded-lg p-1 mb-6 w-fit max-w-full overflow-x-auto">
     {#each [['timeline', 'Timeline'], ['actions', `Aufgaben (${openActions.length})`], ['details', 'Details']] as [tab, label]}
       <button
         onclick={() => activeTab = tab as typeof activeTab}
-        class="px-4 py-1.5 text-sm rounded-md transition-colors {activeTab === tab ? 'bg-terracotta text-white font-medium' : 'text-ink/60 hover:text-ink hover:bg-cream'}"
+        class="px-3 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap {activeTab === tab ? 'bg-terracotta text-white font-medium' : 'text-ink/60 hover:text-ink hover:bg-cream'}"
       >
         {label}
       </button>
