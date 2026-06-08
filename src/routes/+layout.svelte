@@ -38,9 +38,8 @@
 <div class="flex h-screen bg-cream overflow-hidden">
   <!-- Sidebar Desktop -->
   <aside class="hidden md:flex flex-col w-56 bg-surface border-r border-line flex-shrink-0">
-    <div class="px-5 py-5 border-b border-line">
-      <h1 class="font-display font-bold text-xl text-ink">mini-crm</h1>
-      <p class="text-xs text-ink/40 mt-0.5">Persönliches CRM</p>
+    <div class="px-4 py-4 border-b border-line">
+      <img src="/logo.png" alt="Hirschfeld" class="h-10 w-auto object-contain" />
     </div>
 
     <nav class="flex-1 py-3 px-3 space-y-0.5">
@@ -70,7 +69,7 @@
 
   <!-- Mobile Header -->
   <div class="md:hidden fixed top-0 left-0 right-0 z-40 bg-surface border-b border-line flex items-center justify-between px-4 py-3">
-    <h1 class="font-display font-bold text-lg text-ink">mini-crm</h1>
+    <img src="/logo.png" alt="Hirschfeld" class="h-8 w-auto object-contain" />
     <div class="flex items-center gap-2">
       <button onclick={() => paletteOpen = true} class="p-2 text-ink/60 hover:text-ink">
         <Search class="w-5 h-5" />
