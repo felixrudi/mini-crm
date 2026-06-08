@@ -4,6 +4,8 @@
   import { fly } from 'svelte/transition';
   import { toast } from '$lib/toast';
   import X from '@lucide/svelte/icons/x';
+  import Camera from '@lucide/svelte/icons/camera';
+  import Loader from '@lucide/svelte/icons/loader';
 
   let {
     contact = null,
@@ -21,11 +23,52 @@
 
   let vorname = $state(contact?.vorname ?? '');
   let nachname = $state(contact?.nachname ?? '');
+  let titel = $state(contact?.titel ?? '');
+  let anrede = $state(contact?.anrede ?? '');
+  let email = $state(contact?.email ?? '');
+  let telefon = $state(contact?.telefon ?? '');
+  let rolle = $state(contact?.rolle ?? '');
+  let strasse = $state(contact?.strasse ?? '');
+  let plz = $state(contact?.plz ?? '');
+  let ort = $state(contact?.ort ?? '');
   let displayName = $state(contact?.name ?? '');
+  let scanning = $state(false);
+  let fileInput: HTMLInputElement;
 
   function syncName() {
     const computed = [vorname, nachname].filter(Boolean).join(' ');
     if (computed) displayName = computed;
+  }
+
+  async function handleCardScan(e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    scanning = true;
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const res = await fetch('/api/extract-card', { method: 'POST', body: fd });
+      if (!res.ok) throw new Error();
+      const d = await res.json();
+      if (d.vorname) vorname = d.vorname;
+      if (d.nachname) nachname = d.nachname;
+      if (d.titel) titel = d.titel;
+      if (d.anrede) anrede = d.anrede;
+      if (d.email) email = d.email;
+      if (d.telefon) telefon = d.telefon;
+      if (d.rolle) rolle = d.rolle;
+      if (d.strasse) strasse = d.strasse;
+      if (d.plz) plz = d.plz;
+      if (d.ort) ort = d.ort;
+      const computed = [d.vorname, d.nachname].filter(Boolean).join(' ');
+      if (computed) displayName = computed;
+      else if (d.name) displayName = d.name;
+      toast.success('Visitenkarte erkannt');
+    } catch {
+      toast.error('Erkennung fehlgeschlagen');
+    } finally {
+      scanning = false;
+    }
   }
 </script>
 
@@ -40,14 +83,41 @@
   class="fixed inset-y-0 right-0 z-50 w-full sm:w-[640px] bg-surface shadow-2xl flex flex-col"
   transition:fly={{ x: 640, duration: 250 }}
 >
+  <!-- Hidden file input for camera/upload -->
+  <input
+    bind:this={fileInput}
+    type="file"
+    accept="image/*"
+    capture="environment"
+    class="hidden"
+    onchange={handleCardScan}
+  />
+
   <!-- Header -->
   <div class="flex items-center justify-between px-6 py-4 border-b border-line flex-shrink-0">
     <h2 class="font-display font-bold text-lg text-ink">
       {contact ? 'Kontakt bearbeiten' : 'Neuer Kontakt'}
     </h2>
-    <button onclick={() => onclose?.()} class="text-ink/40 hover:text-ink transition-colors p-1">
-      <X class="w-5 h-5" />
-    </button>
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        onclick={() => fileInput.click()}
+        disabled={scanning}
+        title="Visitenkarte scannen"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-line text-ink/70 hover:bg-cream hover:text-terracotta transition-colors disabled:opacity-50"
+      >
+        {#if scanning}
+          <Loader class="w-4 h-4 animate-spin" />
+          <span>Scannen…</span>
+        {:else}
+          <Camera class="w-4 h-4" />
+          <span>Visitenkarte</span>
+        {/if}
+      </button>
+      <button onclick={() => onclose?.()} class="text-ink/40 hover:text-ink transition-colors p-1">
+        <X class="w-5 h-5" />
+      </button>
+    </div>
   </div>
 
   <!-- Scrollable Form -->
@@ -85,18 +155,14 @@
             <div class="flex gap-2">
               {#each ['Herr', 'Frau'] as option}
                 <label class="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="anrede"
-                    value={option}
-                    checked={contact?.anrede === option}
-                    class="accent-terracotta"
-                  />
+                  <input type="radio" name="anrede" value={option} checked={anrede === option}
+                    onchange={() => anrede = option} class="accent-terracotta" />
                   <span class="text-sm text-ink">{option}</span>
                 </label>
               {/each}
               <label class="flex items-center gap-2 cursor-pointer">
-                <input type="radio" name="anrede" value="" checked={!contact?.anrede} class="accent-terracotta" />
+                <input type="radio" name="anrede" value="" checked={!anrede}
+                  onchange={() => anrede = ''} class="accent-terracotta" />
                 <span class="text-sm text-ink/50">—</span>
               </label>
             </div>
@@ -105,35 +171,24 @@
           <!-- Titel -->
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1" for="titel">Titel</label>
-            <input
-              id="titel" name="titel" type="text"
-              value={contact?.titel ?? ''}
+            <input id="titel" name="titel" type="text" bind:value={titel}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
-              placeholder="Dr., Mag., DI …"
-            />
+              placeholder="Dr., Mag., DI …" />
           </div>
 
           <!-- Vorname + Nachname -->
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-medium text-ink/60 mb-1" for="vorname">Vorname</label>
-              <input
-                id="vorname" name="vorname" type="text"
-                bind:value={vorname}
-                oninput={syncName}
+              <input id="vorname" name="vorname" type="text" bind:value={vorname} oninput={syncName}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
-                placeholder="Felix"
-              />
+                placeholder="Felix" />
             </div>
             <div>
               <label class="block text-xs font-medium text-ink/60 mb-1" for="nachname">Nachname</label>
-              <input
-                id="nachname" name="nachname" type="text"
-                bind:value={nachname}
-                oninput={syncName}
+              <input id="nachname" name="nachname" type="text" bind:value={nachname} oninput={syncName}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
-                placeholder="Hirschfeld"
-              />
+                placeholder="Hirschfeld" />
             </div>
           </div>
 
@@ -167,12 +222,9 @@
           </div>
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1" for="rolle">Rolle</label>
-            <input
-              id="rolle" name="rolle" type="text"
-              value={contact?.rolle ?? ''}
+            <input id="rolle" name="rolle" type="text" bind:value={rolle}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
-              placeholder="z.B. Geschäftsführer"
-            />
+              placeholder="z.B. Geschäftsführer" />
           </div>
         </div>
       </section>
@@ -183,14 +235,14 @@
         <div class="space-y-3">
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1" for="email">E-Mail</label>
-            <input id="email" name="email" type="email" value={contact?.email ?? ''}
+            <input id="email" name="email" type="email" bind:value={email}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="name@firma.at" />
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-medium text-ink/60 mb-1" for="telefon">Telefon</label>
-              <input id="telefon" name="telefon" type="tel" value={contact?.telefon ?? ''}
+              <input id="telefon" name="telefon" type="tel" bind:value={telefon}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="+43 …" />
             </div>
@@ -224,20 +276,20 @@
         <div class="space-y-3">
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1" for="strasse">Straße</label>
-            <input id="strasse" name="strasse" type="text" value={contact?.strasse ?? ''}
+            <input id="strasse" name="strasse" type="text" bind:value={strasse}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="Musterstraße 1/2" />
           </div>
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block text-xs font-medium text-ink/60 mb-1" for="plz">PLZ</label>
-              <input id="plz" name="plz" type="text" value={contact?.plz ?? ''}
+              <input id="plz" name="plz" type="text" bind:value={plz}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="1010" />
             </div>
             <div class="col-span-2">
               <label class="block text-xs font-medium text-ink/60 mb-1" for="ort">Ort</label>
-              <input id="ort" name="ort" type="text" value={contact?.ort ?? ''}
+              <input id="ort" name="ort" type="text" bind:value={ort}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="Wien" />
             </div>

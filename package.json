@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.102.0",
     "@lucide/svelte": "^0.511.0",
     "@sveltejs/adapter-node": "^5.2.11",
     "@sveltejs/kit": "^2.15.0",
