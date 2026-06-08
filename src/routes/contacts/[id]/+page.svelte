@@ -36,6 +36,43 @@
 
   let openActions = $derived(data.actions_list.filter((a: Action) => a.status === 'offen'));
   let doneActions = $derived(data.actions_list.filter((a: Action) => a.status === 'erledigt'));
+
+  let photo = $state(data.contact.photo ?? null);
+  let photoFileInput: HTMLInputElement;
+
+  async function handlePhotoChange(e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    const resized = await resizeImage(file, 400);
+    const fd = new FormData();
+    fd.append('image', resized, 'photo.jpg');
+    const res = await fetch(`/api/contacts/${data.contact.id}/photo`, { method: 'POST', body: fd });
+    if (res.ok) {
+      const d = await res.json();
+      photo = d.photo;
+      toast.success('Foto gespeichert');
+    } else {
+      toast.error('Upload fehlgeschlagen');
+    }
+    (e.target as HTMLInputElement).value = '';
+  }
+
+  function resizeImage(file: File, maxSize: number): Promise<Blob> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const ratio = Math.min(maxSize / img.width, maxSize / img.height, 1);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(blob => resolve(blob!), 'image/jpeg', 0.85);
+      };
+      img.src = url;
+    });
+  }
 </script>
 
 <div class="p-6 max-w-4xl mx-auto">
@@ -49,9 +86,28 @@
   <div class="bg-surface rounded-xl border border-line p-6 mb-6">
     <div class="flex items-start justify-between gap-4">
       <div class="flex items-center gap-4">
-        <div class="w-14 h-14 rounded-full bg-terracotta/10 flex items-center justify-center flex-shrink-0">
-          <span class="text-xl font-display font-bold text-terracotta">{data.contact.name?.charAt(0)?.toUpperCase()}</span>
-        </div>
+        <input
+          bind:this={photoFileInput}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          class="hidden"
+          onchange={handlePhotoChange}
+        />
+        <button
+          type="button"
+          title="Foto ändern"
+          onclick={() => photoFileInput.click()}
+          class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-terracotta/40 transition-all"
+        >
+          {#if photo}
+            <img src={photo} alt="" class="w-full h-full object-cover" />
+          {:else}
+            <div class="w-full h-full bg-terracotta/10 flex items-center justify-center">
+              <span class="text-xl font-display font-bold text-terracotta">{data.contact.name?.charAt(0)?.toUpperCase()}</span>
+            </div>
+          {/if}
+        </button>
         <div>
           <h1 class="font-display font-bold text-xl text-ink">{data.contact.name}</h1>
           <div class="flex flex-wrap items-center gap-2 mt-1">
