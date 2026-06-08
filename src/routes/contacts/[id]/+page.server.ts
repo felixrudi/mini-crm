@@ -48,9 +48,52 @@ export const actions: Actions = {
     await sql`UPDATE actions SET status = CASE WHEN status='offen' THEN 'erledigt' ELSE 'offen' END WHERE id=${id}`;
     return { success: true };
   },
+  update_action: async ({ request }) => {
+    const d = await request.formData();
+    const id = d.get('id') as string;
+    await sql`UPDATE actions SET
+      titel=${d.get('titel') || null},
+      faellig_am=${d.get('faellig_am') || null},
+      notizen=${d.get('notizen') || null}
+      WHERE id=${id}`;
+    return { success: true };
+  },
+  delete_action: async ({ request }) => {
+    const d = await request.formData();
+    await sql`DELETE FROM actions WHERE id=${d.get('id')}`;
+    return { success: true };
+  },
+  delete_interaction: async ({ request }) => {
+    const d = await request.formData();
+    await sql`DELETE FROM interactions WHERE id=${d.get('id')}`;
+    return { success: true };
+  },
+  update_interaction: async ({ request }) => {
+    const d = await request.formData();
+    await sql`UPDATE interactions SET
+      zusammenfassung=${d.get('zusammenfassung') || null},
+      text=${d.get('text') || null}
+      WHERE id=${d.get('id')}`;
+    return { success: true };
+  },
+  delete_email: async ({ request }) => {
+    const d = await request.formData();
+    await sql`DELETE FROM emails WHERE id=${d.get('id')}`;
+    return { success: true };
+  },
+  update_email: async ({ request }) => {
+    const d = await request.formData();
+    await sql`UPDATE emails SET
+      betreff=${d.get('betreff') || null},
+      body_text=${d.get('body_text') || null}
+      WHERE id=${d.get('id')}`;
+    return { success: true };
+  },
   update_contact: async ({ request, params }) => {
     const d = await request.formData();
     const name = (d.get('name') as string)?.trim() || 'Unbekannt';
+    const rawTags = (d.get('tags') as string) || '';
+    const tags = rawTags.split(',').map((t: string) => t.trim().toLowerCase()).filter(Boolean);
     await sql`UPDATE contacts SET
       company_id=${d.get('company_id') || null}, name=${name},
       vorname=${d.get('vorname') || null}, nachname=${d.get('nachname') || null},
@@ -58,9 +101,10 @@ export const actions: Actions = {
       strasse=${d.get('strasse') || null}, plz=${d.get('plz') || null}, ort=${d.get('ort') || null},
       geburtstag=${d.get('geburtstag') || null},
       email=${d.get('email') || null}, telefon=${d.get('telefon') || null},
+      telefon2=${d.get('telefon2') || null},
       whatsapp=${d.get('whatsapp') || null}, wechat_id=${d.get('wechat_id') || null},
       linkedin_url=${d.get('linkedin_url') || null}, rolle=${d.get('rolle') || null},
-      notizen=${d.get('notizen') || null}
+      notizen=${d.get('notizen') || null}, iban=${d.get('iban') || null}, tags=${tags}
       WHERE id=${params.id}`;
     return { success: true };
   }

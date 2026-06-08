@@ -2,8 +2,13 @@ export type Company = {
   id: string;
   name: string;
   website: string | null;
+  strasse: string | null;
+  plz: string | null;
+  ort: string | null;
+  land: string | null;
   notizen: string | null;
   created_at: string;
+  contact_count?: number;
 }
 
 export type Contact = {
@@ -26,6 +31,9 @@ export type Contact = {
   rolle: string | null;
   notizen: string | null;
   photo: string | null;
+  tags: string[];
+  telefon2: string | null;
+  iban: string | null;
   created_at: string;
   companies?: { name: string } | null;
   company_name?: string | null;
@@ -66,6 +74,32 @@ export type Action = {
   notizen: string | null;
   created_at: string;
   contact_name?: string | null;
+}
+
+export type ProspectStatus = 'gesendet' | 'geantwortet' | 'termin' | 'kein_interesse' | 'bounce' | 'abgesagt';
+
+export type Prospect = {
+  id: string;
+  name: string;
+  vorname: string | null;
+  nachname: string | null;
+  titel: string | null;
+  anrede: 'Herr' | 'Frau' | null;
+  email: string | null;
+  firma: string | null;
+  company_id: string | null;
+  company_name: string | null;
+  rolle: string | null;
+  telefon: string | null;
+  website: string | null;
+  notizen: string | null;
+  status: ProspectStatus;
+  kanal: string | null;
+  versandt_am: string | null;
+  followup_am: string | null;
+  sperre: boolean;
+  sperre_grund: string | null;
+  created_at: string;
 }
 
 export type TimelineEntry = {

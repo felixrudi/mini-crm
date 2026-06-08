@@ -8,6 +8,8 @@
   import Users from '@lucide/svelte/icons/users';
   import Building2 from '@lucide/svelte/icons/building-2';
   import CheckSquare from '@lucide/svelte/icons/check-square';
+  import Send from '@lucide/svelte/icons/send';
+  import ScanLine from '@lucide/svelte/icons/scan-line';
   import Menu from '@lucide/svelte/icons/menu';
   import X from '@lucide/svelte/icons/x';
   import Search from '@lucide/svelte/icons/search';
@@ -22,9 +24,12 @@
     { href: '/contacts', label: 'Kontakte', icon: Users },
     { href: '/companies', label: 'Firmen', icon: Building2 },
     { href: '/actions', label: 'Aufgaben', icon: CheckSquare },
+    { href: '/prospects', label: 'Prospects', icon: Send },
+    { href: '/#scan', label: 'Scan & Import', icon: ScanLine },
   ];
 
   function isActive(href: string): boolean {
+    if (href.includes('#')) return false;
     if (href === '/') return page.url.pathname === '/';
     return page.url.pathname.startsWith(href);
   }
@@ -116,7 +121,7 @@
   {/if}
 
   <!-- Main Content -->
-  <main class="flex-1 overflow-y-auto md:pt-0 pt-[57px]">
+  <main class="flex-1 overflow-y-auto overflow-x-hidden md:pt-0 pt-[57px]">
     {@render children()}
   </main>
 </div>

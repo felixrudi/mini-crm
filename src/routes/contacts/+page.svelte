@@ -80,7 +80,7 @@
   }
 </script>
 
-<div class="p-6 max-w-5xl mx-auto">
+<div class="px-4 py-4 md:px-6 md:py-6 max-w-5xl mx-auto">
   <div class="flex items-center justify-between mb-6">
     <div>
       <h1 class="font-display font-bold text-2xl text-ink">Kontakte</h1>

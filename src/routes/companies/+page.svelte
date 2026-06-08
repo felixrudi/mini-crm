@@ -18,12 +18,11 @@
   let editId = $state<string | null>(null);
   let deleteConfirm = $state<string | null>(null);
 
-  // Inline edit state
   let editName = $state('');
   let editWebsite = $state('');
   let editNotizen = $state('');
 
-  function startEdit(company: Company & { contact_count?: number }) {
+  function startEdit(company: Company) {
     editId = company.id;
     editName = company.name;
     editWebsite = company.website ?? '';
@@ -151,7 +150,7 @@
                   </div>
                   <div class="min-w-0">
                     <div class="flex items-center gap-2">
-                      <p class="text-sm font-medium text-ink">{company.name}</p>
+                      <a href="/companies/{company.id}" class="text-sm font-medium text-ink hover:text-terracotta transition-colors">{company.name}</a>
                       {#if company.contact_count > 0}
                         <span class="flex items-center gap-0.5 text-xs text-ink/40">
                           <Users class="w-3 h-3" /> {company.contact_count}
@@ -170,10 +169,10 @@
                   </div>
                 </div>
                 <div class="flex items-center gap-1 flex-shrink-0">
-                  <button onclick={() => startEdit(company)}
+                  <a href="/companies/{company.id}"
                     class="p-1.5 text-ink/30 hover:text-terracotta transition-colors rounded">
                     <Pencil class="w-3.5 h-3.5" />
-                  </button>
+                  </a>
                   {#if deleteConfirm === company.id}
                     <form method="POST" action="?/delete"
                       use:enhance={() => async ({ result, update }) => { if (result.type === 'success') toast.success('Gelöscht'); deleteConfirm = null; await update(); }}

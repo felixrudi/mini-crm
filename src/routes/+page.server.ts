@@ -19,5 +19,8 @@ export const load: PageServerLoad = async () => {
       (SELECT COUNT(*) FROM companies)::int as companies,
       (SELECT COUNT(*) FROM actions WHERE status='offen')::int as open_actions`;
 
-  return { open_actions, recent_contacts, stats: stats[0] };
+  const allTagsRaw = await sql`SELECT DISTINCT unnest(tags) as tag FROM contacts ORDER BY tag`;
+  const allTags = allTagsRaw.map((r: { tag: string }) => r.tag);
+
+  return { open_actions, recent_contacts, stats: stats[0], allTags };
 };

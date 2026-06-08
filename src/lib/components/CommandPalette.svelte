@@ -36,7 +36,7 @@
     loading = true;
     debounceTimer = setTimeout(async () => {
       try {
-        const res = await fetch(`/contacts?q=${encodeURIComponent(query)}&format=json`);
+        const res = await fetch(`/api/contacts/search?q=${encodeURIComponent(query)}`);
         if (res.ok) {
           const data = await res.json();
           results = data.contacts ?? [];
@@ -138,7 +138,7 @@
         </div>
       {:else if !query.trim()}
         <div class="py-6 text-center">
-          <p class="text-xs text-ink/30">Tippe um zu suchen · ↑↓ navigieren · Enter öffnen · Esc schließen</p>
+          <p class="text-xs text-ink/30 px-4">Tippe um zu suchen<span class="hidden sm:inline"> · ↑↓ navigieren · Enter öffnen · Esc schließen</span></p>
         </div>
       {/if}
     </div>

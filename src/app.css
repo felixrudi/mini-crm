@@ -9,8 +9,8 @@
   --color-sage:           #88997B;
   --color-sage-100:       #E7ECDF;
   --color-line:           #E7DFD3;
-  --font-sans:    "Inter", ui-sans-serif, system-ui, "Noto Sans SC", sans-serif;
-  --font-display: "Nunito", "Inter", sans-serif;
+  --font-sans:    "Noto Sans", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Roboto", "Noto Sans", sans-serif;
   --radius: 0.75rem;
 }
 

@@ -14,21 +14,29 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
   create: async ({ request }) => {
-    const data = await request.formData();
-    const name = data.get('name') as string;
+    const d = await request.formData();
+    const name = d.get('name') as string;
     if (!name?.trim()) return fail(400, { error: 'Name erforderlich' });
-    await sql`INSERT INTO companies (name, website, notizen) VALUES (${name.trim()}, ${data.get('website') || null}, ${data.get('notizen') || null})`;
+    await sql`INSERT INTO companies (name, website, strasse, plz, ort, land, notizen)
+      VALUES (${name.trim()}, ${d.get('website') || null}, ${d.get('strasse') || null},
+              ${d.get('plz') || null}, ${d.get('ort') || null}, ${d.get('land') || null},
+              ${d.get('notizen') || null})`;
     return { success: true };
   },
   update: async ({ request }) => {
-    const data = await request.formData();
-    const id = data.get('id') as string;
-    await sql`UPDATE companies SET name=${data.get('name')}, website=${data.get('website') || null}, notizen=${data.get('notizen') || null} WHERE id=${id}`;
+    const d = await request.formData();
+    const id = d.get('id') as string;
+    await sql`UPDATE companies SET
+      name=${d.get('name')}, website=${d.get('website') || null},
+      strasse=${d.get('strasse') || null}, plz=${d.get('plz') || null},
+      ort=${d.get('ort') || null}, land=${d.get('land') || null},
+      notizen=${d.get('notizen') || null}
+      WHERE id=${id}`;
     return { success: true };
   },
   delete: async ({ request }) => {
-    const data = await request.formData();
-    await sql`DELETE FROM companies WHERE id=${data.get('id')}`;
+    const d = await request.formData();
+    await sql`DELETE FROM companies WHERE id=${d.get('id')}`;
     return { success: true };
   }
 };
