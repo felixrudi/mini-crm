@@ -38,8 +38,8 @@
 <div class="flex h-screen bg-cream overflow-hidden">
   <!-- Sidebar Desktop -->
   <aside class="hidden md:flex flex-col w-56 bg-surface border-r border-line flex-shrink-0">
-    <div class="px-4 py-4 border-b border-line">
-      <img src="/logo.png" alt="Hirschfeld" class="h-10 w-auto object-contain" />
+    <div class="px-4 py-5 border-b border-line">
+      <img src="/logo.png" alt="Hirschfeld" class="h-16 w-auto object-contain" />
     </div>
 
     <nav class="flex-1 py-3 px-3 space-y-0.5">
