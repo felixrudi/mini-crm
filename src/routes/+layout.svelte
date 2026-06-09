@@ -9,6 +9,7 @@
   import Building2 from '@lucide/svelte/icons/building-2';
   import CheckSquare from '@lucide/svelte/icons/check-square';
   import Send from '@lucide/svelte/icons/send';
+  import UserSearch from '@lucide/svelte/icons/user-search';
   import ScanLine from '@lucide/svelte/icons/scan-line';
   import Menu from '@lucide/svelte/icons/menu';
   import X from '@lucide/svelte/icons/x';
@@ -24,13 +25,16 @@
     { href: '/contacts', label: 'Kontakte', icon: Users },
     { href: '/companies', label: 'Firmen', icon: Building2 },
     { href: '/actions', label: 'Aufgaben', icon: CheckSquare },
-    { href: '/prospects', label: 'Prospects', icon: Send },
+    { href: '/prospects', label: 'Outreach', icon: Send },
+    { href: '/prospects/contacts', label: 'Outreach-Kontakte', icon: UserSearch },
     { href: '/#scan', label: 'Scan & Import', icon: ScanLine },
   ];
 
   function isActive(href: string): boolean {
     if (href.includes('#')) return false;
     if (href === '/') return page.url.pathname === '/';
+    // Exact match for /prospects to avoid it lighting up when on /prospects/contacts
+    if (href === '/prospects') return page.url.pathname === '/prospects';
     return page.url.pathname.startsWith(href);
   }
 </script>

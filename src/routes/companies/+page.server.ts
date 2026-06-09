@@ -3,10 +3,24 @@ import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
+  // Exclude companies that are linked exclusively to prospect-tagged contacts
+  // (i.e. companies that have no real contacts yet, only outreach imports).
+  // Companies with at least one non-prospect contact (or no contacts at all but
+  // created manually) are always shown.
   const companies = await sql`
     SELECT c.*, COUNT(co.id)::int as contact_count
     FROM companies c
     LEFT JOIN contacts co ON co.company_id = c.id
+    WHERE NOT EXISTS (
+      SELECT 1 FROM contacts pc
+      WHERE pc.company_id = c.id
+        AND 'prospect' = ANY(COALESCE(pc.tags, '{}'::text[]))
+    )
+    OR EXISTS (
+      SELECT 1 FROM contacts rc
+      WHERE rc.company_id = c.id
+        AND NOT ('prospect' = ANY(COALESCE(rc.tags, '{}'::text[])))
+    )
     GROUP BY c.id
     ORDER BY c.name`;
   return { companies };

@@ -7,27 +7,30 @@ export const load: PageServerLoad = async ({ url }) => {
   const tag = url.searchParams.get('tag') || '';
   const kanal = url.searchParams.get('kanal') || '';
 
+  // Always exclude prospect-tagged contacts from regular contacts view
+  const PROSPECT_TAG = 'prospect';
+
   let contacts;
   if (q && tag) {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}) AND ${tag} = ANY(c.tags) ORDER BY c.name`;
+    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}) AND ${tag} = ANY(c.tags) AND NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
   } else if (q && kanal === 'whatsapp') {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}) AND c.whatsapp IS NOT NULL ORDER BY c.name`;
+    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}) AND c.whatsapp IS NOT NULL AND NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
   } else if (q && kanal === 'wechat') {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}) AND c.wechat_id IS NOT NULL ORDER BY c.name`;
+    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}) AND c.wechat_id IS NOT NULL AND NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
   } else if (q) {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'} ORDER BY c.name`;
+    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}) AND NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
   } else if (tag) {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE ${tag} = ANY(c.tags) ORDER BY c.name`;
+    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE ${tag} = ANY(c.tags) AND NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
   } else if (kanal === 'whatsapp') {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE c.whatsapp IS NOT NULL ORDER BY c.name`;
+    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE c.whatsapp IS NOT NULL AND NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
   } else if (kanal === 'wechat') {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE c.wechat_id IS NOT NULL ORDER BY c.name`;
+    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE c.wechat_id IS NOT NULL AND NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
   } else {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id ORDER BY c.name`;
+    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
   }
 
   const companies = await sql`SELECT id, name FROM companies ORDER BY name`;
-  const allTags = await sql`SELECT DISTINCT unnest(tags) as tag FROM contacts WHERE tags IS NOT NULL AND array_length(tags, 1) > 0 ORDER BY tag`;
+  const allTags = await sql`SELECT DISTINCT unnest(tags) as tag FROM contacts WHERE tags IS NOT NULL AND array_length(tags, 1) > 0 AND NOT ('prospect' = ANY(COALESCE(tags, '{}'::text[]))) ORDER BY tag`;
 
   return { contacts, companies, q, tag, kanal, allTags: allTags.map((r: any) => r.tag) };
 };
