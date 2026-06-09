@@ -168,12 +168,16 @@
         </div>
       </div>
       {#if entry.inhalt}
-        <div class="mt-1">
-          <p class="text-sm text-ink/70 line-clamp-2">{entry.inhalt}</p>
+        <div class="mt-1.5">
           {#if isLongNote}
-            <button onclick={() => showModal = true} class="flex items-center gap-1 text-xs text-terracotta mt-1 hover:underline">
-              <Maximize2 class="w-3 h-3" /> Memo öffnen
+            <button
+              onclick={() => showModal = true}
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-xs font-medium hover:bg-amber-100 transition-colors"
+            >
+              <Maximize2 class="w-3.5 h-3.5" /> Memo lesen
             </button>
+          {:else}
+            <p class="text-sm text-ink/70">{entry.inhalt}</p>
           {/if}
         </div>
       {/if}
