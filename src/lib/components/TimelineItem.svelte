@@ -3,6 +3,7 @@
   import { formatDate } from '$lib/utils';
   import { enhance } from '$app/forms';
   import { toast } from '$lib/toast';
+  import { marked } from 'marked';
   import Phone from '@lucide/svelte/icons/phone';
   import MapPin from '@lucide/svelte/icons/map-pin';
   import StickyNote from '@lucide/svelte/icons/sticky-note';
@@ -18,11 +19,16 @@
   import Trash2 from '@lucide/svelte/icons/trash-2';
   import Check from '@lucide/svelte/icons/check';
   import X from '@lucide/svelte/icons/x';
+  import Maximize2 from '@lucide/svelte/icons/maximize-2';
 
   let { entry, contactId }: { entry: TimelineEntry; contactId: string } = $props();
 
   let expanded = $state(false);
+  let showModal = $state(false);
   let editing = $state(false);
+
+  const isLongNote = $derived(entry.art === 'interaction' && (entry.inhalt?.length ?? 0) > 120);
+  const renderedMarkdown = $derived(entry.inhalt ? marked(entry.inhalt) as string : '');
   let editTitel = $state('');
   let editInhalt = $state('');
 
@@ -163,21 +169,58 @@
       </div>
       {#if entry.inhalt}
         <div class="mt-1">
-          {#if expanded}
-            <p class="text-sm text-ink/70 whitespace-pre-wrap">{entry.inhalt}</p>
-            <button onclick={() => expanded = false} class="text-xs text-terracotta mt-1 hover:underline">
-              Weniger anzeigen
+          <p class="text-sm text-ink/70 line-clamp-2">{entry.inhalt}</p>
+          {#if isLongNote}
+            <button onclick={() => showModal = true} class="flex items-center gap-1 text-xs text-terracotta mt-1 hover:underline">
+              <Maximize2 class="w-3 h-3" /> Memo öffnen
             </button>
-          {:else}
-            <p class="text-sm text-ink/70 line-clamp-2">{entry.inhalt}</p>
-            {#if entry.inhalt.length > 120}
-              <button onclick={() => expanded = true} class="text-xs text-terracotta mt-1 hover:underline">
-                Mehr anzeigen
-              </button>
-            {/if}
           {/if}
         </div>
       {/if}
     {/if}
   </div>
 </div>
+
+{#if showModal}
+  <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+    onclick={(e) => { if (e.target === e.currentTarget) showModal = false; }}
+  >
+    <div class="bg-[#faf8f5] rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-line flex-shrink-0">
+        <div>
+          <span class="text-xs font-medium text-ink/50 uppercase tracking-wide">Notiz</span>
+          {#if entry.titel}
+            <h2 class="text-base font-semibold text-ink mt-0.5">{entry.titel}</h2>
+          {/if}
+          <p class="text-xs text-ink/40 mt-0.5">{formatDate(entry.datum)}</p>
+        </div>
+        <button
+          onclick={() => showModal = false}
+          class="p-2 rounded-lg text-ink/40 hover:text-ink hover:bg-line/50 transition-colors"
+        >
+          <X class="w-5 h-5" />
+        </button>
+      </div>
+      <div class="overflow-y-auto px-6 py-5 flex-1">
+        <div class="md-body">
+          {@html renderedMarkdown}
+        </div>
+      </div>
+    </div>
+  </div>
+{/if}
+
+<style>
+  .md-body :global(h1) { font-size: 1.25rem; font-weight: 700; color: #2c2416; margin: 1.25rem 0 0.5rem; }
+  .md-body :global(h2) { font-size: 1rem; font-weight: 600; color: #2c2416; margin: 1rem 0 0.4rem; border-bottom: 1px solid #e8e2d9; padding-bottom: 0.25rem; }
+  .md-body :global(h3) { font-size: 0.875rem; font-weight: 600; color: #2c2416; margin: 0.75rem 0 0.25rem; }
+  .md-body :global(p) { font-size: 0.875rem; color: rgba(44,36,22,0.8); line-height: 1.6; margin: 0.5rem 0; }
+  .md-body :global(ul), .md-body :global(ol) { padding-left: 1.25rem; margin: 0.5rem 0; }
+  .md-body :global(li) { font-size: 0.875rem; color: rgba(44,36,22,0.8); line-height: 1.6; margin: 0.2rem 0; }
+  .md-body :global(strong) { font-weight: 600; color: #2c2416; }
+  .md-body :global(hr) { border: none; border-top: 1px solid #e8e2d9; margin: 1rem 0; }
+  .md-body :global(blockquote) { border-left: 3px solid #c17c5a; padding-left: 0.75rem; color: rgba(44,36,22,0.6); font-style: italic; margin: 0.75rem 0; }
+  .md-body :global(code) { background: #f0ebe3; padding: 0.1rem 0.3rem; border-radius: 4px; font-size: 0.8rem; font-family: monospace; }
+</style>
