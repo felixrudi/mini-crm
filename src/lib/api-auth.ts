@@ -1,4 +1,4 @@
-import { CRM_API_KEY } from '$env/static/private';
+
 
 export function checkApiAuth(request: Request): Response | null {
   const auth = request.headers.get('authorization');
@@ -9,7 +9,7 @@ export function checkApiAuth(request: Request): Response | null {
     });
   }
   const token = auth.slice(7);
-  if (token !== CRM_API_KEY) {
+  if (token !== process.env.CRM_API_KEY) {
     return new Response(JSON.stringify({ error: 'Forbidden' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }

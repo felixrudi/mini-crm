@@ -1,5 +1,5 @@
 import { json, error } from '@sveltejs/kit';
-import { OPENROUTER_API_KEY } from '$env/static/private';
+
 import type { RequestHandler } from './$types';
 
 const PROMPT = `Extrahiere alle Kontaktdaten aus diesem Bild (Visitenkarte, WeChat-Profil, WhatsApp-Screenshot oder ähnliches) als JSON.
@@ -34,7 +34,7 @@ Schema:
 }`;
 
 export const POST: RequestHandler = async ({ request }) => {
-  if (!OPENROUTER_API_KEY) throw error(500, 'OPENROUTER_API_KEY fehlt — dev server neu starten');
+  if (!process.env.OPENROUTER_API_KEY) throw error(500, 'process.env.OPENROUTER_API_KEY fehlt — dev server neu starten');
 
   const formData = await request.formData();
   const file = formData.get('image') as File | null;
@@ -59,7 +59,7 @@ export const POST: RequestHandler = async ({ request }) => {
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://crm.hirschfeld.at',
     },

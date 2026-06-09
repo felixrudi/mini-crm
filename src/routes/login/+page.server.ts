@@ -1,5 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { CRM_PASSWORD } from '$env/static/private';
+
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ cookies }) => {
@@ -14,7 +14,7 @@ export const actions: Actions = {
     const d = await request.formData();
     const password = d.get('password') as string;
 
-    if (password !== CRM_PASSWORD) {
+    if (password !== process.env.CRM_PASSWORD) {
       return fail(401, { error: 'Falsches Passwort' });
     }
 

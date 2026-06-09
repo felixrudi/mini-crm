@@ -1,4 +1,4 @@
 import postgres from 'postgres';
-import { DATABASE_URL } from '$env/static/private';
+// env via process.env
 
-export const sql = postgres(DATABASE_URL);
+export const sql = postgres(process.env.DATABASE_URL as string);

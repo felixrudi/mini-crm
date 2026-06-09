@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import { CRM_PASSWORD } from '$env/static/private';
+
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ cookies, url }) => {
