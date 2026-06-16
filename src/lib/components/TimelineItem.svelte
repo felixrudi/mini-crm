@@ -23,7 +23,7 @@
 
   let { entry, contactId }: { entry: TimelineEntry; contactId: string } = $props();
 
-  let expanded = $state(false);
+  let expanded = $state(true);
   let showModal = $state(false);
   let editing = $state(false);
 
@@ -168,17 +168,8 @@
         </div>
       </div>
       {#if entry.inhalt}
-        <div class="mt-1.5">
-          {#if isLongNote}
-            <button
-              onclick={() => showModal = true}
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-xs font-medium hover:bg-amber-100 transition-colors"
-            >
-              <Maximize2 class="w-3.5 h-3.5" /> Memo lesen
-            </button>
-          {:else}
-            <p class="text-sm text-ink/70">{entry.inhalt}</p>
-          {/if}
+        <div class="mt-1.5 md-body">
+          {@html renderedMarkdown}
         </div>
       {/if}
     {/if}
