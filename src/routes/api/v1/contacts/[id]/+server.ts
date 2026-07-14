@@ -1,22 +1,17 @@
-import { sql } from '$lib/db';
+import { getRecord, updateRecord, deleteRecord } from '$lib/server/teable';
+import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS } from '$lib/server/teable-schema';
 import { checkApiAuth, jsonOk, jsonError } from '$lib/api-auth';
 import type { RequestHandler } from './$types';
 
-// GET /api/v1/contacts/:id
 export const GET: RequestHandler = async ({ request, params }) => {
   const denied = checkApiAuth(request);
   if (denied) return denied;
 
-  const [contact] = await sql`
-    SELECT c.*, co.name as company_name FROM contacts c
-    LEFT JOIN companies co ON c.company_id = co.id
-    WHERE c.id = ${params.id}`;
-
+  const contact = await getRecord(TABLES.kontakteReal, params.id!);
   if (!contact) return jsonError('Not found', 404);
-  return jsonOk({ contact });
+  return jsonOk({ contact: { id: contact.id, ...contact.fields } });
 };
 
-// PATCH /api/v1/contacts/:id
 export const PATCH: RequestHandler = async ({ request, params }) => {
   const denied = checkApiAuth(request);
   if (denied) return denied;
@@ -28,55 +23,66 @@ export const PATCH: RequestHandler = async ({ request, params }) => {
     return jsonError('Invalid JSON');
   }
 
-  const [existing] = await sql`SELECT * FROM contacts WHERE id = ${params.id}`;
+  const existing = await getRecord(TABLES.kontakteReal, params.id!);
   if (!existing) return jsonError('Not found', 404);
 
-  const tags = body.tags !== undefined
-    ? Array.isArray(body.tags)
-      ? (body.tags as string[]).map(t => t.trim().toLowerCase()).filter(Boolean)
-      : typeof body.tags === 'string'
-        ? (body.tags as string).split(',').map((t: string) => t.trim().toLowerCase()).filter(Boolean)
-        : existing.tags
-    : existing.tags;
+  const tags =
+    body.tags !== undefined
+      ? Array.isArray(body.tags)
+        ? (body.tags as string[]).map((t) => t.trim().toLowerCase()).filter(Boolean)
+        : typeof body.tags === 'string'
+          ? (body.tags as string).split(',').map((t) => t.trim().toLowerCase()).filter(Boolean)
+          : ((existing.fields[KONTAKTE_FIELDS.tags] as string[] | undefined) ?? [])
+      : ((existing.fields[KONTAKTE_FIELDS.tags] as string[] | undefined) ?? []);
 
-  const merged = { ...existing, ...body, tags };
+  // Body keys follow the same lowercase/snake_case contract as POST's request
+  // body (vorname, nachname, telefon, ...), not Teable's capitalized field
+  // names — so each field is picked explicitly rather than blindly spread-
+  // merged with existing.fields (which IS keyed by Teable field names). A
+  // blind `{...existing.fields, ...body}` merge would silently never apply
+  // any update, since body's keys never collide with existing.fields' keys.
+  const pick = <T>(key: string, fieldKey: string): T | null =>
+    body[key] !== undefined ? ((body[key] as T) ?? null) : ((existing.fields[fieldKey] as T) ?? null);
 
-  await sql`
-    UPDATE contacts SET
-      company_id = ${(merged.company_id as string) || null},
-      name       = ${(merged.name as string) || 'Unbekannt'},
-      vorname    = ${(merged.vorname as string) || null},
-      nachname   = ${(merged.nachname as string) || null},
-      titel      = ${(merged.titel as string) || null},
-      anrede     = ${(merged.anrede as string) || null},
-      strasse    = ${(merged.strasse as string) || null},
-      plz        = ${(merged.plz as string) || null},
-      ort        = ${(merged.ort as string) || null},
-      geburtstag = ${(merged.geburtstag as string) || null},
-      email      = ${(merged.email as string) || null},
-      telefon    = ${(merged.telefon as string) || null},
-      telefon2   = ${(merged.telefon2 as string) || null},
-      whatsapp   = ${(merged.whatsapp as string) || null},
-      wechat_id  = ${(merged.wechat_id as string) || null},
-      linkedin_url = ${(merged.linkedin_url as string) || null},
-      rolle      = ${(merged.rolle as string) || null},
-      notizen    = ${(merged.notizen as string) || null},
-      iban       = ${(merged.iban as string) || null},
-      tags       = ${tags}
-    WHERE id = ${params.id}`;
+  await updateRecord(TABLES.kontakteReal, params.id!, {
+    [KONTAKTE_FIELDS.firma]:
+      body.company_id !== undefined
+        ? body.company_id
+          ? [{ id: body.company_id as string }]
+          : null
+        : existing.fields[KONTAKTE_FIELDS.firma],
+    [KONTAKTE_FIELDS.name]: pick<string>('name', KONTAKTE_FIELDS.name) || 'Unbekannt',
+    [KONTAKTE_FIELDS.vorname]: pick('vorname', KONTAKTE_FIELDS.vorname),
+    [KONTAKTE_FIELDS.nachname]: pick('nachname', KONTAKTE_FIELDS.nachname),
+    [KONTAKTE_FIELDS.titel]: pick('titel', KONTAKTE_FIELDS.titel),
+    [KONTAKTE_FIELDS.anrede]: pick('anrede', KONTAKTE_FIELDS.anrede),
+    [KONTAKTE_FIELDS.strasse]: pick('strasse', KONTAKTE_FIELDS.strasse),
+    [KONTAKTE_FIELDS.plz]: pick('plz', KONTAKTE_FIELDS.plz),
+    [KONTAKTE_FIELDS.ort]: pick('ort', KONTAKTE_FIELDS.ort),
+    [KONTAKTE_FIELDS.geburtstag]: pick('geburtstag', KONTAKTE_FIELDS.geburtstag),
+    [KONTAKTE_FIELDS.email]: pick('email', KONTAKTE_FIELDS.email),
+    [KONTAKTE_FIELDS.telefon]: pick('telefon', KONTAKTE_FIELDS.telefon),
+    [KONTAKTE_FIELDS.telefon2]: pick('telefon2', KONTAKTE_FIELDS.telefon2),
+    [KONTAKTE_FIELDS.whatsapp]: pick('whatsapp', KONTAKTE_FIELDS.whatsapp),
+    [KONTAKTE_FIELDS.wechatId]: pick('wechat_id', KONTAKTE_FIELDS.wechatId),
+    [KONTAKTE_FIELDS.linkedinUrl]: pick('linkedin_url', KONTAKTE_FIELDS.linkedinUrl),
+    [KONTAKTE_FIELDS.rolle]: pick('rolle', KONTAKTE_FIELDS.rolle),
+    [KONTAKTE_FIELDS.notizen]: pick('notizen', KONTAKTE_FIELDS.notizen),
+    [KONTAKTE_FIELDS.iban]: pick('iban', KONTAKTE_FIELDS.iban),
+    [KONTAKTE_FIELDS.tags]: tags
+  });
 
-  const [updated] = await sql`SELECT * FROM contacts WHERE id = ${params.id}`;
-  return jsonOk({ contact: updated });
+  const updated = await getRecord(TABLES.kontakteReal, params.id!);
+  return jsonOk({ contact: { id: updated!.id, ...updated!.fields } });
 };
 
-// DELETE /api/v1/contacts/:id
 export const DELETE: RequestHandler = async ({ request, params }) => {
   const denied = checkApiAuth(request);
   if (denied) return denied;
 
-  const [existing] = await sql`SELECT id FROM contacts WHERE id = ${params.id}`;
+  const existing = await getRecord(TABLES.kontakteReal, params.id!);
   if (!existing) return jsonError('Not found', 404);
 
-  await sql`DELETE FROM contacts WHERE id = ${params.id}`;
+  await deleteRecord(TABLES.kontakteReal, params.id!);
   return jsonOk({ deleted: true });
 };
