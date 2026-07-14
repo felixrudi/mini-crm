@@ -1,101 +1,96 @@
-import { sql } from '$lib/db';
-import { fail } from '@sveltejs/kit';
+import { listRecords, createRecord, updateRecord, deleteRecord, linkId } from '$lib/server/teable';
+import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS } from '$lib/server/teable-schema';
+import { mapContact } from '$lib/server/teable-map';
 import type { Actions, PageServerLoad } from './$types';
+
+function matchesFilters(
+  fields: Record<string, unknown>,
+  { q, tag, kanal }: { q: string; tag: string; kanal: string }
+): boolean {
+  if (q) {
+    const hay = `${fields[KONTAKTE_FIELDS.name] ?? ''} ${fields[KONTAKTE_FIELDS.email] ?? ''}`.toLowerCase();
+    if (!hay.includes(q.toLowerCase())) return false;
+  }
+  if (tag) {
+    const tags = (fields[KONTAKTE_FIELDS.tags] as string[] | undefined) ?? [];
+    if (!tags.includes(tag)) return false;
+  }
+  if (kanal === 'whatsapp' && !fields[KONTAKTE_FIELDS.whatsapp]) return false;
+  if (kanal === 'wechat' && !fields[KONTAKTE_FIELDS.wechatId]) return false;
+  return true;
+}
 
 export const load: PageServerLoad = async ({ url }) => {
   const q = url.searchParams.get('q') || '';
   const tag = url.searchParams.get('tag') || '';
   const kanal = url.searchParams.get('kanal') || '';
 
-  // Always exclude prospect-tagged contacts from regular contacts view
-  const PROSPECT_TAG = 'prospect';
+  const [kontakteRecs, firmenRecs] = await Promise.all([
+    listRecords(TABLES.kontakteReal),
+    listRecords(TABLES.firmen)
+  ]);
+  const firmaNameById = new Map(firmenRecs.map((f) => [f.id, f.fields[FIRMEN_FIELDS.name] as string]));
 
-  let contacts;
-  if (q && tag) {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}) AND ${tag} = ANY(c.tags) AND NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
-  } else if (q && kanal === 'whatsapp') {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}) AND c.whatsapp IS NOT NULL AND NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
-  } else if (q && kanal === 'wechat') {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}) AND c.wechat_id IS NOT NULL AND NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
-  } else if (q) {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}) AND NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
-  } else if (tag) {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE ${tag} = ANY(c.tags) AND NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
-  } else if (kanal === 'whatsapp') {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE c.whatsapp IS NOT NULL AND NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
-  } else if (kanal === 'wechat') {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE c.wechat_id IS NOT NULL AND NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
-  } else {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE NOT (${PROSPECT_TAG} = ANY(COALESCE(c.tags, '{}'::text[]))) ORDER BY c.name`;
-  }
+  const contacts = kontakteRecs
+    .filter((r) => matchesFilters(r.fields, { q, tag, kanal }))
+    .map((r) => mapContact(r, firmaNameById.get(linkId(r.fields[KONTAKTE_FIELDS.firma]) ?? '') ?? null))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
-  const companies = await sql`SELECT id, name FROM companies ORDER BY name`;
-  const allTags = await sql`SELECT DISTINCT unnest(tags) as tag FROM contacts WHERE tags IS NOT NULL AND array_length(tags, 1) > 0 AND NOT ('prospect' = ANY(COALESCE(tags, '{}'::text[]))) ORDER BY tag`;
+  const companies = firmenRecs
+    .map((f) => ({ id: f.id, name: f.fields[FIRMEN_FIELDS.name] }))
+    .sort((a, b) => String(a.name).localeCompare(String(b.name)));
 
-  return { contacts, companies, q, tag, kanal, allTags: allTags.map((r: any) => r.tag) };
+  const allTags = [...new Set(kontakteRecs.flatMap((r) => (r.fields[KONTAKTE_FIELDS.tags] as string[] | undefined) ?? []))].sort();
+
+  return { contacts, companies, q, tag, kanal, allTags };
 };
 
 function parseTags(d: FormData): string[] {
   const raw = (d.get('tags') as string) || '';
-  return raw.split(',').map((t: string) => t.trim().toLowerCase()).filter(Boolean);
+  return raw.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean);
 }
 
 function extractContactFields(d: FormData) {
   const name = (d.get('name') as string)?.trim() || 'Unbekannt';
   return {
-    name,
-    vorname: d.get('vorname') || null,
-    nachname: d.get('nachname') || null,
-    titel: d.get('titel') || null,
-    anrede: d.get('anrede') || null,
-    strasse: d.get('strasse') || null,
-    plz: d.get('plz') || null,
-    ort: d.get('ort') || null,
-    geburtstag: d.get('geburtstag') || null,
-    company_id: d.get('company_id') || null,
-    rolle: d.get('rolle') || null,
-    email: d.get('email') || null,
-    telefon: d.get('telefon') || null,
-    telefon2: d.get('telefon2') || null,
-    whatsapp: d.get('whatsapp') || null,
-    wechat_id: d.get('wechat_id') || null,
-    linkedin_url: d.get('linkedin_url') || null,
-    notizen: d.get('notizen') || null,
-    iban: d.get('iban') || null,
-    tags: parseTags(d),
+    [KONTAKTE_FIELDS.name]: name,
+    [KONTAKTE_FIELDS.vorname]: d.get('vorname') || null,
+    [KONTAKTE_FIELDS.nachname]: d.get('nachname') || null,
+    [KONTAKTE_FIELDS.titel]: d.get('titel') || null,
+    [KONTAKTE_FIELDS.anrede]: d.get('anrede') || null,
+    [KONTAKTE_FIELDS.strasse]: d.get('strasse') || null,
+    [KONTAKTE_FIELDS.plz]: d.get('plz') || null,
+    [KONTAKTE_FIELDS.ort]: d.get('ort') || null,
+    [KONTAKTE_FIELDS.geburtstag]: d.get('geburtstag') || null,
+    [KONTAKTE_FIELDS.firma]: d.get('company_id') ? [{ id: d.get('company_id') as string }] : null,
+    [KONTAKTE_FIELDS.rolle]: d.get('rolle') || null,
+    [KONTAKTE_FIELDS.email]: d.get('email') || null,
+    [KONTAKTE_FIELDS.telefon]: d.get('telefon') || null,
+    [KONTAKTE_FIELDS.telefon2]: d.get('telefon2') || null,
+    [KONTAKTE_FIELDS.whatsapp]: d.get('whatsapp') || null,
+    [KONTAKTE_FIELDS.wechatId]: d.get('wechat_id') || null,
+    [KONTAKTE_FIELDS.linkedinUrl]: d.get('linkedin_url') || null,
+    [KONTAKTE_FIELDS.notizen]: d.get('notizen') || null,
+    [KONTAKTE_FIELDS.iban]: d.get('iban') || null,
+    [KONTAKTE_FIELDS.tags]: parseTags(d)
   };
 }
 
 export const actions: Actions = {
   create: async ({ request }) => {
     const d = await request.formData();
-    const f = extractContactFields(d);
-    const [row] = await sql`INSERT INTO contacts
-      (company_id, name, vorname, nachname, titel, anrede, strasse, plz, ort, geburtstag,
-       email, telefon, telefon2, whatsapp, wechat_id, linkedin_url, rolle, notizen, iban, tags)
-      VALUES (${f.company_id}, ${f.name}, ${f.vorname}, ${f.nachname}, ${f.titel}, ${f.anrede},
-              ${f.strasse}, ${f.plz}, ${f.ort}, ${f.geburtstag},
-              ${f.email}, ${f.telefon}, ${f.telefon2}, ${f.whatsapp}, ${f.wechat_id}, ${f.linkedin_url},
-              ${f.rolle}, ${f.notizen}, ${f.iban}, ${f.tags})
-      RETURNING id`;
-    return { success: true, id: row.id };
+    const rec = await createRecord(TABLES.kontakteReal, extractContactFields(d));
+    return { success: true, id: rec.id };
   },
   update: async ({ request }) => {
     const d = await request.formData();
     const id = d.get('id') as string;
-    const f = extractContactFields(d);
-    await sql`UPDATE contacts SET
-      company_id=${f.company_id}, name=${f.name}, vorname=${f.vorname}, nachname=${f.nachname},
-      titel=${f.titel}, anrede=${f.anrede}, strasse=${f.strasse}, plz=${f.plz}, ort=${f.ort},
-      geburtstag=${f.geburtstag}, email=${f.email}, telefon=${f.telefon}, telefon2=${f.telefon2},
-      whatsapp=${f.whatsapp}, wechat_id=${f.wechat_id}, linkedin_url=${f.linkedin_url},
-      rolle=${f.rolle}, notizen=${f.notizen}, iban=${f.iban}, tags=${f.tags}
-      WHERE id=${id}`;
+    await updateRecord(TABLES.kontakteReal, id, extractContactFields(d));
     return { success: true };
   },
   delete: async ({ request }) => {
     const d = await request.formData();
-    await sql`DELETE FROM contacts WHERE id=${d.get('id')}`;
+    await deleteRecord(TABLES.kontakteReal, d.get('id') as string);
     return { success: true };
   }
 };
