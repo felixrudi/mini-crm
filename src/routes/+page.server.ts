@@ -1,26 +1,57 @@
-import { sql } from '$lib/db';
+import { listRecords, linkId } from '$lib/server/teable';
+import { TABLES, AUFGABEN_FIELDS, KONTAKTE_FIELDS, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS } from '$lib/server/teable-schema';
+import { mapAction, mapContact } from '$lib/server/teable-map';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-  const open_actions = await sql`
-    SELECT a.*, c.name as contact_name FROM actions a
-    LEFT JOIN contacts c ON a.contact_id = c.id
-    WHERE a.status = 'offen' ORDER BY a.faellig_am NULLS LAST LIMIT 10`;
+  const [aufgabenRecs, kontakteRecs, firmenRecs, interaktionenRecs] = await Promise.all([
+    listRecords(TABLES.aufgabenReal),
+    listRecords(TABLES.kontakteReal),
+    listRecords(TABLES.firmen),
+    listRecords(TABLES.interaktionenReal)
+  ]);
 
-  const recent_contacts = await sql`
-    SELECT co.*, cm.name as company_name,
-      (SELECT datum FROM contact_timeline WHERE contact_id = co.id ORDER BY datum DESC LIMIT 1) as last_activity
-    FROM contacts co LEFT JOIN companies cm ON co.company_id = cm.id
-    ORDER BY last_activity DESC NULLS LAST LIMIT 8`;
+  const kontaktNameById = new Map(kontakteRecs.map((k) => [k.id, k.fields[KONTAKTE_FIELDS.name] as string]));
+  const firmaNameById = new Map(firmenRecs.map((f) => [f.id, f.fields[FIRMEN_FIELDS.name] as string]));
 
-  const stats = await sql`
-    SELECT
-      (SELECT COUNT(*) FROM contacts)::int as contacts,
-      (SELECT COUNT(*) FROM companies)::int as companies,
-      (SELECT COUNT(*) FROM actions WHERE status='offen')::int as open_actions`;
+  const open_actions = aufgabenRecs
+    .filter((a) => a.fields[AUFGABEN_FIELDS.status] === 'offen')
+    .map((a) => mapAction(a, kontaktNameById.get(linkId(a.fields[AUFGABEN_FIELDS.kontakt]) ?? '') ?? null))
+    .sort((a, b) => {
+      if (!a.faellig_am) return 1;
+      if (!b.faellig_am) return -1;
+      return a.faellig_am.localeCompare(b.faellig_am);
+    })
+    .slice(0, 10);
 
-  const allTagsRaw = await sql`SELECT DISTINCT unnest(tags) as tag FROM contacts ORDER BY tag`;
-  const allTags = allTagsRaw.map((r: { tag: string }) => r.tag);
+  const lastActivityByContact = new Map<string, string>();
+  for (const i of interaktionenRecs) {
+    const cid = linkId(i.fields[INTERAKTIONEN_FIELDS.kontakt]);
+    const datum = i.fields[INTERAKTIONEN_FIELDS.datum] as string;
+    if (!cid || !datum) continue;
+    const cur = lastActivityByContact.get(cid);
+    if (!cur || datum > cur) lastActivityByContact.set(cid, datum);
+  }
 
-  return { open_actions, recent_contacts, stats: stats[0], allTags };
+  const recent_contacts = kontakteRecs
+    .map((c) => ({
+      ...mapContact(c, firmaNameById.get(linkId(c.fields[KONTAKTE_FIELDS.firma]) ?? '') ?? null),
+      last_activity: lastActivityByContact.get(c.id) ?? null
+    }))
+    .sort((a, b) => {
+      if (!a.last_activity) return 1;
+      if (!b.last_activity) return -1;
+      return b.last_activity.localeCompare(a.last_activity);
+    })
+    .slice(0, 8);
+
+  const stats = {
+    contacts: kontakteRecs.length,
+    companies: firmenRecs.length,
+    open_actions: aufgabenRecs.filter((a) => a.fields[AUFGABEN_FIELDS.status] === 'offen').length
+  };
+
+  const allTags = [...new Set(kontakteRecs.flatMap((r) => (r.fields[KONTAKTE_FIELDS.tags] as string[] | undefined) ?? []))].sort();
+
+  return { open_actions, recent_contacts, stats, allTags };
 };

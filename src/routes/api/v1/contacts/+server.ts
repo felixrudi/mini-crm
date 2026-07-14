@@ -1,71 +1,35 @@
-import { sql } from '$lib/db';
+import { listRecords, createRecord, linkId } from '$lib/server/teable';
+import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS } from '$lib/server/teable-schema';
 import { checkApiAuth, jsonOk, jsonError } from '$lib/api-auth';
 import type { RequestHandler } from './$types';
 
-// GET /api/v1/contacts?q=...&tag=...&exclude_tag=...&limit=50
+// GET /api/v1/contacts?q=...&tag=...&limit=50
 export const GET: RequestHandler = async ({ request, url }) => {
   const denied = checkApiAuth(request);
   if (denied) return denied;
 
-  const q = url.searchParams.get('q') || '';
+  const q = (url.searchParams.get('q') || '').toLowerCase();
   const tag = url.searchParams.get('tag') || '';
-  const excludeTag = url.searchParams.get('exclude_tag') || '';
   const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 200);
 
-  let contacts;
-  if (q && tag && excludeTag) {
-    contacts = await sql`
-      SELECT c.*, co.name as company_name FROM contacts c
-      LEFT JOIN companies co ON c.company_id = co.id
-      WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'})
-        AND ${tag} = ANY(c.tags)
-        AND NOT (${excludeTag} = ANY(COALESCE(c.tags, '{}'::text[])))
-      ORDER BY c.name LIMIT ${limit}`;
-  } else if (q && tag) {
-    contacts = await sql`
-      SELECT c.*, co.name as company_name FROM contacts c
-      LEFT JOIN companies co ON c.company_id = co.id
-      WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'})
-        AND ${tag} = ANY(c.tags)
-      ORDER BY c.name LIMIT ${limit}`;
-  } else if (q && excludeTag) {
-    contacts = await sql`
-      SELECT c.*, co.name as company_name FROM contacts c
-      LEFT JOIN companies co ON c.company_id = co.id
-      WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'})
-        AND NOT (${excludeTag} = ANY(COALESCE(c.tags, '{}'::text[])))
-      ORDER BY c.name LIMIT ${limit}`;
-  } else if (q) {
-    contacts = await sql`
-      SELECT c.*, co.name as company_name FROM contacts c
-      LEFT JOIN companies co ON c.company_id = co.id
-      WHERE c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}
-      ORDER BY c.name LIMIT ${limit}`;
-  } else if (tag && excludeTag) {
-    contacts = await sql`
-      SELECT c.*, co.name as company_name FROM contacts c
-      LEFT JOIN companies co ON c.company_id = co.id
-      WHERE ${tag} = ANY(c.tags)
-        AND NOT (${excludeTag} = ANY(COALESCE(c.tags, '{}'::text[])))
-      ORDER BY c.name LIMIT ${limit}`;
-  } else if (tag) {
-    contacts = await sql`
-      SELECT c.*, co.name as company_name FROM contacts c
-      LEFT JOIN companies co ON c.company_id = co.id
-      WHERE ${tag} = ANY(c.tags)
-      ORDER BY c.name LIMIT ${limit}`;
-  } else if (excludeTag) {
-    contacts = await sql`
-      SELECT c.*, co.name as company_name FROM contacts c
-      LEFT JOIN companies co ON c.company_id = co.id
-      WHERE NOT (${excludeTag} = ANY(COALESCE(c.tags, '{}'::text[])))
-      ORDER BY c.name LIMIT ${limit}`;
-  } else {
-    contacts = await sql`
-      SELECT c.*, co.name as company_name FROM contacts c
-      LEFT JOIN companies co ON c.company_id = co.id
-      ORDER BY c.name LIMIT ${limit}`;
+  const [kontakteRecs, firmenRecs] = await Promise.all([
+    listRecords(TABLES.kontakteReal),
+    listRecords(TABLES.firmen)
+  ]);
+  const firmaNameById = new Map(firmenRecs.map((f) => [f.id, f.fields[FIRMEN_FIELDS.name]]));
+
+  let filtered = kontakteRecs;
+  if (q) {
+    filtered = filtered.filter((r) => `${r.fields[KONTAKTE_FIELDS.name] ?? ''} ${r.fields[KONTAKTE_FIELDS.email] ?? ''}`.toLowerCase().includes(q));
   }
+  if (tag) {
+    filtered = filtered.filter((r) => ((r.fields[KONTAKTE_FIELDS.tags] as string[]) ?? []).includes(tag));
+  }
+
+  const contacts = filtered
+    .slice(0, limit)
+    .map((r): Record<string, unknown> => ({ id: r.id, ...r.fields, company_name: firmaNameById.get(linkId(r.fields[KONTAKTE_FIELDS.firma]) ?? '') ?? null }))
+    .sort((a, b) => String(a[KONTAKTE_FIELDS.name]).localeCompare(String(b[KONTAKTE_FIELDS.name])));
 
   return jsonOk({ contacts });
 };
@@ -84,38 +48,33 @@ export const POST: RequestHandler = async ({ request }) => {
 
   const name = (body.name as string)?.trim() || [body.vorname, body.nachname].filter(Boolean).join(' ') || 'Unbekannt';
   const tags = Array.isArray(body.tags)
-    ? (body.tags as string[]).map(t => t.trim().toLowerCase()).filter(Boolean)
+    ? (body.tags as string[]).map((t) => t.trim().toLowerCase()).filter(Boolean)
     : typeof body.tags === 'string'
-      ? (body.tags as string).split(',').map((t: string) => t.trim().toLowerCase()).filter(Boolean)
+      ? (body.tags as string).split(',').map((t) => t.trim().toLowerCase()).filter(Boolean)
       : [];
 
-  const [row] = await sql`
-    INSERT INTO contacts
-      (company_id, name, vorname, nachname, titel, anrede, strasse, plz, ort, geburtstag,
-       email, telefon, telefon2, whatsapp, wechat_id, linkedin_url, rolle, notizen, iban, tags)
-    VALUES (
-      ${(body.company_id as string) || null},
-      ${name},
-      ${(body.vorname as string) || null},
-      ${(body.nachname as string) || null},
-      ${(body.titel as string) || null},
-      ${(body.anrede as string) || null},
-      ${(body.strasse as string) || null},
-      ${(body.plz as string) || null},
-      ${(body.ort as string) || null},
-      ${(body.geburtstag as string) || null},
-      ${(body.email as string) || null},
-      ${(body.telefon as string) || null},
-      ${(body.telefon2 as string) || null},
-      ${(body.whatsapp as string) || null},
-      ${(body.wechat_id as string) || null},
-      ${(body.linkedin_url as string) || null},
-      ${(body.rolle as string) || null},
-      ${(body.notizen as string) || null},
-      ${(body.iban as string) || null},
-      ${tags}
-    )
-    RETURNING *`;
+  const rec = await createRecord(TABLES.kontakteReal, {
+    [KONTAKTE_FIELDS.firma]: body.company_id ? [{ id: body.company_id as string }] : null,
+    [KONTAKTE_FIELDS.name]: name,
+    [KONTAKTE_FIELDS.vorname]: (body.vorname as string) || null,
+    [KONTAKTE_FIELDS.nachname]: (body.nachname as string) || null,
+    [KONTAKTE_FIELDS.titel]: (body.titel as string) || null,
+    [KONTAKTE_FIELDS.anrede]: (body.anrede as string) || null,
+    [KONTAKTE_FIELDS.strasse]: (body.strasse as string) || null,
+    [KONTAKTE_FIELDS.plz]: (body.plz as string) || null,
+    [KONTAKTE_FIELDS.ort]: (body.ort as string) || null,
+    [KONTAKTE_FIELDS.geburtstag]: (body.geburtstag as string) || null,
+    [KONTAKTE_FIELDS.email]: (body.email as string) || null,
+    [KONTAKTE_FIELDS.telefon]: (body.telefon as string) || null,
+    [KONTAKTE_FIELDS.telefon2]: (body.telefon2 as string) || null,
+    [KONTAKTE_FIELDS.whatsapp]: (body.whatsapp as string) || null,
+    [KONTAKTE_FIELDS.wechatId]: (body.wechat_id as string) || null,
+    [KONTAKTE_FIELDS.linkedinUrl]: (body.linkedin_url as string) || null,
+    [KONTAKTE_FIELDS.rolle]: (body.rolle as string) || null,
+    [KONTAKTE_FIELDS.notizen]: (body.notizen as string) || null,
+    [KONTAKTE_FIELDS.iban]: (body.iban as string) || null,
+    [KONTAKTE_FIELDS.tags]: tags
+  });
 
-  return jsonOk({ contact: row }, 201);
+  return jsonOk({ contact: { id: rec.id, ...rec.fields } }, 201);
 };

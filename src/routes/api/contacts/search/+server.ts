@@ -1,30 +1,24 @@
-import { sql } from '$lib/db';
+import { listRecords, linkId } from '$lib/server/teable';
+import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS } from '$lib/server/teable-schema';
+import { mapContact } from '$lib/server/teable-map';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ url }) => {
   const q = url.searchParams.get('q') || '';
-  const tag = url.searchParams.get('tag') || '';
-  const kanal = url.searchParams.get('kanal') || '';
+  if (!q.trim()) return json({ contacts: [] });
 
-  let contacts;
-  if (q && tag) {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}) AND ${tag} = ANY(c.tags) ORDER BY c.name LIMIT 100`;
-  } else if (q && kanal === 'whatsapp') {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}) AND c.whatsapp IS NOT NULL ORDER BY c.name LIMIT 100`;
-  } else if (q && kanal === 'wechat') {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE (c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'}) AND c.wechat_id IS NOT NULL ORDER BY c.name LIMIT 100`;
-  } else if (q) {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE c.name ILIKE ${'%' + q + '%'} OR c.email ILIKE ${'%' + q + '%'} OR c.vorname ILIKE ${'%' + q + '%'} OR c.nachname ILIKE ${'%' + q + '%'} ORDER BY c.name LIMIT 50`;
-  } else if (tag) {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE ${tag} = ANY(c.tags) ORDER BY c.name LIMIT 100`;
-  } else if (kanal === 'whatsapp') {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE c.whatsapp IS NOT NULL ORDER BY c.name LIMIT 100`;
-  } else if (kanal === 'wechat') {
-    contacts = await sql`SELECT c.*, co.name as company_name FROM contacts c LEFT JOIN companies co ON c.company_id = co.id WHERE c.wechat_id IS NOT NULL ORDER BY c.name LIMIT 100`;
-  } else {
-    contacts = [];
-  }
+  const [all, firmenRecs] = await Promise.all([listRecords(TABLES.kontakteReal), listRecords(TABLES.firmen)]);
+  const firmaNameById = new Map(firmenRecs.map((f) => [f.id, f.fields[FIRMEN_FIELDS.name] as string]));
+  const needle = q.toLowerCase();
+  const contacts = all
+    .filter((r) => {
+      const hay = `${r.fields[KONTAKTE_FIELDS.name] ?? ''} ${r.fields[KONTAKTE_FIELDS.email] ?? ''}`.toLowerCase();
+      return hay.includes(needle);
+    })
+    .slice(0, 10)
+    .map((r) => mapContact(r, firmaNameById.get(linkId(r.fields[KONTAKTE_FIELDS.firma]) ?? '') ?? null))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return json({ contacts });
 };

@@ -123,9 +123,11 @@ Run: `cd /Users/felix/Documents/Programmieren/mini-crm && node --env-file=.env s
 
 Expected: prints CREATE/DELETE status+body. If DELETE status is not 200/204, or the body shape differs from `{"success": true}`-style assumptions, update Task 2's `deleteRecord()` accordingly before writing it.
 
-- [ ] **Step 3: Note findings inline in this plan**
+- [x] **Step 3: Note findings inline in this plan**
 
 Add a one-line comment under this task recording the actual observed DELETE status code and attachment response shape (fill in after running), so Task 2 is written against confirmed reality, not assumption.
+
+> **Observed (2026-07-14):** `DELETE /api/table/{tableId}/record/{recordId}` returns **200** with the **full deleted record** in the body (`fields` keyed by field **ID**, not name — unlike every other endpoint here) — not the `{"success": true}` shape assumed when this plan was drafted. Independently confirmed the delete was real via a follow-up GET → 404. Task 2's `deleteRecord()` doesn't parse the response body, so this doesn't require a client-code change — noted here only so nobody re-derives it. Full detail: `scripts/verify-teable-api.ts` trailing comment. Attachment-upload shape still unconfirmed — re-run that half of the spike once Task 1's `Foto`/`Dateien` fields exist.
 
 - [ ] **Step 4: Commit the spike script (kept for the record, not deleted yet)**
 
@@ -136,13 +138,29 @@ git commit -m "chore: add Teable API verification spike (Task 0)"
 
 ---
 
-## Task 1: Create the Teable schema (manual, via Teable UI)
+## Task 1: Create the Teable schema — DONE, via scripted API (superseded the original manual plan)
 
-Not a code task — Teable table/field creation was always done by hand in this system (see `modules/werkbank/marketing/scraper/teable-workflow.md`: "3 Tabellen (A/B/C) angelegt... Single-Selects befüllt" — manual, never scripted). No verified API shape exists in this repo for table/field creation, so this stays manual to avoid guessing at an unverified endpoint for something this structural.
+**Status: ✅ complete (2026-07-14), executed live against `teable.hirschfeld.at`.**
 
-**Files:**
-- Modify: `/Users/felix/Documents/Henry/data/teable-config.json` (append new table IDs once created)
-- Modify: `src/lib/server/teable-schema.ts` (created in Task 2, filled in with real IDs after this task)
+The original version of this task planned a manual, click-through Teable UI checklist, on the reasoning that no verified API shape existed in this repo for table/field creation. That reasoning turned out to be wrong on further research: Teable's live self-hosted OpenAPI spec (`https://teable.hirschfeld.at/docs-json`) documents `POST /api/base/{baseId}/table` (create table + fields in one call) and `POST /api/table/{tableId}/field` (add a field, including `link` and `isLookup` fields) — confirmed available on this self-hosted instance, not gated to Teable Cloud. Built and ran `/Users/felix/Documents/Henry/scripts/create_crm_teable_schema.py` instead of doing this by hand.
+
+Two real API quirks hit and fixed during the live run (kept here for anyone re-running or extending the script):
+1. Date-field `options.formatting.time` only accepts `"HH:mm" | "hh:mm A" | "None"` — not arbitrary strings like `"24"`.
+2. The first field in a table's field array becomes its "primary field", and Teable rejects a `link`-type field as primary — link fields must not be first in the array (fixed by putting `Name`/`Titel` first in `Kontakte_Real`/`Interaktionen_Real`/`Aufgaben_Real`).
+
+**Real table IDs** (base `felix_base`, `bseJqfV4E4Ri1QYjUUL`) — already filled into `src/lib/server/teable-schema.ts` and `/Users/felix/Documents/Henry/data/teable-config.json`:
+
+| Table | ID |
+|---|---|
+| Firmen | `tbl58ahoWar7wVxWHjA` |
+| Kontakte_Real | `tblnTqgSMBRZLWINOp6` |
+| Interaktionen_Real | `tblNE3WqZkqafOGS9f1` |
+| Aufgaben_Real | `tblZBgkRKvvVeckzZaP` |
+| Prospects | `tbl6LjxihnKhe0I5A1L` |
+
+All fields verified via a follow-up `GET /api/table/{id}/field` per table against the live instance — every field name/type matches this task's original spec (below, kept for reference), the `Firma`/`Kontakt` link fields point at the correct foreign tables, and the `Firma-Name` lookup field on `Kontakte_Real` is correctly typed as a lookup through the `Firma` link. Teable auto-created the expected symmetric reverse-link fields on `Firmen` (`Kontakte_Real`, `Prospects`) and `Kontakte_Real` (`Interaktionen_Real`, `Aufgaben_Real`) — harmless, standard Teable behavior, not something the script needs to manage.
+
+**Original field spec (for reference — matches what was actually created):**
 
 - [ ] **Step 1: In base `felix_base` (`bseJqfV4E4Ri1QYjUUL`), create table `Firmen`**
 
@@ -947,6 +965,180 @@ git commit -m "feat: migrate companies routes from Postgres to Teable"
 
 ---
 
+## Task 4b: Field-shape mapper module (course correction, added after Task 4 review)
+
+**Why this exists:** Task 4's implementer found that spreading a Teable record's raw `fields` object straight into a route's return value produces German, capitalized field names (`Name`, `Vorname`, `Firma-Name`...) — but every `.svelte` template in this app was written against the OLD Postgres-shaped flat English snake_case fields (`name`, `vorname`, `company_name`...), confirmed by reading every affected `.svelte` file and `src/lib/types.ts`. Nothing in Tasks 5/6/8/9 as originally drafted accounted for this — their code blocks (below, already corrected in this revision) now route every Svelte-facing `load`/action return value through this mapper instead of spreading raw Teable fields. `Interaktionen_Real` also needs one nontrivial reshape: the app's `TimelineEntry` type expects `{art: 'interaction'|'email', subtyp, titel, inhalt, eintrag_id, datum}` — derived here from the merged table's `Typ` field (`email_rein`/`email_raus` → `art:'email'`, else `art:'interaction'`).
+
+Confirmed component contracts (from reading the actual `.svelte` files, not guessed):
+- `contact.photo` must be a **plain string** (URL or data-URI) everywhere, rendered directly as `<img src>` — never an object/array. Teable's Attachment field returns an array of `{id, name, mimetype/mimeType, url, ...}` objects — take the first entry's `url`.
+- The Dateien/files list (`contacts/[id]/+page.svelte`, fetched client-side from `/api/contacts/:id/files`) expects `{id, filename, mimetype, data, created_at}` — `data` is used directly as an image `src`, so a Teable attachment's `url` slots in as `data` unchanged in meaning.
+- `company_name` / `contact_name` / `contact_count` must already be flattened strings/numbers in the `load` function's output — no template does nested `company.name` access.
+
+**Files:**
+- Create: `src/lib/server/teable-map.ts`
+- Modify: `src/routes/companies/[id]/+page.server.ts` (Task 4's file — fix the contact-list mapping to use `mapContact`)
+
+**Interfaces:**
+- Consumes: `TeableRecord`, `linkId` from `$lib/server/teable`; all `*_FIELDS` constants from `$lib/server/teable-schema`
+- Produces: `mapCompany(record, contactCount?)`, `mapContact(record, companyName?)`, `mapTimelineEntry(record)`, `mapAction(record, contactName?)`, `mapProspect(record, companyName?)`, `mapFile(attachment)` — used by every remaining Svelte-facing task (5, 6, 8, 9)
+
+- [ ] **Step 1: Write `teable-map.ts`**
+
+```ts
+// src/lib/server/teable-map.ts
+// Converts Teable {id, fields} records into the exact flat field shapes
+// src/lib/types.ts and every .svelte template already expect — these shapes
+// predate the Teable migration and are preserved so no .svelte file changes.
+import type { TeableRecord } from './teable';
+import { linkId } from './teable';
+import { KONTAKTE_FIELDS, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS, AUFGABEN_FIELDS, PROSPECT_FIELDS } from './teable-schema';
+
+type Attachment = { id: string; name: string; mimetype?: string; mimeType?: string; url: string; timestamp?: string };
+
+function firstAttachmentUrl(field: unknown): string | null {
+  const atts = field as Attachment[] | undefined;
+  return atts && atts.length > 0 ? atts[0].url : null;
+}
+
+export function mapCompany(r: TeableRecord, contactCount = 0) {
+  const f = r.fields as Record<string, unknown>;
+  return {
+    id: r.id,
+    name: f[FIRMEN_FIELDS.name] as string,
+    website: (f[FIRMEN_FIELDS.website] as string) ?? null,
+    strasse: (f[FIRMEN_FIELDS.strasse] as string) ?? null,
+    plz: (f[FIRMEN_FIELDS.plz] as string) ?? null,
+    ort: (f[FIRMEN_FIELDS.ort] as string) ?? null,
+    land: (f[FIRMEN_FIELDS.land] as string) ?? null,
+    notizen: (f[FIRMEN_FIELDS.notizen] as string) ?? null,
+    created_at: r.createdTime ?? null,
+    contact_count: contactCount
+  };
+}
+
+export function mapContact(r: TeableRecord, companyName: string | null = null) {
+  const f = r.fields as Record<string, unknown>;
+  return {
+    id: r.id,
+    company_id: linkId(f[KONTAKTE_FIELDS.firma]),
+    company_name: companyName,
+    name: f[KONTAKTE_FIELDS.name] as string,
+    vorname: (f[KONTAKTE_FIELDS.vorname] as string) ?? null,
+    nachname: (f[KONTAKTE_FIELDS.nachname] as string) ?? null,
+    titel: (f[KONTAKTE_FIELDS.titel] as string) ?? null,
+    anrede: (f[KONTAKTE_FIELDS.anrede] as 'Herr' | 'Frau' | null) ?? null,
+    strasse: (f[KONTAKTE_FIELDS.strasse] as string) ?? null,
+    plz: (f[KONTAKTE_FIELDS.plz] as string) ?? null,
+    ort: (f[KONTAKTE_FIELDS.ort] as string) ?? null,
+    geburtstag: (f[KONTAKTE_FIELDS.geburtstag] as string) ?? null,
+    email: (f[KONTAKTE_FIELDS.email] as string) ?? null,
+    telefon: (f[KONTAKTE_FIELDS.telefon] as string) ?? null,
+    telefon2: (f[KONTAKTE_FIELDS.telefon2] as string) ?? null,
+    whatsapp: (f[KONTAKTE_FIELDS.whatsapp] as string) ?? null,
+    wechat_id: (f[KONTAKTE_FIELDS.wechatId] as string) ?? null,
+    linkedin_url: (f[KONTAKTE_FIELDS.linkedinUrl] as string) ?? null,
+    rolle: (f[KONTAKTE_FIELDS.rolle] as string) ?? null,
+    notizen: (f[KONTAKTE_FIELDS.notizen] as string) ?? null,
+    photo: firstAttachmentUrl(f[KONTAKTE_FIELDS.foto]),
+    tags: (f[KONTAKTE_FIELDS.tags] as string[]) ?? [],
+    iban: (f[KONTAKTE_FIELDS.iban] as string) ?? null,
+    created_at: r.createdTime ?? null
+  };
+}
+
+export function mapTimelineEntry(r: TeableRecord) {
+  const f = r.fields as Record<string, unknown>;
+  const typ = f[INTERAKTIONEN_FIELDS.typ] as string;
+  const isEmail = typ === 'email_rein' || typ === 'email_raus';
+  return {
+    contact_id: linkId(f[INTERAKTIONEN_FIELDS.kontakt]) as string,
+    art: isEmail ? ('email' as const) : ('interaction' as const),
+    eintrag_id: r.id,
+    subtyp: isEmail ? (typ === 'email_rein' ? 'rein' : 'raus') : typ,
+    datum: f[INTERAKTIONEN_FIELDS.datum] as string,
+    titel: (f[INTERAKTIONEN_FIELDS.titel] as string) ?? null,
+    inhalt: (f[INTERAKTIONEN_FIELDS.text] as string) ?? null
+  };
+}
+
+export function mapAction(r: TeableRecord, contactName: string | null = null) {
+  const f = r.fields as Record<string, unknown>;
+  return {
+    id: r.id,
+    contact_id: linkId(f[AUFGABEN_FIELDS.kontakt]),
+    contact_name: contactName,
+    titel: f[AUFGABEN_FIELDS.titel] as string,
+    status: f[AUFGABEN_FIELDS.status] as 'offen' | 'erledigt',
+    faellig_am: (f[AUFGABEN_FIELDS.faelligAm] as string) ?? null,
+    notizen: (f[AUFGABEN_FIELDS.notizen] as string) ?? null,
+    created_at: r.createdTime ?? null
+  };
+}
+
+export function mapProspect(r: TeableRecord, companyName: string | null = null) {
+  const f = r.fields as Record<string, unknown>;
+  return {
+    id: r.id,
+    name: f[PROSPECT_FIELDS.name] as string,
+    vorname: (f[PROSPECT_FIELDS.vorname] as string) ?? null,
+    nachname: (f[PROSPECT_FIELDS.nachname] as string) ?? null,
+    titel: (f[PROSPECT_FIELDS.titel] as string) ?? null,
+    anrede: (f[PROSPECT_FIELDS.anrede] as 'Herr' | 'Frau' | null) ?? null,
+    email: (f[PROSPECT_FIELDS.email] as string) ?? null,
+    firma: (f[PROSPECT_FIELDS.firmaText] as string) ?? null,
+    company_id: linkId(f[PROSPECT_FIELDS.firma]),
+    company_name: companyName,
+    rolle: (f[PROSPECT_FIELDS.rolle] as string) ?? null,
+    telefon: (f[PROSPECT_FIELDS.telefon] as string) ?? null,
+    website: (f[PROSPECT_FIELDS.website] as string) ?? null,
+    notizen: (f[PROSPECT_FIELDS.notizen] as string) ?? null,
+    status: f[PROSPECT_FIELDS.status] as string,
+    kanal: (f[PROSPECT_FIELDS.kanal] as string) ?? null,
+    versandt_am: (f[PROSPECT_FIELDS.versandtAm] as string) ?? null,
+    followup_am: (f[PROSPECT_FIELDS.followupAm] as string) ?? null,
+    sperre: Boolean(f[PROSPECT_FIELDS.sperre]),
+    sperre_grund: (f[PROSPECT_FIELDS.sperreGrund] as string) ?? null,
+    created_at: r.createdTime ?? null
+  };
+}
+
+export function mapFile(att: Attachment) {
+  return {
+    id: att.id,
+    filename: att.name,
+    mimetype: att.mimetype ?? att.mimeType ?? 'application/octet-stream',
+    data: att.url,
+    created_at: att.timestamp ?? null
+  };
+}
+```
+
+- [ ] **Step 2: Fix `src/routes/companies/[id]/+page.server.ts`'s contact-list mapping**
+
+Replace the `contacts` mapping in `load` (the line that does `.map((c) => ({ id: c.id, name: c.fields[KONTAKTE_FIELDS.name], ...c.fields }))`) with:
+
+```ts
+import { mapContact } from '$lib/server/teable-map';
+// ...
+const contacts = allContacts
+  .filter((c) => linkId(c.fields[KONTAKTE_FIELDS.firma]) === params.id)
+  .map((c) => mapContact(c))
+  .sort((a, b) => String(a.name).localeCompare(String(b.name)));
+```
+
+Also replace the `company` return value (currently `{ id: company.id, ...company.fields }`) with `mapCompany(company)` (contact count not needed on the detail page per the Svelte template's field list — pass `0` or omit, since `companies/[id]/+page.svelte` doesn't read `contact_count`).
+
+- [ ] **Step 3: Verify + commit**
+
+Reuse the isolated `tsc --strict --skipLibCheck` pattern from prior tasks, extended to cover `teable-map.ts` and the fixed file. Commit both files together.
+
+```bash
+git add src/lib/server/teable-map.ts src/routes/companies/[id]/+page.server.ts
+git commit -m "fix: add Teable-to-template field mapper, fix companies/[id] to use it"
+```
+
+---
+
 ## Task 5: Rewrite Kontakte_Real core routes
 
 **Files:**
@@ -965,6 +1157,7 @@ git commit -m "feat: migrate companies routes from Postgres to Teable"
 ```ts
 import { listRecords, createRecord, updateRecord, deleteRecord, linkId } from '$lib/server/teable';
 import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS } from '$lib/server/teable-schema';
+import { mapContact } from '$lib/server/teable-map';
 import type { Actions, PageServerLoad } from './$types';
 
 function matchesFilters(
@@ -997,12 +1190,8 @@ export const load: PageServerLoad = async ({ url }) => {
 
   const contacts = kontakteRecs
     .filter((r) => matchesFilters(r.fields, { q, tag, kanal }))
-    .map((r) => ({
-      id: r.id,
-      ...r.fields,
-      company_name: firmaNameById.get(linkId(r.fields[KONTAKTE_FIELDS.firma]) ?? '') ?? null
-    }))
-    .sort((a, b) => String(a[KONTAKTE_FIELDS.name]).localeCompare(String(b[KONTAKTE_FIELDS.name])));
+    .map((r) => mapContact(r, firmaNameById.get(linkId(r.fields[KONTAKTE_FIELDS.firma]) ?? '') ?? null))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const companies = firmenRecs
     .map((f) => ({ id: f.id, name: f.fields[FIRMEN_FIELDS.name] }))
@@ -1076,6 +1265,7 @@ import {
   linkId
 } from '$lib/server/teable';
 import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS, AUFGABEN_FIELDS } from '$lib/server/teable-schema';
+import { mapContact, mapTimelineEntry, mapAction } from '$lib/server/teable-map';
 import { error } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -1094,20 +1284,20 @@ export const load: PageServerLoad = async ({ params }) => {
 
   // Replaces the contact_timeline VIEW: Interaktionen_Real already merges
   // interactions+emails, so this is just a filter+sort, no UNION needed.
+  // mapTimelineEntry derives {art, subtyp, titel, inhalt, eintrag_id} from the
+  // merged table's Typ field — this is the exact shape TimelineItem.svelte expects.
   const timeline = allInteractions
     .filter((r) => linkId(r.fields[INTERAKTIONEN_FIELDS.kontakt]) === params.id)
-    .map((r) => ({ id: r.id, ...r.fields }))
-    .sort((a, b) => String(b[INTERAKTIONEN_FIELDS.datum]).localeCompare(String(a[INTERAKTIONEN_FIELDS.datum])));
+    .map(mapTimelineEntry)
+    .sort((a, b) => b.datum.localeCompare(a.datum));
 
   const actions_list = allActions
     .filter((r) => linkId(r.fields[AUFGABEN_FIELDS.kontakt]) === params.id)
-    .map((r) => ({ id: r.id, ...r.fields }))
+    .map((r) => mapAction(r))
     .sort((a, b) => {
-      const af = a[AUFGABEN_FIELDS.faelligAm] as string | null;
-      const bf = b[AUFGABEN_FIELDS.faelligAm] as string | null;
-      if (!af) return 1;
-      if (!bf) return -1;
-      return af.localeCompare(bf);
+      if (!a.faellig_am) return 1;
+      if (!b.faellig_am) return -1;
+      return a.faellig_am.localeCompare(b.faellig_am);
     });
 
   const companies = firmenRecs
@@ -1115,7 +1305,7 @@ export const load: PageServerLoad = async ({ params }) => {
     .sort((a, b) => String(a.name).localeCompare(String(b.name)));
 
   return {
-    contact: { id: contact.id, ...contact.fields, company_name: firma?.fields[FIRMEN_FIELDS.name] ?? null },
+    contact: mapContact(contact, (firma?.fields[FIRMEN_FIELDS.name] as string) ?? null),
     timeline,
     actions_list,
     companies
@@ -1274,12 +1464,14 @@ export const GET: RequestHandler = async ({ url }) => {
   const limit = q ? 50 : 100;
   const contacts = filtered
     .slice(0, limit)
-    .map((r) => ({ id: r.id, ...r.fields, company_name: firmaNameById.get(linkId(r.fields[KONTAKTE_FIELDS.firma]) ?? '') ?? null }))
-    .sort((a, b) => String(a[KONTAKTE_FIELDS.name]).localeCompare(String(b[KONTAKTE_FIELDS.name])));
+    .map((r) => mapContact(r, firmaNameById.get(linkId(r.fields[KONTAKTE_FIELDS.firma]) ?? '') ?? null))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return json({ contacts });
 };
 ```
+
+Add `import { mapContact } from '$lib/server/teable-map';` to this file's import block alongside the existing `$lib/server/teable`/`teable-schema` imports.
 
 - [ ] **Step 4: Rewrite `src/routes/contacts/[id]/vcard/+server.ts`**
 
@@ -1328,9 +1520,12 @@ export const GET: RequestHandler = async ({ params }) => {
 
 - [ ] **Step 5: Rewrite `src/routes/api/contacts/search/+server.ts`**
 
+Note: this endpoint feeds two different client-side consumers with different field needs — the dashboard's quick-search (`src/routes/+page.svelte`, reads `id, photo, name, company_name, rolle, email, telefon, whatsapp, wechat_id`) and `CommandPalette.svelte` (`id, name, company_name`). Return the full `mapContact` shape rather than a hand-picked subset so both are satisfied — this is the one place the original Postgres code under-selected columns (`id, name, email, rolle` only) in a way that would have already been a latent bug against the dashboard's field list; the Teable rewrite fixes it rather than reproducing it, since `mapContact` costs nothing extra here (data's already fetched).
+
 ```ts
-import { listRecords } from '$lib/server/teable';
-import { TABLES, KONTAKTE_FIELDS } from '$lib/server/teable-schema';
+import { listRecords, linkId } from '$lib/server/teable';
+import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS } from '$lib/server/teable-schema';
+import { mapContact } from '$lib/server/teable-map';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -1338,7 +1533,8 @@ export const GET: RequestHandler = async ({ url }) => {
   const q = url.searchParams.get('q') || '';
   if (!q.trim()) return json({ contacts: [] });
 
-  const all = await listRecords(TABLES.kontakteReal);
+  const [all, firmenRecs] = await Promise.all([listRecords(TABLES.kontakteReal), listRecords(TABLES.firmen)]);
+  const firmaNameById = new Map(firmenRecs.map((f) => [f.id, f.fields[FIRMEN_FIELDS.name] as string]));
   const needle = q.toLowerCase();
   const contacts = all
     .filter((r) => {
@@ -1346,13 +1542,8 @@ export const GET: RequestHandler = async ({ url }) => {
       return hay.includes(needle);
     })
     .slice(0, 10)
-    .map((r) => ({
-      id: r.id,
-      name: r.fields[KONTAKTE_FIELDS.name],
-      email: r.fields[KONTAKTE_FIELDS.email],
-      rolle: r.fields[KONTAKTE_FIELDS.rolle]
-    }))
-    .sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    .map((r) => mapContact(r, firmaNameById.get(linkId(r.fields[KONTAKTE_FIELDS.firma]) ?? '') ?? null))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return json({ contacts });
 };
@@ -1379,7 +1570,9 @@ git commit -m "feat: migrate contacts core routes from Postgres to Teable"
 - Modify: `src/routes/api/contacts/[id]/files/[fid]/+server.ts`
 
 **Interfaces:**
-- Consumes: `uploadAttachment`, `getRecord`, `updateRecord` from `$lib/server/teable`
+- Consumes: `uploadAttachment`, `getRecord`, `updateRecord` from `$lib/server/teable`; `mapFile` from `$lib/server/teable-map`
+
+**Confirmed client contract (from reading the actual `.svelte` files — see Task 4b): keep it exactly as-is, adapt the server to match, not the other way round.** `contacts/+page.svelte` and `contacts/[id]/+page.svelte` render `contact.photo` directly as `<img src={contact.photo}>` — it must stay a plain string (the photo endpoint's JSON response `{photo: ...}` is read directly into that string field client-side). The Dateien tab (`contacts/[id]/+page.svelte`) has a local `CrmFile` type `{id, filename, mimetype, data, created_at}` and uses `data` directly as an image `src` — so the files endpoints must keep returning exactly that shape, with `data` holding Teable's attachment URL (a URL works fine as an `<img src>`, same as the old base64 data-URI did). `ContactForm.svelte` does not touch `photo` at all — no change needed there.
 
 - [ ] **Step 1: Rewrite `src/routes/api/contacts/[id]/photo/+server.ts`**
 
@@ -1389,6 +1582,8 @@ import { uploadAttachment, updateRecord, getRecord } from '$lib/server/teable';
 import { TABLES, KONTAKTE_FIELDS } from '$lib/server/teable-schema';
 import type { RequestHandler } from './$types';
 
+type Attachment = { url: string };
+
 export const POST: RequestHandler = async ({ request, params }) => {
   const { id } = params;
   const formData = await request.formData();
@@ -1397,7 +1592,8 @@ export const POST: RequestHandler = async ({ request, params }) => {
 
   await uploadAttachment(TABLES.kontakteReal, id!, KONTAKTE_FIELDS.foto, file);
   const updated = await getRecord(TABLES.kontakteReal, id!);
-  return json({ photo: updated?.fields[KONTAKTE_FIELDS.foto] ?? null });
+  const atts = (updated?.fields[KONTAKTE_FIELDS.foto] as Attachment[] | undefined) ?? [];
+  return json({ photo: atts.length > 0 ? atts[0].url : null });
 };
 
 export const DELETE: RequestHandler = async ({ params }) => {
@@ -1412,12 +1608,15 @@ export const DELETE: RequestHandler = async ({ params }) => {
 import { json, error } from '@sveltejs/kit';
 import { getRecord, uploadAttachment } from '$lib/server/teable';
 import { TABLES, KONTAKTE_FIELDS } from '$lib/server/teable-schema';
+import { mapFile } from '$lib/server/teable-map';
 import type { RequestHandler } from './$types';
+
+type Attachment = { id: string; name: string; mimetype?: string; mimeType?: string; url: string; timestamp?: string };
 
 export const GET: RequestHandler = async ({ params }) => {
   const contact = await getRecord(TABLES.kontakteReal, params.id!);
-  const files = (contact?.fields[KONTAKTE_FIELDS.dateien] as Array<Record<string, unknown>> | undefined) ?? [];
-  return json({ files });
+  const atts = (contact?.fields[KONTAKTE_FIELDS.dateien] as Attachment[] | undefined) ?? [];
+  return json({ files: atts.map(mapFile) });
 };
 
 export const POST: RequestHandler = async ({ request, params }) => {
@@ -1427,12 +1626,12 @@ export const POST: RequestHandler = async ({ request, params }) => {
 
   await uploadAttachment(TABLES.kontakteReal, params.id!, KONTAKTE_FIELDS.dateien, file);
   const updated = await getRecord(TABLES.kontakteReal, params.id!);
-  const files = (updated?.fields[KONTAKTE_FIELDS.dateien] as Array<Record<string, unknown>> | undefined) ?? [];
-  return json({ file: files[files.length - 1] });
+  const atts = (updated?.fields[KONTAKTE_FIELDS.dateien] as Attachment[] | undefined) ?? [];
+  return json({ file: atts.length > 0 ? mapFile(atts[atts.length - 1]) : null });
 };
 ```
 
-Note: Teable's Attachment field holds an array of `{id, name, mimetype, url, ...}` objects natively (per `uploadAttachment` API research) — this replaces the whole `contact_files` table. The Svelte component consuming `files` (`src/lib/components/*` — not touched in this plan, verify its field expectations during Step 4 below and adjust prop names if it expects the old `{id, filename, mimetype, data}` shape).
+Note: Teable's Attachment field holds an array of `{id, name, mimetype, url, ...}` objects natively — this replaces the whole `contact_files` table. `mapFile` (Task 4b) converts each entry to the `{id, filename, mimetype, data, created_at}` shape the Dateien tab already expects, with `data` set to the attachment's `url`.
 
 - [ ] **Step 3: Rewrite `src/routes/api/contacts/[id]/files/[fid]/+server.ts`**
 
@@ -1442,11 +1641,13 @@ import { getRecord, updateRecord } from '$lib/server/teable';
 import { TABLES, KONTAKTE_FIELDS } from '$lib/server/teable-schema';
 import type { RequestHandler } from './$types';
 
+type Attachment = { id: string; url: string };
+
 export const DELETE: RequestHandler = async ({ params }) => {
   const contact = await getRecord(TABLES.kontakteReal, params.id!);
-  const files = (contact?.fields[KONTAKTE_FIELDS.dateien] as Array<{ id: string }> | undefined) ?? [];
-  const remaining = files.filter((f) => f.id !== params.fid);
-  if (remaining.length === files.length) throw error(404, 'Nicht gefunden');
+  const atts = (contact?.fields[KONTAKTE_FIELDS.dateien] as Attachment[] | undefined) ?? [];
+  const remaining = atts.filter((f) => f.id !== params.fid);
+  if (remaining.length === atts.length) throw error(404, 'Nicht gefunden');
 
   // Teable attachment fields are replaced wholesale on write, not appended-to
   // for removal — write back the filtered array.
@@ -1456,8 +1657,8 @@ export const DELETE: RequestHandler = async ({ params }) => {
 
 export const GET: RequestHandler = async ({ params }) => {
   const contact = await getRecord(TABLES.kontakteReal, params.id!);
-  const files = (contact?.fields[KONTAKTE_FIELDS.dateien] as Array<{ id: string; url: string; name: string; mimetype: string }> | undefined) ?? [];
-  const file = files.find((f) => f.id === params.fid);
+  const atts = (contact?.fields[KONTAKTE_FIELDS.dateien] as Attachment[] | undefined) ?? [];
+  const file = atts.find((f) => f.id === params.fid);
   if (!file) throw error(404, 'Nicht gefunden');
 
   // Teable serves attachments from its own URL — redirect instead of proxying
@@ -1467,9 +1668,9 @@ export const GET: RequestHandler = async ({ params }) => {
 };
 ```
 
-- [ ] **Step 4: Check `src/lib/components/*` for the old `{id, filename, mimetype, data}` file shape**
+- [ ] **Step 4: Confirm no `.svelte` file needs changes**
 
-Run: `grep -rn "filename\|mimetype" src/lib/components/` and update any component that destructures the old Postgres shape to use Teable's attachment object shape (`name` instead of `filename`, `url` instead of a base64 `data` field for direct linking/downloading, `mimetype` unchanged). Also check `ContactForm.svelte`'s photo-display logic (currently expects a base64 data-URL string — now expects `{url, ...}` object or array).
+Run: `grep -rn "\.photo\|filename\|mimetype" src/lib/components/ src/routes/contacts/` and confirm every match still lines up with the shapes above (`contact.photo` as a plain string, files as `{id, filename, mimetype, data, created_at}`) — this step is now a verification checklist, not a code-change step, since Steps 1-3 already adapt the server to match the client's existing contract rather than the reverse.
 
 - [ ] **Step 5: Manual verification**
 
@@ -1686,9 +1887,12 @@ git commit -m "feat: migrate external REST API v1 contacts routes to Teable"
 
 The `promote` action now creates a `Kontakte_Real` record and deletes the `Prospects` record — same behavior as before, just against Teable instead of Postgres, and there's no second prospect mechanism to reconcile with any more.
 
+Note: `prospects/+page.svelte` reads `data.counts` as an **array** of `{status, count}` (via `.find(c => c.status === s)?.count`), not a Record — build it as an array below. It also does `(editProspect as any)[field]` generic bracket-access for prefill, so `mapProspect`'s exact field names (`titel`, `anrede`, `vorname`, `nachname`, `email`, `firma`, `rolle`, `telefon`, `website`, plus `name`/`company_id`/`status`/`kanal`/`versandt_am`/`followup_am`/`notizen`) must match verbatim — this is exactly what `mapProspect` (Task 4b) produces.
+
 ```ts
 import { listRecords, createRecord, updateRecord, deleteRecord, getRecord, linkId } from '$lib/server/teable';
 import { TABLES, PROSPECT_FIELDS, FIRMEN_FIELDS, KONTAKTE_FIELDS } from '$lib/server/teable-schema';
+import { mapProspect, mapContact } from '$lib/server/teable-map';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -1700,7 +1904,7 @@ export const load: PageServerLoad = async ({ url }) => {
     listRecords(TABLES.prospects),
     listRecords(TABLES.firmen)
   ]);
-  const firmaNameById = new Map(firmenRecs.map((f) => [f.id, f.fields[FIRMEN_FIELDS.name]]));
+  const firmaNameById = new Map(firmenRecs.map((f) => [f.id, f.fields[FIRMEN_FIELDS.name] as string]));
 
   let filtered = prospectRecs;
   if (status) filtered = filtered.filter((r) => r.fields[PROSPECT_FIELDS.status] === status);
@@ -1712,23 +1916,20 @@ export const load: PageServerLoad = async ({ url }) => {
   }
 
   const prospects = filtered
-    .map((r) => ({
-      id: r.id,
-      ...r.fields,
-      company_name: firmaNameById.get(linkId(r.fields[PROSPECT_FIELDS.firma]) ?? '') ?? null
-    }))
+    .map((r) => mapProspect(r, firmaNameById.get(linkId(r.fields[PROSPECT_FIELDS.firma]) ?? '') ?? null))
     .sort((a, b) => {
-      const av = (a[PROSPECT_FIELDS.versandtAm] as string) ?? '';
-      const bv = (b[PROSPECT_FIELDS.versandtAm] as string) ?? '';
+      const av = a.versandt_am ?? '';
+      const bv = b.versandt_am ?? '';
       if (av !== bv) return av ? (bv ? bv.localeCompare(av) : -1) : 1;
       return 0;
     });
 
-  const counts: Record<string, number> = {};
+  const countsByStatus = new Map<string, number>();
   for (const r of prospectRecs) {
     const s = (r.fields[PROSPECT_FIELDS.status] as string) ?? 'unbekannt';
-    counts[s] = (counts[s] ?? 0) + 1;
+    countsByStatus.set(s, (countsByStatus.get(s) ?? 0) + 1);
   }
+  const counts = [...countsByStatus.entries()].map(([status, count]) => ({ status, count }));
 
   const companies = firmenRecs
     .map((f) => ({ id: f.id, name: f.fields[FIRMEN_FIELDS.name] }))
@@ -1955,6 +2156,7 @@ git commit -m "feat: unify Prospects into one Teable table, remove tag-based pro
 ```ts
 import { listRecords, linkId } from '$lib/server/teable';
 import { TABLES, AUFGABEN_FIELDS, KONTAKTE_FIELDS, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS } from '$lib/server/teable-schema';
+import { mapAction, mapContact } from '$lib/server/teable-map';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -1965,18 +2167,16 @@ export const load: PageServerLoad = async () => {
     listRecords(TABLES.interaktionenReal)
   ]);
 
-  const kontaktNameById = new Map(kontakteRecs.map((k) => [k.id, k.fields[KONTAKTE_FIELDS.name]]));
-  const firmaNameById = new Map(firmenRecs.map((f) => [f.id, f.fields[FIRMEN_FIELDS.name]]));
+  const kontaktNameById = new Map(kontakteRecs.map((k) => [k.id, k.fields[KONTAKTE_FIELDS.name] as string]));
+  const firmaNameById = new Map(firmenRecs.map((f) => [f.id, f.fields[FIRMEN_FIELDS.name] as string]));
 
   const open_actions = aufgabenRecs
     .filter((a) => a.fields[AUFGABEN_FIELDS.status] === 'offen')
-    .map((a) => ({ id: a.id, ...a.fields, contact_name: kontaktNameById.get(linkId(a.fields[AUFGABEN_FIELDS.kontakt]) ?? '') ?? null }))
+    .map((a) => mapAction(a, kontaktNameById.get(linkId(a.fields[AUFGABEN_FIELDS.kontakt]) ?? '') ?? null))
     .sort((a, b) => {
-      const af = a[AUFGABEN_FIELDS.faelligAm] as string | null;
-      const bf = b[AUFGABEN_FIELDS.faelligAm] as string | null;
-      if (!af) return 1;
-      if (!bf) return -1;
-      return af.localeCompare(bf);
+      if (!a.faellig_am) return 1;
+      if (!b.faellig_am) return -1;
+      return a.faellig_am.localeCompare(b.faellig_am);
     })
     .slice(0, 10);
 
@@ -1991,9 +2191,7 @@ export const load: PageServerLoad = async () => {
 
   const recent_contacts = kontakteRecs
     .map((c) => ({
-      id: c.id,
-      ...c.fields,
-      company_name: firmaNameById.get(linkId(c.fields[KONTAKTE_FIELDS.firma]) ?? '') ?? null,
+      ...mapContact(c, firmaNameById.get(linkId(c.fields[KONTAKTE_FIELDS.firma]) ?? '') ?? null),
       last_activity: lastActivityByContact.get(c.id) ?? null
     }))
     .sort((a, b) => {
@@ -2020,6 +2218,7 @@ export const load: PageServerLoad = async () => {
 ```ts
 import { listRecords, createRecord, updateRecord, getRecord, linkId } from '$lib/server/teable';
 import { TABLES, AUFGABEN_FIELDS, KONTAKTE_FIELDS } from '$lib/server/teable-schema';
+import { mapAction } from '$lib/server/teable-map';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -2027,17 +2226,15 @@ export const load: PageServerLoad = async () => {
     listRecords(TABLES.aufgabenReal),
     listRecords(TABLES.kontakteReal)
   ]);
-  const kontaktNameById = new Map(kontakteRecs.map((k) => [k.id, k.fields[KONTAKTE_FIELDS.name]]));
+  const kontaktNameById = new Map(kontakteRecs.map((k) => [k.id, k.fields[KONTAKTE_FIELDS.name] as string]));
 
   const actions_open = aufgabenRecs
     .filter((a) => a.fields[AUFGABEN_FIELDS.status] === 'offen')
-    .map((a) => ({ id: a.id, ...a.fields, contact_name: kontaktNameById.get(linkId(a.fields[AUFGABEN_FIELDS.kontakt]) ?? '') ?? null }))
+    .map((a) => mapAction(a, kontaktNameById.get(linkId(a.fields[AUFGABEN_FIELDS.kontakt]) ?? '') ?? null))
     .sort((a, b) => {
-      const af = a[AUFGABEN_FIELDS.faelligAm] as string | null;
-      const bf = b[AUFGABEN_FIELDS.faelligAm] as string | null;
-      if (!af) return 1;
-      if (!bf) return -1;
-      return af.localeCompare(bf);
+      if (!a.faellig_am) return 1;
+      if (!b.faellig_am) return -1;
+      return a.faellig_am.localeCompare(b.faellig_am);
     });
 
   const contacts = kontakteRecs

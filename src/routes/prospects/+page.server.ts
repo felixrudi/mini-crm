@@ -1,27 +1,49 @@
-import { sql } from '$lib/db';
+import { listRecords, createRecord, updateRecord, deleteRecord, getRecord, linkId } from '$lib/server/teable';
+import { TABLES, PROSPECT_FIELDS, FIRMEN_FIELDS, KONTAKTE_FIELDS } from '$lib/server/teable-schema';
+import { mapProspect } from '$lib/server/teable-map';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url }) => {
   const status = url.searchParams.get('status') || '';
-  const q = url.searchParams.get('q') || '';
+  const q = (url.searchParams.get('q') || '').toLowerCase();
 
-  let prospects;
-  if (status && q) {
-    prospects = await sql`SELECT p.*, co.name as company_name FROM prospects p LEFT JOIN companies co ON p.company_id = co.id WHERE p.status = ${status} AND (p.name ILIKE ${'%' + q + '%'} OR p.email ILIKE ${'%' + q + '%'} OR p.firma ILIKE ${'%' + q + '%'}) ORDER BY p.versandt_am DESC NULLS LAST, p.created_at DESC`;
-  } else if (status) {
-    prospects = await sql`SELECT p.*, co.name as company_name FROM prospects p LEFT JOIN companies co ON p.company_id = co.id WHERE p.status = ${status} ORDER BY p.versandt_am DESC NULLS LAST, p.created_at DESC`;
-  } else if (q) {
-    prospects = await sql`SELECT p.*, co.name as company_name FROM prospects p LEFT JOIN companies co ON p.company_id = co.id WHERE p.name ILIKE ${'%' + q + '%'} OR p.email ILIKE ${'%' + q + '%'} OR p.firma ILIKE ${'%' + q + '%'} ORDER BY p.versandt_am DESC NULLS LAST, p.created_at DESC`;
-  } else {
-    prospects = await sql`SELECT p.*, co.name as company_name FROM prospects p LEFT JOIN companies co ON p.company_id = co.id ORDER BY p.versandt_am DESC NULLS LAST, p.created_at DESC`;
+  const [prospectRecs, firmenRecs] = await Promise.all([
+    listRecords(TABLES.prospects),
+    listRecords(TABLES.firmen)
+  ]);
+  const firmaNameById = new Map(firmenRecs.map((f) => [f.id, f.fields[FIRMEN_FIELDS.name] as string]));
+
+  let filtered = prospectRecs;
+  if (status) filtered = filtered.filter((r) => r.fields[PROSPECT_FIELDS.status] === status);
+  if (q) {
+    filtered = filtered.filter((r) => {
+      const hay = `${r.fields[PROSPECT_FIELDS.name] ?? ''} ${r.fields[PROSPECT_FIELDS.email] ?? ''} ${r.fields[PROSPECT_FIELDS.firmaText] ?? ''}`.toLowerCase();
+      return hay.includes(q);
+    });
   }
 
-  const counts = await sql`SELECT status, count(*)::int FROM prospects GROUP BY status`;
-  const total = await sql`SELECT count(*)::int as n FROM prospects`;
-  const companies = await sql`SELECT id, name FROM companies ORDER BY name`;
+  const prospects = filtered
+    .map((r) => mapProspect(r, firmaNameById.get(linkId(r.fields[PROSPECT_FIELDS.firma]) ?? '') ?? null))
+    .sort((a, b) => {
+      const av = a.versandt_am ?? '';
+      const bv = b.versandt_am ?? '';
+      if (av !== bv) return av ? (bv ? bv.localeCompare(av) : -1) : 1;
+      return 0;
+    });
 
-  return { prospects, counts, total: total[0]?.n ?? 0, status, q, companies };
+  const countsByStatus = new Map<string, number>();
+  for (const r of prospectRecs) {
+    const s = (r.fields[PROSPECT_FIELDS.status] as string) ?? 'unbekannt';
+    countsByStatus.set(s, (countsByStatus.get(s) ?? 0) + 1);
+  }
+  const counts = [...countsByStatus.entries()].map(([status, count]) => ({ status, count }));
+
+  const companies = firmenRecs
+    .map((f) => ({ id: f.id, name: f.fields[FIRMEN_FIELDS.name] }))
+    .sort((a, b) => String(a.name).localeCompare(String(b.name)));
+
+  return { prospects, counts, total: prospectRecs.length, status, q, companies };
 };
 
 export const actions: Actions = {
@@ -29,26 +51,33 @@ export const actions: Actions = {
     const d = await request.formData();
     const name = (d.get('name') as string)?.trim();
     if (!name) return fail(400, { error: 'Name fehlt' });
-    await sql`INSERT INTO prospects
-      (name, vorname, nachname, titel, anrede, email, firma, company_id, rolle, telefon, website, notizen, status, kanal, versandt_am, followup_am)
-      VALUES (
-        ${name},
-        ${d.get('vorname') || null}, ${d.get('nachname') || null},
-        ${d.get('titel') || null}, ${d.get('anrede') || null},
-        ${d.get('email') || null}, ${d.get('firma') || null},
-        ${d.get('company_id') || null},
-        ${d.get('rolle') || null}, ${d.get('telefon') || null},
-        ${d.get('website') || null}, ${d.get('notizen') || null},
-        ${(d.get('status') as string) || 'gesendet'},
-        ${d.get('kanal') || 'email'},
-        ${d.get('versandt_am') || null}, ${d.get('followup_am') || null}
-      )`;
+    await createRecord(TABLES.prospects, {
+      [PROSPECT_FIELDS.name]: name,
+      [PROSPECT_FIELDS.vorname]: d.get('vorname') || null,
+      [PROSPECT_FIELDS.nachname]: d.get('nachname') || null,
+      [PROSPECT_FIELDS.titel]: d.get('titel') || null,
+      [PROSPECT_FIELDS.anrede]: d.get('anrede') || null,
+      [PROSPECT_FIELDS.email]: d.get('email') || null,
+      [PROSPECT_FIELDS.firmaText]: d.get('firma') || null,
+      [PROSPECT_FIELDS.firma]: d.get('company_id') ? [{ id: d.get('company_id') as string }] : null,
+      [PROSPECT_FIELDS.rolle]: d.get('rolle') || null,
+      [PROSPECT_FIELDS.telefon]: d.get('telefon') || null,
+      [PROSPECT_FIELDS.website]: d.get('website') || null,
+      [PROSPECT_FIELDS.notizen]: d.get('notizen') || null,
+      [PROSPECT_FIELDS.status]: (d.get('status') as string) || 'gesendet',
+      [PROSPECT_FIELDS.kanal]: d.get('kanal') || 'email',
+      [PROSPECT_FIELDS.versandtAm]: d.get('versandt_am') || null,
+      [PROSPECT_FIELDS.followupAm]: d.get('followup_am') || null,
+      [PROSPECT_FIELDS.herkunft]: 'einzelansprache'
+    });
     return { success: true };
   },
 
   update_status: async ({ request }) => {
     const d = await request.formData();
-    await sql`UPDATE prospects SET status = ${d.get('status') as string} WHERE id = ${d.get('id') as string}`;
+    await updateRecord(TABLES.prospects, d.get('id') as string, {
+      [PROSPECT_FIELDS.status]: d.get('status') as string
+    });
     return { success: true };
   },
 
@@ -56,51 +85,61 @@ export const actions: Actions = {
     const d = await request.formData();
     const id = d.get('id') as string;
     const name = (d.get('name') as string)?.trim() || 'Unbekannt';
-    await sql`UPDATE prospects SET
-      name=${name}, vorname=${d.get('vorname')||null}, nachname=${d.get('nachname')||null},
-      titel=${d.get('titel')||null}, anrede=${d.get('anrede')||null},
-      email=${d.get('email')||null}, firma=${d.get('firma')||null},
-      company_id=${d.get('company_id')||null},
-      rolle=${d.get('rolle')||null}, telefon=${d.get('telefon')||null},
-      website=${d.get('website')||null}, notizen=${d.get('notizen')||null},
-      status=${(d.get('status') as string)||'gesendet'}, kanal=${d.get('kanal')||'email'},
-      versandt_am=${d.get('versandt_am')||null}, followup_am=${d.get('followup_am')||null}
-      WHERE id=${id}`;
+    await updateRecord(TABLES.prospects, id, {
+      [PROSPECT_FIELDS.name]: name,
+      [PROSPECT_FIELDS.vorname]: d.get('vorname') || null,
+      [PROSPECT_FIELDS.nachname]: d.get('nachname') || null,
+      [PROSPECT_FIELDS.titel]: d.get('titel') || null,
+      [PROSPECT_FIELDS.anrede]: d.get('anrede') || null,
+      [PROSPECT_FIELDS.email]: d.get('email') || null,
+      [PROSPECT_FIELDS.firmaText]: d.get('firma') || null,
+      [PROSPECT_FIELDS.firma]: d.get('company_id') ? [{ id: d.get('company_id') as string }] : null,
+      [PROSPECT_FIELDS.rolle]: d.get('rolle') || null,
+      [PROSPECT_FIELDS.telefon]: d.get('telefon') || null,
+      [PROSPECT_FIELDS.website]: d.get('website') || null,
+      [PROSPECT_FIELDS.notizen]: d.get('notizen') || null,
+      [PROSPECT_FIELDS.status]: (d.get('status') as string) || 'gesendet',
+      [PROSPECT_FIELDS.kanal]: d.get('kanal') || 'email',
+      [PROSPECT_FIELDS.versandtAm]: d.get('versandt_am') || null,
+      [PROSPECT_FIELDS.followupAm]: d.get('followup_am') || null
+    });
     return { success: true };
   },
 
   promote: async ({ request }) => {
     const d = await request.formData();
     const id = d.get('id') as string;
-    const rows = await sql`SELECT * FROM prospects WHERE id = ${id}`;
-    const p = rows[0];
+    const p = await getRecord(TABLES.prospects, id);
     if (!p) return fail(404, { error: 'Nicht gefunden' });
 
-    // Firma: direkte company_id nutzen, oder per Name suchen/anlegen
-    let company_id: string | null = p.company_id ?? null;
-    if (!company_id && p.firma) {
-      const existing = await sql`SELECT id FROM companies WHERE name ILIKE ${p.firma} LIMIT 1`;
-      if (existing.length > 0) {
-        company_id = existing[0].id;
-      } else {
-        const newCo = await sql`INSERT INTO companies (name, website) VALUES (${p.firma}, ${p.website || null}) RETURNING id`;
-        company_id = newCo[0].id;
-      }
+    let firmaId = linkId(p.fields[PROSPECT_FIELDS.firma]);
+    const firmaText = p.fields[PROSPECT_FIELDS.firmaText] as string | null;
+    if (!firmaId && firmaText) {
+      const allFirmen = await listRecords(TABLES.firmen);
+      const existing = allFirmen.find((f) => String(f.fields[FIRMEN_FIELDS.name] ?? '').toLowerCase() === firmaText.toLowerCase());
+      firmaId = existing ? existing.id : (await createRecord(TABLES.firmen, { [FIRMEN_FIELDS.name]: firmaText, [FIRMEN_FIELDS.website]: p.fields[PROSPECT_FIELDS.website] ?? null })).id;
     }
 
-    const result = await sql`INSERT INTO contacts
-      (name, vorname, nachname, titel, anrede, email, company_id, rolle, telefon, notizen)
-      VALUES (${p.name}, ${p.vorname}, ${p.nachname}, ${p.titel}, ${p.anrede},
-              ${p.email}, ${company_id}, ${p.rolle}, ${p.telefon}, ${p.notizen})
-      RETURNING id`;
+    const created = await createRecord(TABLES.kontakteReal, {
+      [KONTAKTE_FIELDS.name]: p.fields[PROSPECT_FIELDS.name],
+      [KONTAKTE_FIELDS.vorname]: p.fields[PROSPECT_FIELDS.vorname],
+      [KONTAKTE_FIELDS.nachname]: p.fields[PROSPECT_FIELDS.nachname],
+      [KONTAKTE_FIELDS.titel]: p.fields[PROSPECT_FIELDS.titel],
+      [KONTAKTE_FIELDS.anrede]: p.fields[PROSPECT_FIELDS.anrede],
+      [KONTAKTE_FIELDS.email]: p.fields[PROSPECT_FIELDS.email],
+      [KONTAKTE_FIELDS.firma]: firmaId ? [{ id: firmaId }] : null,
+      [KONTAKTE_FIELDS.rolle]: p.fields[PROSPECT_FIELDS.rolle],
+      [KONTAKTE_FIELDS.telefon]: p.fields[PROSPECT_FIELDS.telefon],
+      [KONTAKTE_FIELDS.notizen]: p.fields[PROSPECT_FIELDS.notizen]
+    });
 
-    await sql`DELETE FROM prospects WHERE id = ${id}`;
-    return { success: true, contact_id: result[0]?.id };
+    await deleteRecord(TABLES.prospects, id);
+    return { success: true, contact_id: created.id };
   },
 
   delete: async ({ request }) => {
     const d = await request.formData();
-    await sql`DELETE FROM prospects WHERE id = ${d.get('id') as string}`;
+    await deleteRecord(TABLES.prospects, d.get('id') as string);
     return { success: true };
   },
 
@@ -109,27 +148,37 @@ export const actions: Actions = {
     const rows = JSON.parse(d.get('rows') as string) as Record<string, string>[];
     if (!rows?.length) return fail(400, { error: 'Keine Daten' });
 
+    const existingAll = await listRecords(TABLES.prospects);
+    const existingEmails = new Set(
+      existingAll.map((r) => String(r.fields[PROSPECT_FIELDS.email] ?? '').toLowerCase()).filter(Boolean)
+    );
+
+    let count = 0;
     for (const row of rows) {
       const name = (row.name || [row.vorname, row.nachname].filter(Boolean).join(' ') || row.Name || '').trim();
       if (!name) continue;
-      await sql`INSERT INTO prospects
-        (name, vorname, nachname, titel, anrede, email, firma, rolle, telefon, website, status, versandt_am)
-        VALUES (
-          ${name},
-          ${row.vorname || row.Vorname || null},
-          ${row.nachname || row.Nachname || null},
-          ${row.titel || row.Titel || null},
-          ${row.anrede || row.Anrede || null},
-          ${row.email || row.Email || row['E-Mail'] || null},
-          ${row.firma || row.Firma || row.kanzlei || row.Kanzlei || null},
-          ${row.rolle || row.Rolle || row.position || null},
-          ${row.telefon || row.Telefon || row.phone || null},
-          ${row.website || row.Website || null},
-          'gesendet',
-          ${row.versandt_am || row.datum || null}
-        )
-        ON CONFLICT DO NOTHING`;
+      const email = (row.email || row.Email || row['E-Mail'] || '').toLowerCase();
+      // Mirrors the old ON CONFLICT DO NOTHING behavior (best-effort dedupe by email).
+      if (email && existingEmails.has(email)) continue;
+
+      await createRecord(TABLES.prospects, {
+        [PROSPECT_FIELDS.name]: name,
+        [PROSPECT_FIELDS.vorname]: row.vorname || row.Vorname || null,
+        [PROSPECT_FIELDS.nachname]: row.nachname || row.Nachname || null,
+        [PROSPECT_FIELDS.titel]: row.titel || row.Titel || null,
+        [PROSPECT_FIELDS.anrede]: row.anrede || row.Anrede || null,
+        [PROSPECT_FIELDS.email]: row.email || row.Email || row['E-Mail'] || null,
+        [PROSPECT_FIELDS.firmaText]: row.firma || row.Firma || row.kanzlei || row.Kanzlei || null,
+        [PROSPECT_FIELDS.rolle]: row.rolle || row.Rolle || row.position || null,
+        [PROSPECT_FIELDS.telefon]: row.telefon || row.Telefon || row.phone || null,
+        [PROSPECT_FIELDS.website]: row.website || row.Website || null,
+        [PROSPECT_FIELDS.status]: 'gesendet',
+        [PROSPECT_FIELDS.versandtAm]: row.versandt_am || row.datum || null,
+        [PROSPECT_FIELDS.herkunft]: 'einzelansprache'
+      });
+      if (email) existingEmails.add(email);
+      count++;
     }
-    return { success: true, count: rows.length };
+    return { success: true, count };
   }
 };
