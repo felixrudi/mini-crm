@@ -123,9 +123,11 @@ Run: `cd /Users/felix/Documents/Programmieren/mini-crm && node --env-file=.env s
 
 Expected: prints CREATE/DELETE status+body. If DELETE status is not 200/204, or the body shape differs from `{"success": true}`-style assumptions, update Task 2's `deleteRecord()` accordingly before writing it.
 
-- [ ] **Step 3: Note findings inline in this plan**
+- [x] **Step 3: Note findings inline in this plan**
 
 Add a one-line comment under this task recording the actual observed DELETE status code and attachment response shape (fill in after running), so Task 2 is written against confirmed reality, not assumption.
+
+> **Observed (2026-07-14):** `DELETE /api/table/{tableId}/record/{recordId}` returns **200** with the **full deleted record** in the body (`fields` keyed by field **ID**, not name — unlike every other endpoint here) — not the `{"success": true}` shape assumed when this plan was drafted. Independently confirmed the delete was real via a follow-up GET → 404. Task 2's `deleteRecord()` doesn't parse the response body, so this doesn't require a client-code change — noted here only so nobody re-derives it. Full detail: `scripts/verify-teable-api.ts` trailing comment. Attachment-upload shape still unconfirmed — re-run that half of the spike once Task 1's `Foto`/`Dateien` fields exist.
 
 - [ ] **Step 4: Commit the spike script (kept for the record, not deleted yet)**
 
