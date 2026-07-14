@@ -5,7 +5,9 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import ContactForm from '$lib/components/ContactForm.svelte';
-  import type { Contact } from '$lib/types';
+  import ViewTabs from '$lib/components/ViewTabs.svelte';
+  import { groupByTags, tagColor } from '$lib/tags';
+  import type { Contact, ViewFilter } from '$lib/types';
   import Users from '@lucide/svelte/icons/users';
   import Plus from '@lucide/svelte/icons/plus';
   import Search from '@lucide/svelte/icons/search';
@@ -30,24 +32,21 @@
 
   let debounceTimer: ReturnType<typeof setTimeout>;
 
-  // --- Tag-Filter + Sortierung ---
-  const TAG_COLORS = [
-    'bg-terracotta/10 text-terracotta border-terracotta/20',
-    'bg-sage/10 text-sage border-sage/20',
-    'bg-blue-50 text-blue-600 border-blue-200',
-    'bg-amber-50 text-amber-700 border-amber-200',
-    'bg-purple-50 text-purple-700 border-purple-200',
-    'bg-pink-50 text-pink-700 border-pink-200',
-  ];
-  function tagColor(tag: string) {
-    const hash = tag.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    return TAG_COLORS[hash % TAG_COLORS.length];
-  }
-
+  // --- Filter, Sortierung, Gruppierung ---
   let selectedTags = $state<string[]>(data.tags ?? []);
   let tagMode = $state<'or' | 'and'>(data.tagMode === 'and' ? 'and' : 'or');
+  let ort = $state(data.ort ?? '');
   let sortBy = $state<'name' | 'company' | 'tags'>(data.sort ?? 'name');
-  let hasTagFilter = $derived(selectedTags.length > 0);
+  let group = $state<'' | 'tags'>(data.group === 'tags' ? 'tags' : '');
+  let hasTagFilter = $derived(selectedTags.length > 0 || ort !== '');
+
+  let currentFilter = $derived<ViewFilter>({
+    tags: selectedTags,
+    tagMode,
+    sort: sortBy,
+    ort,
+    group
+  });
 
   function updateUrl() {
     const url = new URL($page.url);
@@ -58,6 +57,10 @@
     else url.searchParams.delete('mode');
     if (sortBy !== 'name') url.searchParams.set('sort', sortBy);
     else url.searchParams.delete('sort');
+    if (ort) url.searchParams.set('ort', ort);
+    else url.searchParams.delete('ort');
+    if (group === 'tags') url.searchParams.set('group', 'tags');
+    else url.searchParams.delete('group');
     goto(url.toString(), { replaceState: true, keepFocus: true, noScroll: true });
   }
 
@@ -78,11 +81,33 @@
     updateUrl();
   }
 
+  function setOrt(o: string) {
+    ort = o;
+    updateUrl();
+  }
+
+  function setGroup(g: '' | 'tags') {
+    group = g;
+    updateUrl();
+  }
+
   function clearTagFilter() {
     selectedTags = [];
     tagMode = 'or';
+    ort = '';
     updateUrl();
   }
+
+  function applyView(filter: ViewFilter) {
+    selectedTags = filter.tags ?? [];
+    tagMode = filter.tagMode === 'and' ? 'and' : 'or';
+    sortBy = filter.sort === 'company' || filter.sort === 'tags' ? filter.sort : 'name';
+    ort = filter.ort ?? '';
+    group = filter.group === 'tags' ? 'tags' : '';
+    updateUrl();
+  }
+
+  let contactGroups = $derived(group === 'tags' ? groupByTags(data.contacts, (c) => c.tags ?? []) : null);
 
   async function handleAvatarChange(e: Event) {
     const file = (e.target as HTMLInputElement).files?.[0];
@@ -90,7 +115,6 @@
     const targetId = avatarUploadId;
     avatarUploadId = null;
 
-    // Client-side resize to max 400px
     const resized = await resizeImage(file, 400);
     const fd = new FormData();
     fd.append('image', resized, 'photo.jpg');
@@ -116,7 +140,7 @@
         canvas.height = Math.round(img.height * ratio);
         canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
         URL.revokeObjectURL(url);
-        canvas.toBlob(blob => resolve(blob!), 'image/jpeg', 0.85);
+        canvas.toBlob((blob) => resolve(blob!), 'image/jpeg', 0.85);
       };
       img.src = url;
     });
@@ -135,6 +159,102 @@
     }, 300);
   }
 </script>
+
+{#snippet contactRow(contact: Contact)}
+  <tr class="hover:bg-cream/50 transition-colors">
+    <td class="px-4 py-3">
+      <div class="flex items-center gap-2.5">
+        <button
+          type="button"
+          title="Foto hinzufügen"
+          onclick={() => { avatarUploadId = contact.id; avatarFileInput.click(); }}
+          class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-terracotta/40 transition-all"
+        >
+          {#if contact.photo || photoCache[contact.id]}
+            <img src={contact.photo || photoCache[contact.id]} alt="" class="w-full h-full object-cover" />
+          {:else}
+            <div class="w-full h-full bg-terracotta/10 flex items-center justify-center">
+              <span class="text-base font-semibold text-terracotta">{contact.name?.charAt(0)?.toUpperCase()}</span>
+            </div>
+          {/if}
+        </button>
+        <a href="/contacts/{contact.id}" class="text-sm font-medium text-ink hover:text-terracotta transition-colors">
+          {contact.name}
+        </a>
+      </div>
+    </td>
+    <td class="px-4 py-3">
+      {#if contact.company_name}
+        <span class="flex items-center gap-1 text-sm text-ink/60">
+          <Building2 class="w-3 h-3 text-ink/30" />
+          {contact.company_name}
+        </span>
+      {:else}
+        <span class="text-sm text-ink/20">—</span>
+      {/if}
+    </td>
+    <td class="px-4 py-3 hidden md:table-cell">
+      <span class="text-sm text-ink/60">{contact.rolle ?? '—'}</span>
+    </td>
+    <td class="px-4 py-3 hidden lg:table-cell">
+      <div class="flex items-center gap-2">
+        {#if contact.email}
+          <a href="mailto:{contact.email}" class="text-ink/40 hover:text-terracotta transition-colors" title={contact.email}>
+            <Mail class="w-3.5 h-3.5" />
+          </a>
+        {/if}
+        {#if contact.telefon}
+          <a href="tel:{contact.telefon}" class="text-ink/40 hover:text-terracotta transition-colors" title={contact.telefon}>
+            <Phone class="w-3.5 h-3.5" />
+          </a>
+        {/if}
+        {#if contact.linkedin_url}
+          <a href={contact.linkedin_url} target="_blank" rel="noopener" class="text-ink/40 hover:text-terracotta transition-colors">
+            <ExternalLink class="w-3.5 h-3.5" />
+          </a>
+        {/if}
+      </div>
+    </td>
+    <td class="px-4 py-3">
+      <div class="flex items-center justify-end gap-1">
+        <button
+          onclick={() => { editContact = contact; showForm = true; }}
+          class="p-1.5 text-ink/30 hover:text-terracotta transition-colors rounded"
+          title="Bearbeiten"
+        >
+          <Pencil class="w-3.5 h-3.5" />
+        </button>
+        {#if deleteConfirm === contact.id}
+          <form
+            method="POST"
+            action="?/delete"
+            use:enhance={() => {
+              return async ({ result, update }) => {
+                if (result.type === 'success') toast.success('Kontakt gelöscht');
+                else toast.error('Fehler');
+                deleteConfirm = null;
+                await update();
+              };
+            }}
+            class="flex items-center gap-1"
+          >
+            <input type="hidden" name="id" value={contact.id} />
+            <button type="submit" class="px-2 py-1 bg-red-500 text-white rounded text-xs">Ja</button>
+            <button type="button" onclick={() => (deleteConfirm = null)} class="px-2 py-1 border border-line rounded text-xs">Nein</button>
+          </form>
+        {:else}
+          <button
+            onclick={() => (deleteConfirm = contact.id)}
+            class="p-1.5 text-ink/30 hover:text-red-500 transition-colors rounded"
+            title="Löschen"
+          >
+            <Trash2 class="w-3.5 h-3.5" />
+          </button>
+        {/if}
+      </div>
+    </td>
+  </tr>
+{/snippet}
 
 <div class="px-4 py-4 md:px-6 md:py-6 max-w-5xl mx-auto">
   <div class="flex items-center justify-between mb-6">
@@ -162,6 +282,8 @@
       class="w-full pl-9 pr-4 py-2.5 bg-surface border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
     />
   </div>
+
+  <ViewTabs seite="kontakte" views={data.views} currentFilter={currentFilter} onselect={applyView} />
 
   <!-- Tag-Filter + Sortierung -->
   <div class="bg-surface rounded-xl border border-line p-4 mb-6">
@@ -211,17 +333,46 @@
       </div>
     {/if}
 
-    <div>
-      <p class="text-xs font-medium text-ink/40 uppercase tracking-wide mb-2">Sortieren nach</p>
-      <select
-        value={sortBy}
-        onchange={(e) => setSort((e.currentTarget as HTMLSelectElement).value as 'name' | 'company' | 'tags')}
-        class="px-3 py-1.5 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
-      >
-        <option value="name">Name (A-Z)</option>
-        <option value="company">Firma (A-Z)</option>
-        <option value="tags">Anzahl Tags</option>
-      </select>
+    {#if data.allOrte.length > 0}
+      <div class="mb-3">
+        <p class="text-xs font-medium text-ink/40 uppercase tracking-wide mb-2">Ort</p>
+        <select
+          value={ort}
+          onchange={(e) => setOrt((e.currentTarget as HTMLSelectElement).value)}
+          class="px-3 py-1.5 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+        >
+          <option value="">Alle Orte</option>
+          {#each data.allOrte as o}
+            <option value={o}>{o}</option>
+          {/each}
+        </select>
+      </div>
+    {/if}
+
+    <div class="flex flex-wrap gap-4">
+      <div>
+        <p class="text-xs font-medium text-ink/40 uppercase tracking-wide mb-2">Sortieren nach</p>
+        <select
+          value={sortBy}
+          onchange={(e) => setSort((e.currentTarget as HTMLSelectElement).value as 'name' | 'company' | 'tags')}
+          class="px-3 py-1.5 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+        >
+          <option value="name">Name (A-Z)</option>
+          <option value="company">Firma (A-Z)</option>
+          <option value="tags">Anzahl Tags</option>
+        </select>
+      </div>
+      <div>
+        <p class="text-xs font-medium text-ink/40 uppercase tracking-wide mb-2">Gruppieren</p>
+        <select
+          value={group}
+          onchange={(e) => setGroup((e.currentTarget as HTMLSelectElement).value as '' | 'tags')}
+          class="px-3 py-1.5 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+        >
+          <option value="">Keine</option>
+          <option value="tags">Nach Tags</option>
+        </select>
+      </div>
     </div>
   </div>
 
@@ -241,6 +392,26 @@
         </button>
       {/if}
     </div>
+  {:else if contactGroups}
+    <div class="space-y-4">
+      {#each contactGroups as g (g.tag)}
+        <div class="bg-surface rounded-xl border border-line overflow-hidden">
+          <div class="px-4 py-2.5 bg-cream/70 border-b border-line flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded-full text-xs font-medium border {g.tag === 'Ohne Tags' ? 'bg-cream text-ink/40 border-line' : tagColor(g.tag)}">{g.tag}</span>
+            <span class="text-xs text-ink/40">{g.items.length}</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <tbody class="divide-y divide-line">
+                {#each g.items as contact}
+                  {@render contactRow(contact)}
+                {/each}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {/each}
+    </div>
   {:else}
     <div class="bg-surface rounded-xl border border-line overflow-hidden">
       <div class="overflow-x-auto">
@@ -256,99 +427,7 @@
           </thead>
           <tbody class="divide-y divide-line">
             {#each data.contacts as contact}
-              <tr class="hover:bg-cream/50 transition-colors">
-                <td class="px-4 py-3">
-                  <div class="flex items-center gap-2.5">
-                    <button
-                      type="button"
-                      title="Foto hinzufügen"
-                      onclick={() => { avatarUploadId = contact.id; avatarFileInput.click(); }}
-                      class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-terracotta/40 transition-all"
-                    >
-                      {#if contact.photo || photoCache[contact.id]}
-                        <img src={contact.photo || photoCache[contact.id]} alt="" class="w-full h-full object-cover" />
-                      {:else}
-                        <div class="w-full h-full bg-terracotta/10 flex items-center justify-center">
-                          <span class="text-base font-semibold text-terracotta">{contact.name?.charAt(0)?.toUpperCase()}</span>
-                        </div>
-                      {/if}
-                    </button>
-                    <a href="/contacts/{contact.id}" class="text-sm font-medium text-ink hover:text-terracotta transition-colors">
-                      {contact.name}
-                    </a>
-                  </div>
-                </td>
-                <td class="px-4 py-3">
-                  {#if contact.company_name}
-                    <span class="flex items-center gap-1 text-sm text-ink/60">
-                      <Building2 class="w-3 h-3 text-ink/30" />
-                      {contact.company_name}
-                    </span>
-                  {:else}
-                    <span class="text-sm text-ink/20">—</span>
-                  {/if}
-                </td>
-                <td class="px-4 py-3 hidden md:table-cell">
-                  <span class="text-sm text-ink/60">{contact.rolle ?? '—'}</span>
-                </td>
-                <td class="px-4 py-3 hidden lg:table-cell">
-                  <div class="flex items-center gap-2">
-                    {#if contact.email}
-                      <a href="mailto:{contact.email}" class="text-ink/40 hover:text-terracotta transition-colors" title={contact.email}>
-                        <Mail class="w-3.5 h-3.5" />
-                      </a>
-                    {/if}
-                    {#if contact.telefon}
-                      <a href="tel:{contact.telefon}" class="text-ink/40 hover:text-terracotta transition-colors" title={contact.telefon}>
-                        <Phone class="w-3.5 h-3.5" />
-                      </a>
-                    {/if}
-                    {#if contact.linkedin_url}
-                      <a href={contact.linkedin_url} target="_blank" rel="noopener" class="text-ink/40 hover:text-terracotta transition-colors">
-                        <ExternalLink class="w-3.5 h-3.5" />
-                      </a>
-                    {/if}
-                  </div>
-                </td>
-                <td class="px-4 py-3">
-                  <div class="flex items-center justify-end gap-1">
-                    <button
-                      onclick={() => { editContact = contact; showForm = true; }}
-                      class="p-1.5 text-ink/30 hover:text-terracotta transition-colors rounded"
-                      title="Bearbeiten"
-                    >
-                      <Pencil class="w-3.5 h-3.5" />
-                    </button>
-                    {#if deleteConfirm === contact.id}
-                      <form
-                        method="POST"
-                        action="?/delete"
-                        use:enhance={() => {
-                          return async ({ result, update }) => {
-                            if (result.type === 'success') toast.success('Kontakt gelöscht');
-                            else toast.error('Fehler');
-                            deleteConfirm = null;
-                            await update();
-                          };
-                        }}
-                        class="flex items-center gap-1"
-                      >
-                        <input type="hidden" name="id" value={contact.id} />
-                        <button type="submit" class="px-2 py-1 bg-red-500 text-white rounded text-xs">Ja</button>
-                        <button type="button" onclick={() => deleteConfirm = null} class="px-2 py-1 border border-line rounded text-xs">Nein</button>
-                      </form>
-                    {:else}
-                      <button
-                        onclick={() => deleteConfirm = contact.id}
-                        class="p-1.5 text-ink/30 hover:text-red-500 transition-colors rounded"
-                        title="Löschen"
-                      >
-                        <Trash2 class="w-3.5 h-3.5" />
-                      </button>
-                    {/if}
-                  </div>
-                </td>
-              </tr>
+              {@render contactRow(contact)}
             {/each}
           </tbody>
         </table>
@@ -371,7 +450,7 @@
     contact={editContact}
     companies={data.companies}
     action={editContact ? '?/update' : '?/create'}
-    onclose={() => showForm = false}
+    onclose={() => (showForm = false)}
     onsuccess={() => { showForm = false; goto($page.url.toString(), { invalidateAll: true }); }}
   />
 {/if}
