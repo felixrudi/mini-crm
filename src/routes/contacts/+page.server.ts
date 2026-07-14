@@ -1,49 +1,16 @@
 import { listRecords, createRecord, updateRecord, deleteRecord, linkId } from '$lib/server/teable';
 import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS } from '$lib/server/teable-schema';
 import { mapContact } from '$lib/server/teable-map';
+import { matchesContactFilters, sortContacts } from '$lib/server/contact-filters';
+import type { TagMode, SortKey } from '$lib/server/contact-filters';
+import { listViews } from '$lib/server/views';
 import type { Actions, PageServerLoad } from './$types';
-
-type TagMode = 'and' | 'or';
-type SortKey = 'name' | 'company' | 'tags';
-
-function matchesFilters(
-  fields: Record<string, unknown>,
-  { q, tags, tagMode, kanal }: { q: string; tags: string[]; tagMode: TagMode; kanal: string }
-): boolean {
-  if (q) {
-    const hay = `${fields[KONTAKTE_FIELDS.name] ?? ''} ${fields[KONTAKTE_FIELDS.email] ?? ''}`.toLowerCase();
-    if (!hay.includes(q.toLowerCase())) return false;
-  }
-  if (tags.length > 0) {
-    const recordTags = (fields[KONTAKTE_FIELDS.tags] as string[] | undefined) ?? [];
-    const matches =
-      tagMode === 'and'
-        ? tags.every((t) => recordTags.includes(t))
-        : tags.some((t) => recordTags.includes(t));
-    if (!matches) return false;
-  }
-  if (kanal === 'whatsapp' && !fields[KONTAKTE_FIELDS.whatsapp]) return false;
-  if (kanal === 'wechat' && !fields[KONTAKTE_FIELDS.wechatId]) return false;
-  return true;
-}
-
-function sortContacts<T extends { name: string; company_name: string | null; tags?: string[] }>(
-  contacts: T[],
-  sort: SortKey
-): T[] {
-  const byName = (a: T, b: T) => a.name.localeCompare(b.name);
-  if (sort === 'company') {
-    return contacts.sort((a, b) => (a.company_name ?? '').localeCompare(b.company_name ?? '') || byName(a, b));
-  }
-  if (sort === 'tags') {
-    return contacts.sort((a, b) => (b.tags?.length ?? 0) - (a.tags?.length ?? 0) || byName(a, b));
-  }
-  return contacts.sort(byName);
-}
 
 export const load: PageServerLoad = async ({ url }) => {
   const q = url.searchParams.get('q') || '';
   const kanal = url.searchParams.get('kanal') || '';
+  const ort = url.searchParams.get('ort') || '';
+  const group = url.searchParams.get('group') === 'tags' ? 'tags' : '';
   const sort = ((): SortKey => {
     const s = url.searchParams.get('sort');
     return s === 'company' || s === 'tags' ? s : 'name';
@@ -61,15 +28,16 @@ export const load: PageServerLoad = async ({ url }) => {
       ? [legacyTag]
       : [];
 
-  const [kontakteRecs, firmenRecs] = await Promise.all([
+  const [kontakteRecs, firmenRecs, views] = await Promise.all([
     listRecords(TABLES.kontakteReal),
-    listRecords(TABLES.firmen)
+    listRecords(TABLES.firmen),
+    listViews('kontakte')
   ]);
   const firmaNameById = new Map(firmenRecs.map((f) => [f.id, f.fields[FIRMEN_FIELDS.name] as string]));
 
   const contacts = sortContacts(
     kontakteRecs
-      .filter((r) => matchesFilters(r.fields, { q, tags, tagMode, kanal }))
+      .filter((r) => matchesContactFilters(r.fields, { q, tags, tagMode, kanal, ort }))
       .map((r) => mapContact(r, firmaNameById.get(linkId(r.fields[KONTAKTE_FIELDS.firma]) ?? '') ?? null)),
     sort
   );
@@ -79,8 +47,11 @@ export const load: PageServerLoad = async ({ url }) => {
     .sort((a, b) => String(a.name).localeCompare(String(b.name)));
 
   const allTags = [...new Set(kontakteRecs.flatMap((r) => (r.fields[KONTAKTE_FIELDS.tags] as string[] | undefined) ?? []))].sort();
+  const allOrte = [...new Set(
+    kontakteRecs.map((r) => r.fields[KONTAKTE_FIELDS.ort] as string | undefined).filter((o): o is string => Boolean(o))
+  )].sort();
 
-  return { contacts, companies, q, tags, tagMode, kanal, sort, allTags };
+  return { contacts, companies, q, tags, tagMode, kanal, ort, sort, group, allTags, allOrte, views };
 };
 
 function parseTags(d: FormData): string[] {
