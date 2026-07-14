@@ -22,16 +22,21 @@ export type TeableRecord<F = Record<string, unknown>> = {
   createdTime?: string;
 };
 
-async function teableFetch(path: string, init: RequestInit = {}, attempt = 1): Promise<Response> {
+async function teableFetch(
+  path: string,
+  init: RequestInit = {},
+  attempt = 1,
+  okStatuses: number[] = []
+): Promise<Response> {
   const res = await fetch(`${TEABLE_BASE}/api${path}`, {
     ...init,
     headers: { ...BASE_HEADERS, ...(init.headers ?? {}) }
   });
   if (!res.ok && res.status >= 500 && attempt < 3) {
     await new Promise((r) => setTimeout(r, 300 * attempt));
-    return teableFetch(path, init, attempt + 1);
+    return teableFetch(path, init, attempt + 1, okStatuses);
   }
-  if (!res.ok) {
+  if (!res.ok && !okStatuses.includes(res.status)) {
     const body = await res.text();
     throw new Error(`Teable ${init.method ?? 'GET'} ${path} -> ${res.status}: ${body.slice(0, 300)}`);
   }
@@ -59,7 +64,7 @@ export async function getRecord<F = Record<string, unknown>>(
   tableId: string,
   recordId: string
 ): Promise<TeableRecord<F> | null> {
-  const res = await teableFetch(`/table/${tableId}/record/${recordId}?fieldKeyType=name`);
+  const res = await teableFetch(`/table/${tableId}/record/${recordId}?fieldKeyType=name`, {}, 1, [404]);
   if (res.status === 404) return null;
   return (await res.json()) as TeableRecord<F>;
 }
