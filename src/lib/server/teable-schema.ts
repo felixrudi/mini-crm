@@ -1,13 +1,14 @@
 // src/lib/server/teable-schema.ts
 // Single source of truth for CRM table IDs + exact field-name strings.
-// IDs filled in from Task 1 — replace the tbl_TODO placeholders before Task 3.
+// IDs filled in from Task 1 (2026-07-14, base felix_base bseJqfV4E4Ri1QYjUUL,
+// created via Henry's scripts/create_crm_teable_schema.py).
 
 export const TABLES = {
-  firmen: 'tbl_TODO_firmen',
-  kontakteReal: 'tbl_TODO_kontakte_real',
-  interaktionenReal: 'tbl_TODO_interaktionen_real',
-  aufgabenReal: 'tbl_TODO_aufgaben_real',
-  prospects: 'tbl_TODO_prospects'
+  firmen: 'tbl58ahoWar7wVxWHjA',
+  kontakteReal: 'tblnTqgSMBRZLWINOp6',
+  interaktionenReal: 'tblNE3WqZkqafOGS9f1',
+  aufgabenReal: 'tblZBgkRKvvVeckzZaP',
+  prospects: 'tbl6LjxihnKhe0I5A1L'
 } as const;
 
 export const FIRMEN_FIELDS = {
