@@ -20,9 +20,11 @@ echo "→ rsync..."
 ssh "$HETZNER" "rm -rf $REMOTE_BUILD && mkdir -p $REMOTE_BUILD"
 rsync -a --exclude='node_modules' --exclude='.git' --exclude='.env' --exclude='.env.local' ./ "$HETZNER:$REMOTE_BUILD/"
 
-# 2. Docker build
+# 2. Docker build (TEABLE_API_KEY wird zur Build-Zeit gebraucht, SvelteKit
+#    analysiert Server-Module beim Build und der Client wirft fail-fast ohne Key)
+TEABLE_API_KEY=$(grep '^TEABLE_API_KEY=' .env | cut -d= -f2-)
 echo "→ docker build $TAG..."
-ssh "$HETZNER" "docker build -t $TAG $REMOTE_BUILD/ 2>&1 | tail -3"
+ssh "$HETZNER" "docker build --build-arg TEABLE_API_KEY='$TEABLE_API_KEY' -t $TAG $REMOTE_BUILD/ 2>&1 | tail -5"
 
 # 3. docker-compose image-tag aktualisieren
 echo "→ image-tag setzen..."
