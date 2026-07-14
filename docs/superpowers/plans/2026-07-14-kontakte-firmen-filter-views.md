@@ -28,7 +28,7 @@
 
 **Interfaces:** keine (Shell-Skript, kein Code-Interface).
 
-- [ ] **Step 1: `dev.sh` neu schreiben**
+- [x] **Step 1: `dev.sh` neu schreiben**
 
 ```bash
 #!/bin/bash
@@ -41,13 +41,13 @@
 npm run dev
 ```
 
-- [ ] **Step 2: Verifizieren, dass der Dev-Server ohne Tunnel hochkommt**
+- [x] **Step 2: Verifizieren, dass der Dev-Server ohne Tunnel hochkommt**
 
 Run: `npm run dev -- --port 5183 &` warten bis „Local: http://localhost:5183/" erscheint, dann `curl -s -o /dev/null -w "%{http_code}" http://localhost:5183/contacts`
 Expected: `200`
 Danach den Dev-Server-Prozess wieder beenden (`kill %1` oder den PID aus dem Hintergrundjob).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add dev.sh
@@ -65,7 +65,7 @@ git commit -m "chore: dev.sh — toten Postgres-SSH-Tunnel entfernen (Teable-Mig
 **Interfaces:**
 - Produces: `TABLES.ansichten: string`, `FIRMEN_FIELDS.tags: 'Tags'`, `ANSICHTEN_FIELDS: { name, seite, filter, erstelltAm }` — von allen späteren Tasks referenziert.
 
-- [ ] **Step 1: Skript schreiben (Henry-Repo)**
+- [x] **Step 1: Skript schreiben (Henry-Repo)**
 
 ```python
 #!/usr/bin/env python3
@@ -211,17 +211,17 @@ if __name__ == "__main__":
     main()
 ```
 
-- [ ] **Step 2: Dry-Run**
+- [x] **Step 2: Dry-Run**
 
 Run (im Henry-Repo): `cd /Users/felix/Documents/Henry && python3 scripts/add_firmen_tags_und_ansichten.py`
 Expected: zwei `[dry-run]`-Zeilen (Feld „Tags" auf Firmen, Tabelle „Gespeicherte_Ansichten"), kein Fehler, keine echte Teable-Änderung.
 
-- [ ] **Step 3: Echten Lauf ausführen**
+- [x] **Step 3: Echten Lauf ausführen**
 
 Run: `python3 scripts/add_firmen_tags_und_ansichten.py --commit`
 Expected: „Feld 'Tags' angelegt: fldXXXXXXXX", „Tabelle 'Gespeicherte_Ansichten' angelegt: tblXXXXXXXX", JSON mit allen IDs wird ausgegeben und nach `scripts/add_firmen_tags_und_ansichten_ids.json` geschrieben.
 
-- [ ] **Step 4: IDs in `teable-schema.ts` eintragen (mini-crm-Repo)**
+- [x] **Step 4: IDs in `teable-schema.ts` eintragen (mini-crm-Repo)**
 
 `scripts/add_firmen_tags_und_ansichten_ids.json` öffnen, `ansichten_table_id` entnehmen. In `src/lib/server/teable-schema.ts`:
 
@@ -258,7 +258,7 @@ export const ANSICHTEN_FIELDS = {
 } as const;
 ```
 
-- [ ] **Step 5: Beide Repos committen**
+- [x] **Step 5: Beide Repos committen**
 
 ```bash
 cd /Users/felix/Documents/Henry
@@ -281,7 +281,7 @@ git commit -m "feat: Teable-Schema-IDs für Firmen.Tags + Gespeicherte_Ansichten
 **Interfaces:**
 - Produces: `tagColor(tag: string): string`, `groupByTags<T>(items: T[], tagsOf: (item: T) => string[]): TagGroup<T>[]` mit `type TagGroup<T> = { tag: string; items: T[] }` — genutzt von Task 5, 10, 12.
 
-- [ ] **Step 1: Failing Test schreiben**
+- [x] **Step 1: Failing Test schreiben**
 
 `tests/tags.test.ts`:
 
@@ -325,12 +325,12 @@ test('groupByTags: Tag-Gruppen sind alphabetisch sortiert', () => {
 });
 ```
 
-- [ ] **Step 2: Test laufen lassen — muss fehlschlagen (Modul existiert nicht)**
+- [x] **Step 2: Test laufen lassen — muss fehlschlagen (Modul existiert nicht)**
 
 Run: `node --experimental-strip-types --test tests/tags.test.ts`
 Expected: FAIL — `Cannot find module '../src/lib/tags.ts'`
 
-- [ ] **Step 3: `src/lib/tags.ts` implementieren**
+- [x] **Step 3: `src/lib/tags.ts` implementieren**
 
 ```ts
 // src/lib/tags.ts
@@ -384,12 +384,12 @@ export function groupByTags<T>(items: T[], tagsOf: (item: T) => string[]): TagGr
 }
 ```
 
-- [ ] **Step 4: Test laufen lassen — muss bestehen**
+- [x] **Step 4: Test laufen lassen — muss bestehen**
 
 Run: `node --experimental-strip-types --test tests/tags.test.ts`
 Expected: PASS, 5/5 Tests grün.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/tags.ts tests/tags.test.ts
@@ -408,7 +408,7 @@ git commit -m "feat: tagColor + groupByTags in \$lib/tags.ts extrahieren"
 - Consumes: `FIRMEN_FIELDS.tags` (aus Task 2).
 - Produces: `Company.tags: string[]`, `Seite`, `ViewFilter`, `SavedView` Typen — genutzt von Task 6, 8, 10, 12.
 
-- [ ] **Step 1: `Company`-Typ um `tags` erweitern**
+- [x] **Step 1: `Company`-Typ um `tags` erweitern**
 
 In `src/lib/types.ts`, `Company`-Type:
 
@@ -428,7 +428,7 @@ export type Company = {
 }
 ```
 
-- [ ] **Step 2: Ansichten-Typen anhängen (Dateiende von `types.ts`)**
+- [x] **Step 2: Ansichten-Typen anhängen (Dateiende von `types.ts`)**
 
 ```ts
 export type Seite = 'kontakte' | 'firmen';
@@ -451,7 +451,7 @@ export type SavedView = {
 }
 ```
 
-- [ ] **Step 3: `mapCompany` um `tags` ergänzen**
+- [x] **Step 3: `mapCompany` um `tags` ergänzen**
 
 In `src/lib/server/teable-map.ts`, Zeile 24 (`notizen: ...,`) — direkt danach eine Zeile einfügen:
 
@@ -474,12 +474,12 @@ export function mapCompany(r: TeableRecord, contactCount = 0) {
 }
 ```
 
-- [ ] **Step 4: Build-Check (TypeScript-Fehler durch neuen Pflicht-Feldtyp abfangen)**
+- [x] **Step 4: Build-Check (TypeScript-Fehler durch neuen Pflicht-Feldtyp abfangen)**
 
 Run: `npm run build`
 Expected: baut durch. Falls TypeScript an einer Stelle meckert, dass `Company` ohne `tags` konstruiert wird (z.B. spätere Tasks noch nicht fertig) — das ist erwartet und wird in Task 11/12 behoben; an dieser Stelle nur sicherstellen, dass es an `types.ts`/`teable-map.ts` selbst keinen Fehler gibt.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/types.ts src/lib/server/teable-map.ts
@@ -498,7 +498,7 @@ git commit -m "feat: Company.tags + Ansichten-Typen (Seite, ViewFilter, SavedVie
 - Consumes: `tagColor` aus `$lib/tags` (Task 3).
 - Produces: `<TagInput bind:tags placeholder?>` — genutzt von `ContactForm.svelte` (dieser Task) und `companies/+page.svelte` (Task 12).
 
-- [ ] **Step 1: `TagInput.svelte` schreiben**
+- [x] **Step 1: `TagInput.svelte` schreiben**
 
 ```svelte
 <script lang="ts">
@@ -555,7 +555,7 @@ git commit -m "feat: Company.tags + Ansichten-Typen (Seite, ViewFilter, SavedVie
 </div>
 ```
 
-- [ ] **Step 2: `ContactForm.svelte` — Script-Block bereinigen**
+- [x] **Step 2: `ContactForm.svelte` — Script-Block bereinigen**
 
 In `src/lib/components/ContactForm.svelte`, Zeilen 38-69 (`const TAG_COLORS = [...]` bis Ende von `handleTagKeydown`) komplett löschen. Zeile 1 (`import type { Contact, Company } from '$lib/types';`) um den TagInput-Import ergänzen:
 
@@ -566,7 +566,7 @@ In `src/lib/components/ContactForm.svelte`, Zeilen 38-69 (`const TAG_COLORS = [.
 
 `let tagInput = $state('');` (Zeile 35) ebenfalls löschen — wird jetzt in `TagInput.svelte` gehalten. `let tags = $state<string[]>(contact?.tags ?? []);` (Zeile 34) bleibt bestehen.
 
-- [ ] **Step 3: `ContactForm.svelte` — Markup ersetzen**
+- [x] **Step 3: `ContactForm.svelte` — Markup ersetzen**
 
 Zeilen 363-384 (der komplette `<!-- Tags (Chip UI) -->`-Block) ersetzen durch:
 
@@ -578,18 +578,18 @@ Zeilen 363-384 (der komplette `<!-- Tags (Chip UI) -->`-Block) ersetzen durch:
           </div>
 ```
 
-- [ ] **Step 4: Build-Check**
+- [x] **Step 4: Build-Check**
 
 Run: `npm run build`
 Expected: baut durch, keine TypeScript-/Svelte-Fehler zu `TagInput`/`tagColor`.
 
-- [ ] **Step 5: Manuelle Regressions-Prüfung im Dev-Server**
+- [x] **Step 5: Manuelle Regressions-Prüfung im Dev-Server**
 
 Run: `npm run dev -- --port 5183 &`, im Browser `http://localhost:5183/contacts` öffnen, „Neuer Kontakt" → Tag eintippen + Enter → Chip erscheint in derselben Farbe wie vorher, Backspace bei leerem Feld entfernt letzten Chip.
 Expected: Verhalten identisch zum Stand vor dieser Änderung (reine Extraktion, keine Verhaltensänderung).
 Dev-Server danach beenden.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/components/TagInput.svelte src/lib/components/ContactForm.svelte
@@ -609,7 +609,7 @@ git commit -m "refactor: Tag-Chip-Input aus ContactForm in \$lib/components/TagI
 - Consumes: `TABLES.ansichten`, `ANSICHTEN_FIELDS` (Task 2), `ViewFilter`/`SavedView`/`Seite` (Task 4), `listRecords`/`createRecord`/`updateRecord`/`deleteRecord` aus `./teable`.
 - Produces: `listViews(seite)`, `createView(seite, name, filter)`, `renameView(id, name)`, `deleteView(id)` — genutzt von Task 9, 11, 7. `filtersEqual(a, b)`, `isDefaultFilter(f)` — genutzt von Task 8 (`ViewTabs.svelte`).
 
-- [ ] **Step 1: `src/lib/server/views.ts` schreiben**
+- [x] **Step 1: `src/lib/server/views.ts` schreiben**
 
 ```ts
 // src/lib/server/views.ts
@@ -658,7 +658,7 @@ export async function deleteView(id: string): Promise<void> {
 }
 ```
 
-- [ ] **Step 2: `src/lib/views.ts` schreiben (client-sicher, keine Server-Imports)**
+- [x] **Step 2: `src/lib/views.ts` schreiben (client-sicher, keine Server-Imports)**
 
 ```ts
 // src/lib/views.ts
@@ -686,7 +686,7 @@ export function isDefaultFilter(f: ViewFilter): boolean {
 }
 ```
 
-- [ ] **Step 3: Integrationstest schreiben (läuft gegen echtes Teable, räumt sich selbst auf)**
+- [x] **Step 3: Integrationstest schreiben (läuft gegen echtes Teable, räumt sich selbst auf)**
 
 `tests/views.integration.test.ts`:
 
@@ -715,12 +715,12 @@ test('views.ts: create -> list -> rename -> delete Round-Trip gegen echtes Teabl
 });
 ```
 
-- [ ] **Step 4: Test laufen lassen (Env aus `.env` laden)**
+- [x] **Step 4: Test laufen lassen (Env aus `.env` laden)**
 
 Run: `set -a && source .env && set +a && node --experimental-strip-types --test tests/views.integration.test.ts`
 Expected: PASS. Falls FAIL mit „TEABLE_API_KEY not set" — `.env` im Repo-Root prüfen. Falls FAIL mit 404/422 gegen `TABLES.ansichten` — Task 2 Step 4 nochmal prüfen (ID falsch übertragen).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/server/views.ts src/lib/views.ts tests/views.integration.test.ts
@@ -738,7 +738,7 @@ git commit -m "feat: CRUD für gespeicherte Ansichten (\$lib/server/views.ts) + 
 - Consumes: `createView`, `renameView`, `deleteView` aus `$lib/server/views` (Task 6).
 - Produces: `POST /api/views` `{seite, name, filter}` → `SavedView`; `PATCH /api/views` `{id, name}` → `{success}`; `DELETE /api/views` `{id}` → `{success}` — genutzt von `ViewTabs.svelte` (Task 8).
 
-- [ ] **Step 1: Route schreiben**
+- [x] **Step 1: Route schreiben**
 
 ```ts
 // src/routes/api/views/+server.ts
@@ -768,12 +768,12 @@ export const DELETE: RequestHandler = async ({ request }) => {
 };
 ```
 
-- [ ] **Step 2: Build-Check**
+- [x] **Step 2: Build-Check**
 
 Run: `npm run build`
 Expected: baut durch.
 
-- [ ] **Step 3: Manueller Round-Trip gegen den Dev-Server**
+- [x] **Step 3: Manueller Round-Trip gegen den Dev-Server**
 
 Run: `npm run dev -- --port 5183 &` dann:
 ```bash
@@ -786,7 +786,7 @@ curl -s -X DELETE http://localhost:5183/api/views -H "Content-Type: application/
 ```
 Expected: `{"success":true}`. Dev-Server danach beenden.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/routes/api/views/+server.ts
@@ -804,7 +804,7 @@ git commit -m "feat: /api/views — Server-Route für gespeicherte Ansichten (cr
 - Consumes: `SavedView`, `ViewFilter`, `Seite` (Task 4), `filtersEqual`/`isDefaultFilter` (Task 6), `POST`/`PATCH`/`DELETE /api/views` (Task 7).
 - Produces: `<ViewTabs seite views currentFilter onselect />` — genutzt von `contacts/+page.svelte` (Task 10) und `companies/+page.svelte` (Task 12). `onselect(filter: ViewFilter)` wird mit `{}` aufgerufen für den "Alle"-Tab.
 
-- [ ] **Step 1: Komponente schreiben**
+- [x] **Step 1: Komponente schreiben**
 
 ```svelte
 <script lang="ts">
@@ -960,12 +960,12 @@ git commit -m "feat: /api/views — Server-Route für gespeicherte Ansichten (cr
 </div>
 ```
 
-- [ ] **Step 2: Build-Check**
+- [x] **Step 2: Build-Check**
 
 Run: `npm run build`
 Expected: baut durch (die Komponente wird erst in Task 10/12 tatsächlich eingebunden — an dieser Stelle nur auf Syntaxfehler prüfen; `svelte-check`, falls im Projekt vorhanden, sonst reicht `npm run build`).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/components/ViewTabs.svelte
@@ -985,7 +985,7 @@ git commit -m "feat: ViewTabs.svelte — geteilte Tab-Leiste für gespeicherte A
 - Consumes: `KONTAKTE_FIELDS` (`./teable-schema`), `listViews` (Task 6).
 - Produces: `matchesContactFilters(fields, params)`, `sortContacts(contacts, sort)`, `type TagMode`, `type SortKey` — von `+page.server.ts` importiert. `load()` liefert neu zusätzlich `ort: string`, `group: '' | 'tags'`, `allOrte: string[]`, `views: SavedView[]`.
 
-- [ ] **Step 1: Failing Test schreiben**
+- [x] **Step 1: Failing Test schreiben**
 
 `tests/contact-filters.test.ts`:
 
@@ -1036,12 +1036,12 @@ test('sortContacts: Tags-Sortierung ordnet nach absteigender Tag-Anzahl', () => 
 });
 ```
 
-- [ ] **Step 2: Test laufen lassen — muss fehlschlagen**
+- [x] **Step 2: Test laufen lassen — muss fehlschlagen**
 
 Run: `node --experimental-strip-types --test tests/contact-filters.test.ts`
 Expected: FAIL — Modul `../src/lib/server/contact-filters.ts` existiert nicht.
 
-- [ ] **Step 3: `src/lib/server/contact-filters.ts` implementieren**
+- [x] **Step 3: `src/lib/server/contact-filters.ts` implementieren**
 
 ```ts
 // src/lib/server/contact-filters.ts
@@ -1095,12 +1095,12 @@ export function sortContacts<T extends { name: string; company_name: string | nu
 }
 ```
 
-- [ ] **Step 4: Test laufen lassen — muss bestehen**
+- [x] **Step 4: Test laufen lassen — muss bestehen**
 
 Run: `node --experimental-strip-types --test tests/contact-filters.test.ts`
 Expected: PASS, 5/5 grün.
 
-- [ ] **Step 5: `src/routes/contacts/+page.server.ts` komplett ersetzen**
+- [x] **Step 5: `src/routes/contacts/+page.server.ts` komplett ersetzen**
 
 ```ts
 import { listRecords, createRecord, updateRecord, deleteRecord, linkId } from '$lib/server/teable';
@@ -1210,12 +1210,12 @@ export const actions: Actions = {
 };
 ```
 
-- [ ] **Step 6: Build-Check**
+- [x] **Step 6: Build-Check**
 
 Run: `npm run build`
 Expected: baut durch.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/lib/server/contact-filters.ts tests/contact-filters.test.ts src/routes/contacts/+page.server.ts
@@ -1232,7 +1232,7 @@ git commit -m "feat: Ort-Filter + Gruppierungs-Param + gespeicherte Ansichten in
 **Interfaces:**
 - Consumes: `groupByTags`, `tagColor` (`$lib/tags`), `ViewTabs` (Task 8), `ViewFilter` (`$lib/types`), `data.ort`/`data.group`/`data.allOrte`/`data.views` (Task 9).
 
-- [ ] **Step 1: Datei komplett ersetzen**
+- [x] **Step 1: Datei komplett ersetzen**
 
 ```svelte
 <script lang="ts">
@@ -1693,18 +1693,18 @@ git commit -m "feat: Ort-Filter + Gruppierungs-Param + gespeicherte Ansichten in
 {/if}
 ```
 
-- [ ] **Step 2: Build-Check**
+- [x] **Step 2: Build-Check**
 
 Run: `npm run build`
 Expected: baut durch.
 
-- [ ] **Step 3: Manuelle Verifikation im Dev-Server**
+- [x] **Step 3: Manuelle Verifikation im Dev-Server**
 
 Run: `npm run dev -- --port 5183 &`, `http://localhost:5183/contacts` öffnen.
 Prüfen: Ort-Dropdown erscheint (falls Kontakte mit Ort existieren) und filtert korrekt; „Gruppieren" → „Nach Tags" zeigt Gruppen-Abschnitte mit Kopfzeile+Anzahl, ein Kontakt mit mehreren Tags erscheint in mehreren Gruppen, Kontakte ohne Tags in „Ohne Tags" am Ende; bestehende Tag-Filter/Sortierung funktionieren unverändert.
 Dev-Server danach beenden.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/routes/contacts/+page.svelte
@@ -1724,7 +1724,7 @@ git commit -m "feat: Ort-Filter, Gruppierung nach Tags, ViewTabs in contacts/+pa
 - Consumes: `FIRMEN_FIELDS` (Task 2), `listViews` (Task 6).
 - Produces: `matchesCompanyFilters(fields, params)`, `sortCompanies(companies, sort)`, `type CompanySortKey` — von `+page.server.ts` importiert. `load()` liefert `companies` jetzt inkl. `tags`, plus `tags`, `tagMode`, `ort`, `sort`, `group`, `allTags`, `allOrte`, `views`.
 
-- [ ] **Step 1: Failing Test schreiben**
+- [x] **Step 1: Failing Test schreiben**
 
 `tests/company-filters.test.ts`:
 
@@ -1768,12 +1768,12 @@ test('sortCompanies: tags-Sortierung ordnet nach absteigender Tag-Anzahl', () =>
 });
 ```
 
-- [ ] **Step 2: Test laufen lassen — muss fehlschlagen**
+- [x] **Step 2: Test laufen lassen — muss fehlschlagen**
 
 Run: `node --experimental-strip-types --test tests/company-filters.test.ts`
 Expected: FAIL — Modul existiert nicht.
 
-- [ ] **Step 3: `src/lib/server/company-filters.ts` implementieren**
+- [x] **Step 3: `src/lib/server/company-filters.ts` implementieren**
 
 ```ts
 // src/lib/server/company-filters.ts
@@ -1819,12 +1819,12 @@ export function sortCompanies<T extends { name: string; contact_count: number; t
 }
 ```
 
-- [ ] **Step 4: Test laufen lassen — muss bestehen**
+- [x] **Step 4: Test laufen lassen — muss bestehen**
 
 Run: `node --experimental-strip-types --test tests/company-filters.test.ts`
 Expected: PASS, 4/4 grün.
 
-- [ ] **Step 5: `src/routes/companies/+page.server.ts` komplett ersetzen**
+- [x] **Step 5: `src/routes/companies/+page.server.ts` komplett ersetzen**
 
 ```ts
 import { listRecords, createRecord, updateRecord, deleteRecord, linkId } from '$lib/server/teable';
@@ -1933,12 +1933,12 @@ export const actions: Actions = {
 };
 ```
 
-- [ ] **Step 6: Build-Check**
+- [x] **Step 6: Build-Check**
 
 Run: `npm run build`
 Expected: baut durch (companies/+page.svelte ist noch der alte Stand — Task 12 zieht das UI nach; ein TypeScript-Fehler dort, weil `company.tags` noch nicht im Template verwendet wird, ist kein Fehler, nur ein ungenutztes Feld).
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/lib/server/company-filters.ts tests/company-filters.test.ts src/routes/companies/+page.server.ts
@@ -1955,7 +1955,7 @@ git commit -m "feat: Tags/Ort-Filter, Sortierung, Gruppierung, gespeicherte Ansi
 **Interfaces:**
 - Consumes: `TagInput` (Task 5), `ViewTabs` (Task 8), `groupByTags`/`tagColor` (`$lib/tags`), `data.tags`/`data.ort`/`data.sort`/`data.group`/`data.allTags`/`data.allOrte`/`data.views` (Task 11).
 
-- [ ] **Step 1: Datei komplett ersetzen**
+- [x] **Step 1: Datei komplett ersetzen**
 
 ```svelte
 <script lang="ts">
@@ -2361,12 +2361,12 @@ git commit -m "feat: Tags/Ort-Filter, Sortierung, Gruppierung, gespeicherte Ansi
 </div>
 ```
 
-- [ ] **Step 2: Build-Check**
+- [x] **Step 2: Build-Check**
 
 Run: `npm run build`
 Expected: baut durch, keine TypeScript-Fehler.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/routes/companies/+page.svelte
@@ -2383,22 +2383,22 @@ git commit -m "feat: Tags in Firmen-Formularen, Filterblock, ViewTabs, Gruppieru
 
 **Interfaces:** keine.
 
-- [ ] **Step 1: Alle Unit-Tests gesammelt laufen lassen**
+- [x] **Step 1: Alle Unit-Tests gesammelt laufen lassen**
 
 Run: `node --experimental-strip-types --test tests/tags.test.ts tests/contact-filters.test.ts tests/company-filters.test.ts`
 Expected: alle PASS (14 Tests aus Task 3/9/11 zusammen).
 
-- [ ] **Step 2: Integrationstest für Ansichten laufen lassen**
+- [x] **Step 2: Integrationstest für Ansichten laufen lassen**
 
 Run: `set -a && source .env && set +a && node --experimental-strip-types --test tests/views.integration.test.ts`
 Expected: PASS, Testansicht ist am Ende wieder gelöscht (Task 6 Step 3 prüft das selbst).
 
-- [ ] **Step 3: Produktionsbuild**
+- [x] **Step 3: Produktionsbuild**
 
 Run: `npm run build`
 Expected: baut ohne Fehler durch.
 
-- [ ] **Step 4: Manueller Round-Trip im Dev-Server gegen echtes Teable**
+- [x] **Step 4: Manueller Round-Trip im Dev-Server gegen echtes Teable**
 
 Run: `npm run dev -- --port 5183 &`, dann im Browser (Playwright MCP oder manuell):
 1. `/contacts` → neuen Testkontakt „TEST_TMP Kontakt" mit Tags `test, stb` und Ort `Wien` anlegen.
@@ -2410,14 +2410,14 @@ Run: `npm run dev -- --port 5183 &`, dann im Browser (Playwright MCP oder manuel
 
 Expected: alle Schritte funktionieren wie in der Spec beschrieben, am Ende ist Teable wieder im Originalzustand (kein `TEST_TMP`-Datensatz mehr vorhanden). Dev-Server danach beenden.
 
-- [ ] **Step 5: Alle Checkboxen in diesem Plan abhaken, committen**
+- [x] **Step 5: Alle Checkboxen in diesem Plan abhaken, committen**
 
 ```bash
 git add docs/superpowers/plans/2026-07-14-kontakte-firmen-filter-views.md
 git commit -m "docs: Implementierungsplan abgeschlossen — alle Tasks verifiziert"
 ```
 
-- [ ] **Step 6: Werkbank + Work-Log (Henry-Repo) aktualisieren**
+- [x] **Step 6: Werkbank + Work-Log (Henry-Repo) aktualisieren**
 
 `modules/werkbank/mini-crm/protokoll.md`: neuen Eintrag anhängen mit Datum, was gebaut wurde (Tags für Firmen, Ort-Filter, Gruppierung, gespeicherte Ansichten als Tabs), Commit-Hashes der wichtigsten Commits.
 `modules/werkbank/mini-crm/stand.md`: überschreiben mit aktuellem Stand — Feature fertig und lokal verifiziert, noch nicht deployed, wartet auf Felix' Review.
@@ -2436,11 +2436,11 @@ Kein Deploy — das macht Felix selbst nach Review (`./deploy.sh`, wie in `feedb
 
 **Hintergrund:** unabhängige Anforderung von Felix (2026-07-14, siehe `modules/werkbank/mini-crm/stalling.md` im Henry-Repo): `Interaktionen_Real` (Teable) und die App-Timeline müssen bidirektional vollständig sein — alles in Teable muss in der App sichtbar sein, alles in der App Angelegte muss in Teable landen.
 
-- [ ] **Step 1: Code-Seite lesen**
+- [x] **Step 1: Code-Seite lesen**
 
 `src/routes/contacts/[id]/+page.server.ts` lesen (Actions `add_interaction`, `add_email`, `update_interaction`, `update_email`, `delete_interaction`, `delete_email`, sowie `load()`s Timeline-Aufbau über `mapTimelineEntry`). `src/lib/server/teable-map.ts` → `mapTimelineEntry` lesen. `src/lib/server/teable-schema.ts` → `INTERAKTIONEN_FIELDS` lesen. Notieren: welche Felder werden geschrieben, welche gelesen, gibt es Felder in einem, aber nicht im anderen.
 
-- [ ] **Step 2: Live-Daten aus Teable ziehen**
+- [x] **Step 2: Live-Daten aus Teable ziehen**
 
 Run (im mini-crm-Repo, mit geladenem `.env`):
 ```bash
@@ -2457,15 +2457,15 @@ console.log('Vorkommende Typ-Werte:', typValues);
 ```
 Notieren: passen die `Typ`-Werte zu dem, was `mapTimelineEntry` unterscheidet (`email_rein`/`email_raus` vs. alles andere)? Gibt es Records mit leeren Pflichtfeldern (`Kontakt`, `Datum`), die beim Rendern in der App Probleme machen würden?
 
-- [ ] **Step 3: Schreibrichtung testen (App → Teable), mit Cleanup**
+- [x] **Step 3: Schreibrichtung testen (App → Teable), mit Cleanup**
 
 Über die UI (Dev-Server, `/contacts/<id-eines-echten-testbaren-Kontakts-oder-Testkontakts>`) eine Interaktion anlegen („Notiz", Titel „TEST_TMP Interaktion"). Direkt danach per Skript (wie Step 2) `TABLES.interaktionenReal` erneut abfragen und bestätigen, dass der neue Record mit den erwarteten Feldwerten (`Kontakt`, `Typ`, `Datum`, `Titel`) auftaucht. Danach den Testrecord über den Löschen-Button in der UI wieder entfernen und per Skript bestätigen, dass er weg ist.
 
-- [ ] **Step 4: Leserichtung testen (Teable → App)**
+- [x] **Step 4: Leserichtung testen (Teable → App)**
 
 Einen der in Step 2 gefundenen echten (nicht-Test-)Records in der App aufrufen (`/contacts/<zugehörige-kontakt-id>`) und in der Timeline suchen. Bestätigen, dass Titel/Text/Datum korrekt angezeigt werden und nicht z.B. „undefined" oder leer sind.
 
-- [ ] **Step 5: Ergebnis dokumentieren, NICHT fixen**
+- [x] **Step 5: Ergebnis dokumentieren, NICHT fixen**
 
 In `modules/werkbank/mini-crm/stalling.md` (Henry-Repo) den bestehenden Eintrag „Interaktionen_Real: bidirektionale Vollständigkeit prüfen" aktualisieren:
 - Status auf „diagnostiziert" setzen.
