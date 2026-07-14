@@ -22,6 +22,7 @@ export function mapCompany(r: TeableRecord, contactCount = 0) {
     ort: (f[FIRMEN_FIELDS.ort] as string) ?? null,
     land: (f[FIRMEN_FIELDS.land] as string) ?? null,
     notizen: (f[FIRMEN_FIELDS.notizen] as string) ?? null,
+    tags: (f[FIRMEN_FIELDS.tags] as string[]) ?? [],
     created_at: r.createdTime ?? null,
     contact_count: contactCount
   };

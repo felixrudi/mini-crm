@@ -7,6 +7,7 @@ export type Company = {
   ort: string | null;
   land: string | null;
   notizen: string | null;
+  tags: string[];
   created_at: string;
   contact_count?: number;
 }
@@ -110,4 +111,23 @@ export type TimelineEntry = {
   datum: string;
   titel: string | null;
   inhalt: string | null;
+}
+
+export type Seite = 'kontakte' | 'firmen';
+
+export type ViewFilter = {
+  q?: string;
+  tags?: string[];
+  tagMode?: 'and' | 'or';
+  kanal?: string;
+  ort?: string;
+  sort?: string;
+  group?: string;
+};
+
+export type SavedView = {
+  id: string;
+  name: string;
+  seite: Seite;
+  filter: ViewFilter;
 }
