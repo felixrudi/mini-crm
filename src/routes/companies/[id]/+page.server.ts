@@ -1,5 +1,6 @@
 import { getRecord, listRecords, updateRecord, linkId } from '$lib/server/teable';
 import { TABLES, FIRMEN_FIELDS, KONTAKTE_FIELDS } from '$lib/server/teable-schema';
+import { mapCompany, mapContact } from '$lib/server/teable-map';
 import { error } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -10,11 +11,11 @@ export const load: PageServerLoad = async ({ params }) => {
   const allContacts = await listRecords(TABLES.kontakteReal);
   const contacts = allContacts
     .filter((c) => linkId(c.fields[KONTAKTE_FIELDS.firma]) === params.id)
-    .map((c) => ({ id: c.id, name: c.fields[KONTAKTE_FIELDS.name], ...c.fields }))
+    .map((c) => mapContact(c))
     .sort((a, b) => String(a.name).localeCompare(String(b.name)));
 
   return {
-    company: { id: company.id, ...company.fields },
+    company: mapCompany(company),
     contacts
   };
 };
