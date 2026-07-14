@@ -92,9 +92,14 @@ async function main() {
 
   console.log('Migrating interactions + emails -> Interaktionen_Real...');
   const interactions = await sql`SELECT * FROM interactions`;
+  let interactionsCreated = 0;
+  let interactionsSkippedProspect = 0;
   for (const i of interactions) {
     const teableId = contactIdMap.get(i.contact_id);
-    if (!teableId) continue;
+    if (!teableId) {
+      interactionsSkippedProspect++;
+      continue;
+    }
     await createRecord(TABLES.interaktionenReal, {
       [INTERAKTIONEN_FIELDS.kontakt]: link(teableId),
       [INTERAKTIONEN_FIELDS.typ]: i.typ,
@@ -102,11 +107,17 @@ async function main() {
       [INTERAKTIONEN_FIELDS.titel]: i.zusammenfassung,
       [INTERAKTIONEN_FIELDS.text]: i.text
     });
+    interactionsCreated++;
   }
   const emails = await sql`SELECT * FROM emails WHERE contact_id IS NOT NULL`;
+  let emailsCreated = 0;
+  let emailsSkippedProspect = 0;
   for (const e of emails) {
     const teableId = contactIdMap.get(e.contact_id);
-    if (!teableId) continue;
+    if (!teableId) {
+      emailsSkippedProspect++;
+      continue;
+    }
     await createRecord(TABLES.interaktionenReal, {
       [INTERAKTIONEN_FIELDS.kontakt]: link(teableId),
       [INTERAKTIONEN_FIELDS.typ]: e.richtung === 'rein' ? 'email_rein' : 'email_raus',
@@ -116,21 +127,37 @@ async function main() {
       [INTERAKTIONEN_FIELDS.von]: e.von,
       [INTERAKTIONEN_FIELDS.an]: e.an
     });
+    emailsCreated++;
   }
-  console.log(`  ${interactions.length} Interaktionen + ${emails.length} Emails migrated.`);
+  console.log(
+    `  ${interactionsCreated}/${interactions.length} Interaktionen migrated ` +
+      `(${interactionsSkippedProspect} skipped: contact is prospect-tagged, no Kontakte_Real record to link).`
+  );
+  console.log(
+    `  ${emailsCreated}/${emails.length} Emails migrated ` +
+      `(${emailsSkippedProspect} skipped: contact is prospect-tagged, no Kontakte_Real record to link).`
+  );
 
   console.log('Migrating actions -> Aufgaben_Real...');
   const actions = await sql`SELECT * FROM actions`;
+  let actionsDroppedProspectLink = 0;
   for (const a of actions) {
+    const resolvedContactId = a.contact_id ? contactIdMap.get(a.contact_id) : null;
+    if (a.contact_id && !resolvedContactId) {
+      actionsDroppedProspectLink++;
+    }
     await createRecord(TABLES.aufgabenReal, {
-      [AUFGABEN_FIELDS.kontakt]: link(a.contact_id ? contactIdMap.get(a.contact_id) : null),
+      [AUFGABEN_FIELDS.kontakt]: link(resolvedContactId),
       [AUFGABEN_FIELDS.titel]: a.titel,
       [AUFGABEN_FIELDS.status]: a.status,
       [AUFGABEN_FIELDS.faelligAm]: a.faellig_am,
       [AUFGABEN_FIELDS.notizen]: a.notizen
     });
   }
-  console.log(`  ${actions.length} Aufgaben migrated.`);
+  console.log(
+    `  ${actions.length} Aufgaben migrated ` +
+      `(${actionsDroppedProspectLink} created with no contact link: original contact is prospect-tagged, no Kontakte_Real record to link).`
+  );
 
   console.log('Migrating prospects (table) + prospect-tagged contacts -> Prospects...');
   const oldProspects = await sql`SELECT * FROM prospects`;
