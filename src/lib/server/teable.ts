@@ -99,19 +99,63 @@ export async function deleteRecord(tableId: string, recordId: string): Promise<v
   await teableFetch(`/table/${tableId}/record/${recordId}`, { method: 'DELETE' });
 }
 
+// Per-table cache of field-name -> field-id. Unlike every other Teable REST
+// endpoint (which accept fieldKeyType=name), the uploadAttachment endpoint
+// only accepts the field ID in the URL path and 404s on a field name
+// (confirmed live 2026-07-14: "Field Foto not found" with the name, 201 with
+// the id). Resolve + cache so callers can keep passing the readable field
+// name from teable-schema.ts.
+const fieldIdCache = new Map<string, Map<string, string>>();
+
+async function resolveFieldId(tableId: string, fieldName: string): Promise<string> {
+  let table = fieldIdCache.get(tableId);
+  if (!table) {
+    const res = await teableFetch(`/table/${tableId}/field`);
+    const fields = (await res.json()) as { id: string; name: string }[];
+    table = new Map(fields.map((f) => [f.name, f.id]));
+    fieldIdCache.set(tableId, table);
+  }
+  const fieldId = table.get(fieldName);
+  if (!fieldId) throw new Error(`Teable field "${fieldName}" not found on table ${tableId}`);
+  return fieldId;
+}
+
 export async function uploadAttachment(
   tableId: string,
   recordId: string,
   fieldName: string,
   file: File
 ): Promise<void> {
+  const fieldId = await resolveFieldId(tableId, fieldName);
   const form = new FormData();
   form.append('file', file, file.name);
-  await teableFetch(`/table/${tableId}/record/${recordId}/${encodeURIComponent(fieldName)}/uploadAttachment`, {
+  await teableFetch(`/table/${tableId}/record/${recordId}/${fieldId}/uploadAttachment`, {
     method: 'POST',
     body: form
     // No Content-Type header — fetch sets the multipart boundary itself.
   });
+}
+
+/**
+ * Shape of one entry in a Teable attachment field, as actually returned by
+ * GET record (confirmed live 2026-07-14 against Kontakte_Real.Foto). There is
+ * no plain `url` key — only time-limited signed URLs. `presignedUrl` serves
+ * the original file; use it as the `<img src>` / download target.
+ */
+export type TeableAttachment = {
+  id: string;
+  name: string;
+  mimetype?: string;
+  path?: string;
+  token?: string;
+  presignedUrl: string;
+  smThumbnailUrl?: string;
+  lgThumbnailUrl?: string;
+};
+
+/** Read-side helper: pulls the servable URL out of one Teable attachment entry. */
+export function attachmentUrl(att: TeableAttachment): string {
+  return att.presignedUrl;
 }
 
 /** Write-side helper: wraps a record id into the array-of-object shape Teable expects for link fields. */

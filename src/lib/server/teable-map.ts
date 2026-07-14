@@ -2,15 +2,13 @@
 // Converts Teable {id, fields} records into the exact flat field shapes
 // src/lib/types.ts and every .svelte template already expect — these shapes
 // predate the Teable migration and are preserved so no .svelte file changes.
-import type { TeableRecord } from './teable';
-import { linkId } from './teable';
+import type { TeableRecord, TeableAttachment } from './teable';
+import { linkId, attachmentUrl } from './teable';
 import { KONTAKTE_FIELDS, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS, AUFGABEN_FIELDS, PROSPECT_FIELDS } from './teable-schema';
 
-type Attachment = { id: string; name: string; mimetype?: string; mimeType?: string; url: string; timestamp?: string };
-
 function firstAttachmentUrl(field: unknown): string | null {
-  const atts = field as Attachment[] | undefined;
-  return atts && atts.length > 0 ? atts[0].url : null;
+  const atts = field as TeableAttachment[] | undefined;
+  return atts && atts.length > 0 ? attachmentUrl(atts[0]) : null;
 }
 
 export function mapCompany(r: TeableRecord, contactCount = 0) {
@@ -115,12 +113,12 @@ export function mapProspect(r: TeableRecord, companyName: string | null = null) 
   };
 }
 
-export function mapFile(att: Attachment) {
+export function mapFile(att: TeableAttachment) {
   return {
     id: att.id,
     filename: att.name,
-    mimetype: att.mimetype ?? att.mimeType ?? 'application/octet-stream',
-    data: att.url,
-    created_at: att.timestamp ?? null
+    mimetype: att.mimetype ?? 'application/octet-stream',
+    data: attachmentUrl(att),
+    created_at: null
   };
 }
