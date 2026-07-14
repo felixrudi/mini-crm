@@ -82,12 +82,12 @@
         <div class="sm:col-span-2">
           <label class="block text-xs font-medium text-ink/60 mb-1">Titel *</label>
           <input name="titel" type="text" required placeholder="Was muss erledigt werden?"
-            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
         </div>
         <div>
           <label class="block text-xs font-medium text-ink/60 mb-1">Kontakt</label>
           <select name="contact_id"
-            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta">
+            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta">
             <option value="">— Kein Kontakt —</option>
             {#each data.contacts as contact}
               <option value={contact.id}>{contact.name}</option>
@@ -97,12 +97,12 @@
         <div>
           <label class="block text-xs font-medium text-ink/60 mb-1">Fällig am</label>
           <input name="faellig_am" type="date"
-            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
         </div>
         <div class="sm:col-span-2">
           <label class="block text-xs font-medium text-ink/60 mb-1">Notizen</label>
           <input name="notizen" type="text" placeholder="Optional..."
-            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
         </div>
       </div>
       <div class="flex gap-2">

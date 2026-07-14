@@ -15,6 +15,8 @@
   import Trash2 from '@lucide/svelte/icons/trash-2';
   import Pencil from '@lucide/svelte/icons/pencil';
   import ExternalLink from '@lucide/svelte/icons/external-link';
+  import Filter from '@lucide/svelte/icons/filter';
+  import X from '@lucide/svelte/icons/x';
 
   let { data }: { data: PageData } = $props();
 
@@ -27,6 +29,60 @@
   let avatarFileInput: HTMLInputElement;
 
   let debounceTimer: ReturnType<typeof setTimeout>;
+
+  // --- Tag-Filter + Sortierung ---
+  const TAG_COLORS = [
+    'bg-terracotta/10 text-terracotta border-terracotta/20',
+    'bg-sage/10 text-sage border-sage/20',
+    'bg-blue-50 text-blue-600 border-blue-200',
+    'bg-amber-50 text-amber-700 border-amber-200',
+    'bg-purple-50 text-purple-700 border-purple-200',
+    'bg-pink-50 text-pink-700 border-pink-200',
+  ];
+  function tagColor(tag: string) {
+    const hash = tag.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    return TAG_COLORS[hash % TAG_COLORS.length];
+  }
+
+  let selectedTags = $state<string[]>(data.tags ?? []);
+  let tagMode = $state<'or' | 'and'>(data.tagMode === 'and' ? 'and' : 'or');
+  let sortBy = $state<'name' | 'company' | 'tags'>(data.sort ?? 'name');
+  let hasTagFilter = $derived(selectedTags.length > 0);
+
+  function updateUrl() {
+    const url = new URL($page.url);
+    if (selectedTags.length > 0) url.searchParams.set('tags', selectedTags.join(','));
+    else url.searchParams.delete('tags');
+    url.searchParams.delete('tag'); // alter Einzel-Parameter — sobald der Nutzer selbst filtert, auf 'tags' migrieren
+    if (tagMode === 'and') url.searchParams.set('mode', 'and');
+    else url.searchParams.delete('mode');
+    if (sortBy !== 'name') url.searchParams.set('sort', sortBy);
+    else url.searchParams.delete('sort');
+    goto(url.toString(), { replaceState: true, keepFocus: true, noScroll: true });
+  }
+
+  function toggleTag(tag: string) {
+    selectedTags = selectedTags.includes(tag)
+      ? selectedTags.filter((t) => t !== tag)
+      : [...selectedTags, tag];
+    updateUrl();
+  }
+
+  function setTagMode(mode: 'or' | 'and') {
+    tagMode = mode;
+    updateUrl();
+  }
+
+  function setSort(s: 'name' | 'company' | 'tags') {
+    sortBy = s;
+    updateUrl();
+  }
+
+  function clearTagFilter() {
+    selectedTags = [];
+    tagMode = 'or';
+    updateUrl();
+  }
 
   async function handleAvatarChange(e: Event) {
     const file = (e.target as HTMLInputElement).files?.[0];
@@ -96,15 +152,77 @@
   </div>
 
   <!-- Search -->
-  <div class="relative mb-6">
+  <div class="relative mb-4">
     <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink/30" />
     <input
       type="text"
       bind:value={searchValue}
       oninput={handleSearch}
       placeholder="Kontakte suchen..."
-      class="w-full pl-9 pr-4 py-2.5 bg-surface border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+      class="w-full pl-9 pr-4 py-2.5 bg-surface border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
     />
+  </div>
+
+  <!-- Tag-Filter + Sortierung -->
+  <div class="bg-surface rounded-xl border border-line p-4 mb-6">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="font-display font-semibold text-sm text-ink flex items-center gap-2">
+        <Filter class="w-3.5 h-3.5 text-sage" /> Filter &amp; Sortierung
+      </h2>
+      {#if hasTagFilter}
+        <button onclick={clearTagFilter} class="text-xs text-ink/40 hover:text-terracotta transition-colors flex items-center gap-1">
+          <X class="w-3 h-3" /> Filter löschen
+        </button>
+      {/if}
+    </div>
+
+    {#if data.allTags.length > 0}
+      <div class="mb-3">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs font-medium text-ink/40 uppercase tracking-wide">Tags</p>
+          {#if selectedTags.length > 1}
+            <div class="flex items-center gap-1 text-xs">
+              <button
+                type="button"
+                onclick={() => setTagMode('or')}
+                class="px-2 py-0.5 rounded-full border transition-colors {tagMode === 'or' ? 'bg-terracotta text-white border-terracotta' : 'border-line text-ink/50 hover:border-ink/30'}"
+              >ODER</button>
+              <button
+                type="button"
+                onclick={() => setTagMode('and')}
+                class="px-2 py-0.5 rounded-full border transition-colors {tagMode === 'and' ? 'bg-terracotta text-white border-terracotta' : 'border-line text-ink/50 hover:border-ink/30'}"
+              >UND</button>
+            </div>
+          {/if}
+        </div>
+        <div class="flex flex-wrap gap-1.5">
+          {#each data.allTags as tag}
+            <button
+              type="button"
+              onclick={() => toggleTag(tag)}
+              class="px-2.5 py-1 rounded-full text-xs font-medium border transition-all {selectedTags.includes(tag)
+                ? tagColor(tag) + ' ring-2 ring-offset-1 ring-terracotta/40'
+                : 'bg-cream text-ink/50 border-line hover:border-ink/30'}"
+            >
+              {tag}
+            </button>
+          {/each}
+        </div>
+      </div>
+    {/if}
+
+    <div>
+      <p class="text-xs font-medium text-ink/40 uppercase tracking-wide mb-2">Sortieren nach</p>
+      <select
+        value={sortBy}
+        onchange={(e) => setSort((e.currentTarget as HTMLSelectElement).value as 'name' | 'company' | 'tags')}
+        class="px-3 py-1.5 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+      >
+        <option value="name">Name (A-Z)</option>
+        <option value="company">Firma (A-Z)</option>
+        <option value="tags">Anzahl Tags</option>
+      </select>
+    </div>
   </div>
 
   <!-- Table -->

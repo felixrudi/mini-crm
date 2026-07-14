@@ -205,7 +205,7 @@
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1" for="titel">Titel</label>
             <input id="titel" name="titel" type="text" bind:value={titel}
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="Dr., Mag., DI …" />
           </div>
 
@@ -214,13 +214,13 @@
             <div>
               <label class="block text-xs font-medium text-ink/60 mb-1" for="vorname">Vorname</label>
               <input id="vorname" name="vorname" type="text" bind:value={vorname} oninput={syncName}
-                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="Felix" />
             </div>
             <div>
               <label class="block text-xs font-medium text-ink/60 mb-1" for="nachname">Nachname</label>
               <input id="nachname" name="nachname" type="text" bind:value={nachname} oninput={syncName}
-                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="Hirschfeld" />
             </div>
           </div>
@@ -233,7 +233,7 @@
             <input
               id="name_field" name="name" type="text"
               bind:value={displayName}
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="Wird aus Vorname + Nachname befüllt" />
           </div>
 
@@ -243,7 +243,7 @@
             <input
               id="geburtstag" name="geburtstag" type="date"
               value={contact?.geburtstag ? contact.geburtstag.slice(0, 10) : ''}
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
             />
           </div>
         </div>
@@ -257,7 +257,7 @@
             <label class="block text-xs font-medium text-ink/60 mb-1" for="company_id">Firma</label>
             <select
               id="company_id" name="company_id"
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
             >
               <option value="">— Keine Firma —</option>
               {#each companies as company}
@@ -268,7 +268,7 @@
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1" for="rolle">Rolle</label>
             <input id="rolle" name="rolle" type="text" bind:value={rolle}
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="z.B. Geschäftsführer" />
           </div>
         </div>
@@ -281,20 +281,20 @@
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1" for="email">E-Mail</label>
             <input id="email" name="email" type="email" bind:value={email}
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="name@firma.at" />
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-medium text-ink/60 mb-1" for="telefon">Telefon</label>
               <input id="telefon" name="telefon" type="tel" bind:value={telefon}
-                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="+43 …" />
             </div>
             <div>
               <label class="block text-xs font-medium text-ink/60 mb-1" for="whatsapp">WhatsApp</label>
               <input id="whatsapp" name="whatsapp" type="text" value={contact?.whatsapp ?? ''}
-                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="+43 …" />
             </div>
           </div>
@@ -302,13 +302,13 @@
             <div>
               <label class="block text-xs font-medium text-ink/60 mb-1" for="wechat_id">WeChat ID</label>
               <input id="wechat_id" name="wechat_id" type="text" value={contact?.wechat_id ?? ''}
-                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="WeChat ID" />
             </div>
             <div>
               <label class="block text-xs font-medium text-ink/60 mb-1" for="linkedin_url">LinkedIn</label>
               <input id="linkedin_url" name="linkedin_url" type="url" value={contact?.linkedin_url ?? ''}
-                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="linkedin.com/in/…" />
             </div>
           </div>
@@ -322,20 +322,20 @@
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1" for="strasse">Straße</label>
             <input id="strasse" name="strasse" type="text" bind:value={strasse}
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="Musterstraße 1/2" />
           </div>
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block text-xs font-medium text-ink/60 mb-1" for="plz">PLZ</label>
               <input id="plz" name="plz" type="text" bind:value={plz}
-                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="1010" />
             </div>
             <div class="col-span-2">
               <label class="block text-xs font-medium text-ink/60 mb-1" for="ort">Ort</label>
               <input id="ort" name="ort" type="text" bind:value={ort}
-                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="Wien" />
             </div>
           </div>
@@ -350,13 +350,13 @@
             <div>
               <label class="block text-xs font-medium text-ink/60 mb-1" for="telefon2">2. Telefon</label>
               <input id="telefon2" name="telefon2" type="tel" value={contact?.telefon2 ?? ''}
-                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="+43 …" />
             </div>
             <div>
               <label class="block text-xs font-medium text-ink/60 mb-1" for="iban">IBAN / Konto</label>
               <input id="iban" name="iban" type="text" value={contact?.iban ?? ''}
-                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+                class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="AT61 1904 3002 …" />
             </div>
           </div>
@@ -377,7 +377,7 @@
                 bind:value={tagInput}
                 onkeydown={handleTagKeydown}
                 type="text"
-                class="flex-1 min-w-[100px] bg-transparent text-sm text-ink placeholder-ink/30 focus:outline-none py-0.5"
+                class="flex-1 min-w-[100px] bg-transparent text-base text-ink placeholder-ink/30 focus:outline-none py-0.5"
                 placeholder={tags.length === 0 ? 'privat, schüler … Enter' : ''}
               />
             </div>
@@ -390,7 +390,7 @@
         <h3 class="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-3">Notizen</h3>
         <textarea
           name="notizen" rows="3"
-          class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta resize-none"
+          class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta resize-none"
           placeholder="Interne Notizen…"
         >{contact?.notizen ?? ''}</textarea>
       </section>

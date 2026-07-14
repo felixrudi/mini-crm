@@ -72,17 +72,17 @@
         <div class="sm:col-span-2">
           <label class="block text-xs font-medium text-ink/60 mb-1">Name *</label>
           <input name="name" type="text" required placeholder="Firmenname"
-            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
         </div>
         <div>
           <label class="block text-xs font-medium text-ink/60 mb-1">Website</label>
           <input name="website" type="url" placeholder="https://..."
-            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
         </div>
         <div>
           <label class="block text-xs font-medium text-ink/60 mb-1">Notizen</label>
           <input name="notizen" type="text" placeholder="Optional..."
-            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
         </div>
       </div>
       <div class="flex gap-2">
@@ -127,11 +127,11 @@
                 <input type="hidden" name="id" value={company.id} />
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
                   <input name="name" bind:value={editName} required placeholder="Name"
-                    class="px-2 py-1.5 bg-cream border border-terracotta/40 rounded text-sm text-ink focus:outline-none focus:ring-1 focus:ring-terracotta" />
+                    class="px-2 py-1.5 bg-cream border border-terracotta/40 rounded text-base text-ink focus:outline-none focus:ring-1 focus:ring-terracotta" />
                   <input name="website" bind:value={editWebsite} placeholder="Website"
-                    class="px-2 py-1.5 bg-cream border border-line rounded text-sm text-ink focus:outline-none focus:ring-1 focus:ring-terracotta" />
+                    class="px-2 py-1.5 bg-cream border border-line rounded text-base text-ink focus:outline-none focus:ring-1 focus:ring-terracotta" />
                   <input name="notizen" bind:value={editNotizen} placeholder="Notizen"
-                    class="px-2 py-1.5 bg-cream border border-line rounded text-sm text-ink focus:outline-none focus:ring-1 focus:ring-terracotta" />
+                    class="px-2 py-1.5 bg-cream border border-line rounded text-base text-ink focus:outline-none focus:ring-1 focus:ring-terracotta" />
                 </div>
                 <div class="flex gap-1.5">
                   <button type="submit" class="flex items-center gap-1 px-2.5 py-1 bg-terracotta text-white rounded text-xs font-medium">

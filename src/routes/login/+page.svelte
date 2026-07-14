@@ -45,7 +45,7 @@
               bind:value={password}
               required
               autofocus
-              class="w-full pl-9 pr-4 py-2.5 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full pl-9 pr-4 py-2.5 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="••••••••"
             />
           </div>

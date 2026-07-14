@@ -57,7 +57,7 @@
           id="typ"
           name="typ"
           required
-          class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta capitalize"
+          class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta capitalize"
         >
           {#each typen as typ}
             <option value={typ} class="capitalize">{typ.charAt(0).toUpperCase() + typ.slice(1)}</option>
@@ -73,7 +73,7 @@
           type="date"
           value={today}
           required
-          class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+          class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
         />
       </div>
 
@@ -83,7 +83,7 @@
           id="zusammenfassung"
           name="zusammenfassung"
           type="text"
-          class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+          class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
           placeholder="Kurze Zusammenfassung..."
         />
       </div>
@@ -94,7 +94,7 @@
           id="text"
           name="text"
           rows="4"
-          class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta resize-none"
+          class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta resize-none"
           placeholder="Ausführliche Notizen..."
         ></textarea>
       </div>

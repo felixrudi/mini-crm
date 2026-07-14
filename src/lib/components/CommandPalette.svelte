@@ -97,7 +97,7 @@
           onkeydown={handleKeydown}
           type="text"
           placeholder="Kontakt suchen..."
-          class="flex-1 bg-transparent text-sm text-ink placeholder-ink/30 focus:outline-none"
+          class="flex-1 bg-transparent text-base text-ink placeholder-ink/30 focus:outline-none"
         />
         {#if loading}
           <div class="w-4 h-4 border-2 border-terracotta border-t-transparent rounded-full animate-spin flex-shrink-0"></div>

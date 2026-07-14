@@ -31,7 +31,20 @@
   box-sizing: border-box;
 }
 
+html {
+  /* iOS Safari: verhindert Font-Auto-Vergrößerung nach Rotation */
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
+}
+
+/* iOS Safari 100vh-Bug: Adressleiste ein-/ausklappend verändert 100vh.
+   100dvh berücksichtigt die tatsächlich sichtbare Höhe; Fallback für
+   ältere Browser ohne dvh-Support via CSS-Redeklaration. */
+.h-app-shell {
+  height: 100vh;
+  height: 100dvh;
 }

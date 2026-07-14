@@ -60,42 +60,42 @@
           <div class="sm:col-span-2">
             <label class="block text-xs font-medium text-ink/60 mb-1">Name *</label>
             <input name="name" type="text" bind:value={editName} required
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
           </div>
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1">Website</label>
             <input name="website" type="text" bind:value={editWebsite}
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="https://…" />
           </div>
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1">Straße</label>
             <input name="strasse" type="text" bind:value={editStrasse}
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="Musterstraße 1" />
           </div>
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1">PLZ</label>
             <input name="plz" type="text" bind:value={editPlz}
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="1010" />
           </div>
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1">Ort</label>
             <input name="ort" type="text" bind:value={editOrt}
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="Wien" />
           </div>
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1">Land</label>
             <input name="land" type="text" bind:value={editLand}
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="Österreich" />
           </div>
           <div class="sm:col-span-2">
             <label class="block text-xs font-medium text-ink/60 mb-1">Notizen</label>
             <textarea name="notizen" rows="2" bind:value={editNotizen}
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta resize-none"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta resize-none"
               placeholder="Interne Notizen…"></textarea>
           </div>
         </div>

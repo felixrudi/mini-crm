@@ -371,7 +371,7 @@
               bind:value={newActionTitel}
               required
               placeholder="Aufgabe beschreiben..."
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
             />
           </div>
           <div>
@@ -380,7 +380,7 @@
               type="date"
               name="faellig_am"
               bind:value={newActionDate}
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
             />
           </div>
           <div>
@@ -390,7 +390,7 @@
               name="notizen"
               bind:value={newActionNotes}
               placeholder="Optional..."
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
             />
           </div>
         </div>
@@ -430,12 +430,12 @@
                       <input type="hidden" name="id" value={action.id} />
                       <div class="space-y-1.5 mb-2">
                         <input type="text" name="titel" bind:value={editActionTitel} required
-                          class="w-full px-2 py-1.5 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+                          class="w-full px-2 py-1.5 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
                         <div class="grid grid-cols-2 gap-2">
                           <input type="date" name="faellig_am" bind:value={editActionDate}
-                            class="px-2 py-1.5 bg-cream border border-line rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+                            class="px-2 py-1.5 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
                           <input type="text" name="notizen" bind:value={editActionNotes} placeholder="Notizen"
-                            class="px-2 py-1.5 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+                            class="px-2 py-1.5 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
                         </div>
                       </div>
                       <div class="flex gap-1.5">

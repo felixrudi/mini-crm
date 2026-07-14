@@ -2,6 +2,7 @@
   import '../app.css';
   import { page } from '$app/state';
   import { browser } from '$app/environment';
+  import { afterNavigate } from '$app/navigation';
   import ToastContainer from '$lib/components/ToastContainer.svelte';
   import CommandPalette from '$lib/components/CommandPalette.svelte';
   import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
@@ -33,6 +34,18 @@
     if (href === '/') return page.url.pathname === '/';
     return page.url.pathname.startsWith(href);
   }
+
+  // Bug-Fix (2026-07-14): mobiles Dropdown-Menü + CommandPalette leben im
+  // Root-Layout, das wegen ssr=false (SPA-Mode) über SPA-Navigationen hinweg
+  // bestehen bleibt. Ohne diesen Reset kann ein offen gebliebenes Overlay auf
+  // der neu geladenen Unterseite hängen bleiben ("Fenster, das ich mit X
+  // schließen muss" bei jedem Routenwechsel auf iPhone). afterNavigate feuert
+  // bei jeder Navigation (auch der initialen) und garantiert den Reset,
+  // unabhängig davon, ob der einzelne Link-Klick-Handler zuverlässig lief.
+  afterNavigate(() => {
+    mobileMenuOpen = false;
+    paletteOpen = false;
+  });
 </script>
 
 <ToastContainer />
@@ -40,7 +53,7 @@
   <CommandPalette bind:open={paletteOpen} />
 {/if}
 
-<div class="flex h-screen bg-cream overflow-hidden">
+<div class="h-app-shell flex bg-cream overflow-hidden">
   <!-- Sidebar Desktop -->
   <aside class="hidden md:flex flex-col w-56 bg-surface border-r border-line flex-shrink-0">
     <div class="px-4 py-4 border-b border-line">
@@ -81,7 +94,7 @@
   </aside>
 
   <!-- Mobile Header -->
-  <div class="md:hidden fixed top-0 left-0 right-0 z-40 bg-surface border-b border-line flex items-center justify-between px-4 py-3">
+  <div class="md:hidden fixed top-0 left-0 right-0 z-40 bg-surface border-b border-line flex items-center justify-between px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
     <div class="flex items-center gap-2">
       <div class="w-7 h-7 rounded-md bg-terracotta flex items-center justify-center">
         <span class="text-white font-bold text-xs font-display">H</span>
@@ -105,7 +118,7 @@
   <!-- Mobile Menu -->
   {#if mobileMenuOpen}
     <div class="md:hidden fixed inset-0 z-30 bg-ink/20" onclick={() => mobileMenuOpen = false}></div>
-    <div class="md:hidden fixed top-[57px] left-0 right-0 z-40 bg-surface border-b border-line py-2 px-3 shadow-lg">
+    <div class="md:hidden fixed top-[calc(57px+env(safe-area-inset-top))] left-0 right-0 z-40 bg-surface border-b border-line py-2 px-3 shadow-lg">
       {#each navItems as item}
         {@const Icon = item.icon}
         <a
@@ -121,7 +134,7 @@
   {/if}
 
   <!-- Main Content -->
-  <main class="flex-1 overflow-y-auto overflow-x-hidden md:pt-0 pt-[57px]">
+  <main class="flex-1 overflow-y-auto overflow-x-hidden md:pt-0 pt-[calc(57px+env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)]">
     {@render children()}
   </main>
 </div>
