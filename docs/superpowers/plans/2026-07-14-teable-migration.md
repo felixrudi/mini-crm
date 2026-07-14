@@ -138,13 +138,29 @@ git commit -m "chore: add Teable API verification spike (Task 0)"
 
 ---
 
-## Task 1: Create the Teable schema (manual, via Teable UI)
+## Task 1: Create the Teable schema — DONE, via scripted API (superseded the original manual plan)
 
-Not a code task — Teable table/field creation was always done by hand in this system (see `modules/werkbank/marketing/scraper/teable-workflow.md`: "3 Tabellen (A/B/C) angelegt... Single-Selects befüllt" — manual, never scripted). No verified API shape exists in this repo for table/field creation, so this stays manual to avoid guessing at an unverified endpoint for something this structural.
+**Status: ✅ complete (2026-07-14), executed live against `teable.hirschfeld.at`.**
 
-**Files:**
-- Modify: `/Users/felix/Documents/Henry/data/teable-config.json` (append new table IDs once created)
-- Modify: `src/lib/server/teable-schema.ts` (created in Task 2, filled in with real IDs after this task)
+The original version of this task planned a manual, click-through Teable UI checklist, on the reasoning that no verified API shape existed in this repo for table/field creation. That reasoning turned out to be wrong on further research: Teable's live self-hosted OpenAPI spec (`https://teable.hirschfeld.at/docs-json`) documents `POST /api/base/{baseId}/table` (create table + fields in one call) and `POST /api/table/{tableId}/field` (add a field, including `link` and `isLookup` fields) — confirmed available on this self-hosted instance, not gated to Teable Cloud. Built and ran `/Users/felix/Documents/Henry/scripts/create_crm_teable_schema.py` instead of doing this by hand.
+
+Two real API quirks hit and fixed during the live run (kept here for anyone re-running or extending the script):
+1. Date-field `options.formatting.time` only accepts `"HH:mm" | "hh:mm A" | "None"` — not arbitrary strings like `"24"`.
+2. The first field in a table's field array becomes its "primary field", and Teable rejects a `link`-type field as primary — link fields must not be first in the array (fixed by putting `Name`/`Titel` first in `Kontakte_Real`/`Interaktionen_Real`/`Aufgaben_Real`).
+
+**Real table IDs** (base `felix_base`, `bseJqfV4E4Ri1QYjUUL`) — already filled into `src/lib/server/teable-schema.ts` and `/Users/felix/Documents/Henry/data/teable-config.json`:
+
+| Table | ID |
+|---|---|
+| Firmen | `tbl58ahoWar7wVxWHjA` |
+| Kontakte_Real | `tblnTqgSMBRZLWINOp6` |
+| Interaktionen_Real | `tblNE3WqZkqafOGS9f1` |
+| Aufgaben_Real | `tblZBgkRKvvVeckzZaP` |
+| Prospects | `tbl6LjxihnKhe0I5A1L` |
+
+All fields verified via a follow-up `GET /api/table/{id}/field` per table against the live instance — every field name/type matches this task's original spec (below, kept for reference), the `Firma`/`Kontakt` link fields point at the correct foreign tables, and the `Firma-Name` lookup field on `Kontakte_Real` is correctly typed as a lookup through the `Firma` link. Teable auto-created the expected symmetric reverse-link fields on `Firmen` (`Kontakte_Real`, `Prospects`) and `Kontakte_Real` (`Interaktionen_Real`, `Aufgaben_Real`) — harmless, standard Teable behavior, not something the script needs to manage.
+
+**Original field spec (for reference — matches what was actually created):**
 
 - [ ] **Step 1: In base `felix_base` (`bseJqfV4E4Ri1QYjUUL`), create table `Firmen`**
 
