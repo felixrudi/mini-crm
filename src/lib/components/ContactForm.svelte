@@ -6,6 +6,7 @@
   import X from '@lucide/svelte/icons/x';
   import Camera from '@lucide/svelte/icons/camera';
   import Loader from '@lucide/svelte/icons/loader';
+  import TagInput from './TagInput.svelte';
 
   let {
     contact = null,
@@ -32,41 +33,8 @@
   let plz = $state(contact?.plz ?? '');
   let ort = $state(contact?.ort ?? '');
   let tags = $state<string[]>(contact?.tags ?? []);
-  let tagInput = $state('');
   let displayName = $state(contact?.name ?? '');
 
-  const TAG_COLORS = [
-    'bg-terracotta/10 text-terracotta border-terracotta/20',
-    'bg-sage/10 text-sage border-sage/20',
-    'bg-blue-50 text-blue-600 border-blue-200',
-    'bg-amber-50 text-amber-700 border-amber-200',
-    'bg-purple-50 text-purple-700 border-purple-200',
-    'bg-pink-50 text-pink-700 border-pink-200',
-  ];
-
-  function tagColor(tag: string) {
-    const hash = tag.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    return TAG_COLORS[hash % TAG_COLORS.length];
-  }
-
-  function addTag() {
-    const t = tagInput.trim().toLowerCase();
-    if (t && !tags.includes(t)) tags = [...tags, t];
-    tagInput = '';
-  }
-
-  function removeTag(t: string) {
-    tags = tags.filter(x => x !== t);
-  }
-
-  function handleTagKeydown(e: KeyboardEvent) {
-    if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
-      e.preventDefault();
-      addTag();
-    } else if (e.key === 'Backspace' && tagInput === '' && tags.length > 0) {
-      removeTag(tags[tags.length - 1]);
-    }
-  }
   let scanning = $state(false);
   let fileInput: HTMLInputElement;
 
@@ -360,27 +328,10 @@
                 placeholder="AT61 1904 3002 …" />
             </div>
           </div>
-          <!-- Tags (Chip UI) -->
+          <!-- Tags -->
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1">Tags</label>
-            <input type="hidden" name="tags" value={tags.join(',')} />
-            <div class="flex flex-wrap gap-1.5 px-2 py-1.5 bg-cream border border-line rounded-lg min-h-[42px] focus-within:ring-2 focus-within:ring-terracotta/30 focus-within:border-terracotta cursor-text"
-              onclick={(e) => { if (e.target === e.currentTarget) (e.currentTarget.querySelector('input') as HTMLInputElement)?.focus(); }}
-            >
-              {#each tags as t}
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border {tagColor(t)}">
-                  {t}
-                  <button type="button" onclick={() => removeTag(t)} class="hover:opacity-70 transition-opacity leading-none">×</button>
-                </span>
-              {/each}
-              <input
-                bind:value={tagInput}
-                onkeydown={handleTagKeydown}
-                type="text"
-                class="flex-1 min-w-[100px] bg-transparent text-base text-ink placeholder-ink/30 focus:outline-none py-0.5"
-                placeholder={tags.length === 0 ? 'privat, schüler … Enter' : ''}
-              />
-            </div>
+            <TagInput bind:tags placeholder="privat, schüler … Enter" />
           </div>
         </div>
       </section>
