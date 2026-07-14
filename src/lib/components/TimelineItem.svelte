@@ -89,6 +89,14 @@
       ? `/contacts/${contactId}?/update_email`
       : `/contacts/${contactId}?/update_interaction`
   );
+
+  const vonAnLine = $derived(() => {
+    if (entry.art !== 'email') return null;
+    if (entry.von && entry.an) return `Von: ${entry.von} → An: ${entry.an}`;
+    if (entry.von) return `Von: ${entry.von}`;
+    if (entry.an) return `An: ${entry.an}`;
+    return null;
+  });
 </script>
 
 <div class="flex gap-3 py-3 border-b border-line last:border-0 group">
@@ -138,6 +146,9 @@
           <span class="text-xs font-medium text-ink/60 uppercase tracking-wide">{label()}</span>
           {#if entry.titel}
             <p class="text-sm font-medium text-ink mt-0.5">{entry.titel}</p>
+          {/if}
+          {#if vonAnLine()}
+            <p class="text-xs text-ink/40 mt-0.5">{vonAnLine()}</p>
           {/if}
         </div>
         <div class="flex items-center gap-1 flex-shrink-0">

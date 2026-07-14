@@ -111,6 +111,8 @@ export type TimelineEntry = {
   datum: string;
   titel: string | null;
   inhalt: string | null;
+  von: string | null;
+  an: string | null;
 }
 
 export type Seite = 'kontakte' | 'firmen';

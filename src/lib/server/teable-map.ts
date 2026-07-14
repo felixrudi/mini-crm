@@ -69,7 +69,9 @@ export function mapTimelineEntry(r: TeableRecord) {
     subtyp: isEmail ? (typ === 'email_rein' ? 'rein' : 'raus') : typ,
     datum: f[INTERAKTIONEN_FIELDS.datum] as string,
     titel: (f[INTERAKTIONEN_FIELDS.titel] as string) ?? null,
-    inhalt: (f[INTERAKTIONEN_FIELDS.text] as string) ?? null
+    inhalt: (f[INTERAKTIONEN_FIELDS.text] as string) ?? null,
+    von: (f[INTERAKTIONEN_FIELDS.von] as string) ?? null,
+    an: (f[INTERAKTIONEN_FIELDS.an] as string) ?? null
   };
 }
 
