@@ -1,18 +1,17 @@
-import { sql } from '$lib/db';
+import { getRecord, updateRecord, deleteRecord } from '$lib/server/teable';
+import { TABLES, FIRMEN_FIELDS } from '$lib/server/teable-schema';
 import { checkApiAuth, jsonOk, jsonError } from '$lib/api-auth';
 import type { RequestHandler } from './$types';
 
-// GET /api/v1/companies/:id
 export const GET: RequestHandler = async ({ request, params }) => {
   const denied = checkApiAuth(request);
   if (denied) return denied;
 
-  const [company] = await sql`SELECT * FROM companies WHERE id = ${params.id}`;
+  const company = await getRecord(TABLES.firmen, params.id);
   if (!company) return jsonError('Not found', 404);
-  return jsonOk({ company });
+  return jsonOk({ company: { id: company.id, ...company.fields } });
 };
 
-// PATCH /api/v1/companies/:id
 export const PATCH: RequestHandler = async ({ request, params }) => {
   const denied = checkApiAuth(request);
   if (denied) return denied;
@@ -24,34 +23,31 @@ export const PATCH: RequestHandler = async ({ request, params }) => {
     return jsonError('Invalid JSON');
   }
 
-  const [existing] = await sql`SELECT * FROM companies WHERE id = ${params.id}`;
+  const existing = await getRecord(TABLES.firmen, params.id);
   if (!existing) return jsonError('Not found', 404);
 
-  const merged = { ...existing, ...body };
+  const merged = { ...existing.fields, ...body };
+  await updateRecord(TABLES.firmen, params.id, {
+    [FIRMEN_FIELDS.name]: (merged[FIRMEN_FIELDS.name] as string)?.trim ? (merged[FIRMEN_FIELDS.name] as string).trim() : existing.fields[FIRMEN_FIELDS.name],
+    [FIRMEN_FIELDS.website]: merged[FIRMEN_FIELDS.website] || null,
+    [FIRMEN_FIELDS.strasse]: merged[FIRMEN_FIELDS.strasse] || null,
+    [FIRMEN_FIELDS.plz]: merged[FIRMEN_FIELDS.plz] || null,
+    [FIRMEN_FIELDS.ort]: merged[FIRMEN_FIELDS.ort] || null,
+    [FIRMEN_FIELDS.land]: merged[FIRMEN_FIELDS.land] || null,
+    [FIRMEN_FIELDS.notizen]: merged[FIRMEN_FIELDS.notizen] || null
+  });
 
-  await sql`
-    UPDATE companies SET
-      name    = ${(merged.name as string)?.trim() || existing.name},
-      website = ${(merged.website as string) || null},
-      strasse = ${(merged.strasse as string) || null},
-      plz     = ${(merged.plz as string) || null},
-      ort     = ${(merged.ort as string) || null},
-      land    = ${(merged.land as string) || null},
-      notizen = ${(merged.notizen as string) || null}
-    WHERE id = ${params.id}`;
-
-  const [updated] = await sql`SELECT * FROM companies WHERE id = ${params.id}`;
-  return jsonOk({ company: updated });
+  const updated = await getRecord(TABLES.firmen, params.id);
+  return jsonOk({ company: { id: updated!.id, ...updated!.fields } });
 };
 
-// DELETE /api/v1/companies/:id
 export const DELETE: RequestHandler = async ({ request, params }) => {
   const denied = checkApiAuth(request);
   if (denied) return denied;
 
-  const [existing] = await sql`SELECT id FROM companies WHERE id = ${params.id}`;
+  const existing = await getRecord(TABLES.firmen, params.id);
   if (!existing) return jsonError('Not found', 404);
 
-  await sql`DELETE FROM companies WHERE id = ${params.id}`;
+  await deleteRecord(TABLES.firmen, params.id);
   return jsonOk({ deleted: true });
 };
