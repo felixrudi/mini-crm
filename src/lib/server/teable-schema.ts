@@ -8,7 +8,8 @@ export const TABLES = {
   kontakteReal: 'tblnTqgSMBRZLWINOp6',
   interaktionenReal: 'tblNE3WqZkqafOGS9f1',
   aufgabenReal: 'tblZBgkRKvvVeckzZaP',
-  prospects: 'tbl6LjxihnKhe0I5A1L'
+  prospects: 'tbl6LjxihnKhe0I5A1L',
+  ansichten: 'tblXQi0wnkZPOWtqh4i'
 } as const;
 
 export const FIRMEN_FIELDS = {
@@ -18,7 +19,8 @@ export const FIRMEN_FIELDS = {
   plz: 'PLZ',
   ort: 'Ort',
   land: 'Land',
-  notizen: 'Notizen'
+  notizen: 'Notizen',
+  tags: 'Tags'
 } as const;
 
 export const KONTAKTE_FIELDS = {
@@ -85,4 +87,11 @@ export const PROSPECT_FIELDS = {
   sperre: 'Sperre',
   sperreGrund: 'Sperre-Grund',
   herkunft: 'Herkunft'
+} as const;
+
+export const ANSICHTEN_FIELDS = {
+  name: 'Name',
+  seite: 'Seite',
+  filter: 'Filter',
+  erstelltAm: 'Erstellt am'
 } as const;
