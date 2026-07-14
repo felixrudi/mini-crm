@@ -26,6 +26,7 @@
 
   let editName = $state('');
   let editWebsite = $state('');
+  let editOrt = $state('');
   let editNotizen = $state('');
   let editTags = $state<string[]>([]);
   let createTags = $state<string[]>([]);
@@ -34,6 +35,7 @@
     editId = company.id;
     editName = company.name;
     editWebsite = company.website ?? '';
+    editOrt = company.ort ?? '';
     editNotizen = company.notizen ?? '';
     editTags = company.tags ?? [];
   }
@@ -138,6 +140,8 @@
           <input name="name" bind:value={editName} required placeholder="Name"
             class="px-2 py-1.5 bg-cream border border-terracotta/40 rounded text-base text-ink focus:outline-none focus:ring-1 focus:ring-terracotta" />
           <input name="website" bind:value={editWebsite} placeholder="Website"
+            class="px-2 py-1.5 bg-cream border border-line rounded text-base text-ink focus:outline-none focus:ring-1 focus:ring-terracotta" />
+          <input name="ort" bind:value={editOrt} placeholder="Ort"
             class="px-2 py-1.5 bg-cream border border-line rounded text-base text-ink focus:outline-none focus:ring-1 focus:ring-terracotta" />
           <input name="notizen" bind:value={editNotizen} placeholder="Notizen"
             class="px-2 py-1.5 bg-cream border border-line rounded text-base text-ink focus:outline-none focus:ring-1 focus:ring-terracotta" />
@@ -336,6 +340,11 @@
         <div>
           <label class="block text-xs font-medium text-ink/60 mb-1">Website</label>
           <input name="website" type="url" placeholder="https://..."
+            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-ink/60 mb-1">Ort</label>
+          <input name="ort" type="text" placeholder="Wien"
             class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
         </div>
         <div>
