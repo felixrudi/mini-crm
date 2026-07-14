@@ -12,12 +12,24 @@ export const POST: RequestHandler = async ({ request, params }) => {
 
   // uploadAttachment appends to the field rather than replacing it (confirmed
   // live 2026-07-14: repeated uploads accumulate entries) — Foto is meant to
-  // hold a single contact photo, so clear it first to get replace semantics.
-  await updateRecord(TABLES.kontakteReal, id!, { [KONTAKTE_FIELDS.foto]: null });
+  // hold a single contact photo. Upload first, trim second: clearing Foto
+  // before the upload would leave the contact with no photo at all if the
+  // upload itself then failed (network blip, oversized file, Teable 5xx).
+  // Uploading first means a failed upload leaves the existing photo intact;
+  // only after a successful upload do we fetch the record and trim back
+  // down to the single newest attachment (the last entry, since uploads
+  // append).
   await uploadAttachment(TABLES.kontakteReal, id!, KONTAKTE_FIELDS.foto, file);
-  const updated = await getRecord(TABLES.kontakteReal, id!);
-  const atts = (updated?.fields[KONTAKTE_FIELDS.foto] as TeableAttachment[] | undefined) ?? [];
-  return json({ photo: atts.length > 0 ? attachmentUrl(atts[0]) : null });
+  const afterUpload = await getRecord(TABLES.kontakteReal, id!);
+  const atts = (afterUpload?.fields[KONTAKTE_FIELDS.foto] as TeableAttachment[] | undefined) ?? [];
+  let newest = atts[atts.length - 1];
+  if (atts.length > 1) {
+    const trimmed = await updateRecord(TABLES.kontakteReal, id!, {
+      [KONTAKTE_FIELDS.foto]: [newest]
+    });
+    newest = ((trimmed.fields[KONTAKTE_FIELDS.foto] as TeableAttachment[] | undefined) ?? [newest])[0];
+  }
+  return json({ photo: newest ? attachmentUrl(newest) : null });
 };
 
 export const DELETE: RequestHandler = async ({ params }) => {
