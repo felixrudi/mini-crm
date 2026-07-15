@@ -14,6 +14,7 @@ export const TABLES = {
 export const FIRMEN_FIELDS = {
   name: 'Name',
   website: 'Website',
+  telefon: 'Telefon',
   strasse: 'Straße',
   plz: 'PLZ',
   ort: 'Ort',

@@ -17,6 +17,7 @@
   import Trash2 from '@lucide/svelte/icons/trash-2';
   import Users from '@lucide/svelte/icons/users';
   import Filter from '@lucide/svelte/icons/filter';
+  import Phone from '@lucide/svelte/icons/phone';
 
   let { data }: { data: PageData } = $props();
 
@@ -26,6 +27,7 @@
 
   let editName = $state('');
   let editWebsite = $state('');
+  let editTelefon = $state('');
   let editOrt = $state('');
   let editNotizen = $state('');
   let editTags = $state<string[]>([]);
@@ -35,6 +37,7 @@
     editId = company.id;
     editName = company.name;
     editWebsite = company.website ?? '';
+    editTelefon = company.telefon ?? '';
     editOrt = company.ort ?? '';
     editNotizen = company.notizen ?? '';
     editTags = company.tags ?? [];
@@ -141,6 +144,8 @@
             class="px-2 py-1.5 bg-cream border border-terracotta/40 rounded text-base text-ink focus:outline-none focus:ring-1 focus:ring-terracotta" />
           <input name="website" bind:value={editWebsite} placeholder="Website"
             class="px-2 py-1.5 bg-cream border border-line rounded text-base text-ink focus:outline-none focus:ring-1 focus:ring-terracotta" />
+          <input name="telefon" bind:value={editTelefon} placeholder="Telefon"
+            class="px-2 py-1.5 bg-cream border border-line rounded text-base text-ink focus:outline-none focus:ring-1 focus:ring-terracotta" />
           <input name="ort" bind:value={editOrt} placeholder="Ort"
             class="px-2 py-1.5 bg-cream border border-line rounded text-base text-ink focus:outline-none focus:ring-1 focus:ring-terracotta" />
           <input name="notizen" bind:value={editNotizen} placeholder="Notizen"
@@ -180,6 +185,12 @@
               <a href={company.website} target="_blank" rel="noopener"
                 class="flex items-center gap-1 text-xs text-terracotta hover:underline mt-0.5">
                 <ExternalLink class="w-3 h-3" /> {company.website.replace(/^https?:\/\//, '')}
+              </a>
+            {/if}
+            {#if company.telefon}
+              <a href="tel:{company.telefon}"
+                class="flex items-center gap-1 text-xs text-ink/50 hover:text-terracotta transition-colors mt-0.5">
+                <Phone class="w-3 h-3" /> {company.telefon}
               </a>
             {/if}
             {#if company.notizen}
@@ -340,6 +351,11 @@
         <div>
           <label class="block text-xs font-medium text-ink/60 mb-1">Website</label>
           <input name="website" type="url" placeholder="https://..."
+            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-ink/60 mb-1">Telefon</label>
+          <input name="telefon" type="tel" placeholder="+43 1 234567"
             class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
         </div>
         <div>

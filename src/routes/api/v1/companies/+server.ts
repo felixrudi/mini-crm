@@ -41,6 +41,7 @@ export const POST: RequestHandler = async ({ request }) => {
   const rec = await createRecord(TABLES.firmen, {
     [FIRMEN_FIELDS.name]: name,
     [FIRMEN_FIELDS.website]: (body.website as string) || null,
+    [FIRMEN_FIELDS.telefon]: (body.telefon as string) || null,
     [FIRMEN_FIELDS.strasse]: (body.strasse as string) || null,
     [FIRMEN_FIELDS.plz]: (body.plz as string) || null,
     [FIRMEN_FIELDS.ort]: (body.ort as string) || null,

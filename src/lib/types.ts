@@ -2,6 +2,7 @@ export type Company = {
   id: string;
   name: string;
   website: string | null;
+  telefon: string | null;
   strasse: string | null;
   plz: string | null;
   ort: string | null;

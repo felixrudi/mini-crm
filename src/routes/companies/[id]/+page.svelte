@@ -20,6 +20,7 @@
   let editing = $state(false);
   let editName = $state('');
   let editWebsite = $state('');
+  let editTelefon = $state('');
   let editStrasse = $state('');
   let editPlz = $state('');
   let editOrt = $state('');
@@ -29,6 +30,7 @@
   function startEdit() {
     editName = data.company.name;
     editWebsite = data.company.website ?? '';
+    editTelefon = data.company.telefon ?? '';
     editStrasse = data.company.strasse ?? '';
     editPlz = data.company.plz ?? '';
     editOrt = data.company.ort ?? '';
@@ -67,6 +69,12 @@
             <input name="website" type="text" bind:value={editWebsite}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="https://…" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-ink/60 mb-1">Telefon</label>
+            <input name="telefon" type="tel" bind:value={editTelefon}
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              placeholder="+43 1 234567" />
           </div>
           <div>
             <label class="block text-xs font-medium text-ink/60 mb-1">Straße</label>
@@ -131,6 +139,18 @@
               class="flex items-center gap-1 text-sm text-terracotta hover:underline mt-0.5">
               <ExternalLink class="w-3.5 h-3.5" />
               {data.company.website.replace(/^https?:\/\//, '')}
+            </a>
+          {:else}
+            <p class="text-sm text-ink/30 mt-0.5">—</p>
+          {/if}
+        </div>
+        <div>
+          <p class="text-xs font-medium text-ink/40 uppercase tracking-wide">Telefon</p>
+          {#if data.company.telefon}
+            <a href="tel:{data.company.telefon}"
+              class="flex items-center gap-1 text-sm text-terracotta hover:underline mt-0.5">
+              <Phone class="w-3.5 h-3.5" />
+              {data.company.telefon}
             </a>
           {:else}
             <p class="text-sm text-ink/30 mt-0.5">—</p>

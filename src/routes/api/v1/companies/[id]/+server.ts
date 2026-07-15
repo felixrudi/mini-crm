@@ -26,15 +26,24 @@ export const PATCH: RequestHandler = async ({ request, params }) => {
   const existing = await getRecord(TABLES.firmen, params.id);
   if (!existing) return jsonError('Not found', 404);
 
-  const merged = { ...existing.fields, ...body };
+  // Body keys follow the same lowercase contract as POST's request body
+  // (website, telefon, strasse, ...), not Teable's capitalized field names —
+  // so each field is picked explicitly rather than blindly spread-merged with
+  // existing.fields (which IS keyed by Teable field names). A blind
+  // `{...existing.fields, ...body}` merge would silently never apply any
+  // update, since body's keys never collide with existing.fields' keys.
+  const pick = (key: string, fieldKey: string): string | null =>
+    body[key] !== undefined ? ((body[key] as string) || null) : ((existing.fields[fieldKey] as string) ?? null);
+
   await updateRecord(TABLES.firmen, params.id, {
-    [FIRMEN_FIELDS.name]: (merged[FIRMEN_FIELDS.name] as string)?.trim ? (merged[FIRMEN_FIELDS.name] as string).trim() : existing.fields[FIRMEN_FIELDS.name],
-    [FIRMEN_FIELDS.website]: merged[FIRMEN_FIELDS.website] || null,
-    [FIRMEN_FIELDS.strasse]: merged[FIRMEN_FIELDS.strasse] || null,
-    [FIRMEN_FIELDS.plz]: merged[FIRMEN_FIELDS.plz] || null,
-    [FIRMEN_FIELDS.ort]: merged[FIRMEN_FIELDS.ort] || null,
-    [FIRMEN_FIELDS.land]: merged[FIRMEN_FIELDS.land] || null,
-    [FIRMEN_FIELDS.notizen]: merged[FIRMEN_FIELDS.notizen] || null
+    [FIRMEN_FIELDS.name]: (body.name !== undefined ? (body.name as string)?.trim() : undefined) || existing.fields[FIRMEN_FIELDS.name],
+    [FIRMEN_FIELDS.website]: pick('website', FIRMEN_FIELDS.website),
+    [FIRMEN_FIELDS.telefon]: pick('telefon', FIRMEN_FIELDS.telefon),
+    [FIRMEN_FIELDS.strasse]: pick('strasse', FIRMEN_FIELDS.strasse),
+    [FIRMEN_FIELDS.plz]: pick('plz', FIRMEN_FIELDS.plz),
+    [FIRMEN_FIELDS.ort]: pick('ort', FIRMEN_FIELDS.ort),
+    [FIRMEN_FIELDS.land]: pick('land', FIRMEN_FIELDS.land),
+    [FIRMEN_FIELDS.notizen]: pick('notizen', FIRMEN_FIELDS.notizen)
   });
 
   const updated = await getRecord(TABLES.firmen, params.id);

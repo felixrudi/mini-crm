@@ -26,6 +26,7 @@ export const actions: Actions = {
     await updateRecord(TABLES.firmen, params.id, {
       [FIRMEN_FIELDS.name]: d.get('name'),
       [FIRMEN_FIELDS.website]: d.get('website') || null,
+      [FIRMEN_FIELDS.telefon]: d.get('telefon') || null,
       [FIRMEN_FIELDS.strasse]: d.get('strasse') || null,
       [FIRMEN_FIELDS.plz]: d.get('plz') || null,
       [FIRMEN_FIELDS.ort]: d.get('ort') || null,

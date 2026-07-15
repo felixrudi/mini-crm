@@ -44,6 +44,7 @@ export const load: PageServerLoad = async ({ url }) => {
         id: r.id,
         name: r.fields[FIRMEN_FIELDS.name] as string,
         website: (r.fields[FIRMEN_FIELDS.website] as string) ?? null,
+        telefon: (r.fields[FIRMEN_FIELDS.telefon] as string) ?? null,
         strasse: (r.fields[FIRMEN_FIELDS.strasse] as string) ?? null,
         plz: (r.fields[FIRMEN_FIELDS.plz] as string) ?? null,
         ort: (r.fields[FIRMEN_FIELDS.ort] as string) ?? null,
@@ -72,6 +73,7 @@ export const actions: Actions = {
     await createRecord(TABLES.firmen, {
       [FIRMEN_FIELDS.name]: name,
       [FIRMEN_FIELDS.website]: d.get('website') || null,
+      [FIRMEN_FIELDS.telefon]: d.get('telefon') || null,
       [FIRMEN_FIELDS.strasse]: d.get('strasse') || null,
       [FIRMEN_FIELDS.plz]: d.get('plz') || null,
       [FIRMEN_FIELDS.ort]: d.get('ort') || null,
@@ -87,6 +89,7 @@ export const actions: Actions = {
     await updateRecord(TABLES.firmen, id, {
       [FIRMEN_FIELDS.name]: d.get('name'),
       [FIRMEN_FIELDS.website]: d.get('website') || null,
+      [FIRMEN_FIELDS.telefon]: d.get('telefon') || null,
       [FIRMEN_FIELDS.strasse]: d.get('strasse') || null,
       [FIRMEN_FIELDS.plz]: d.get('plz') || null,
       [FIRMEN_FIELDS.ort]: d.get('ort') || null,
