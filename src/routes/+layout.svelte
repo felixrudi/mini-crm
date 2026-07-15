@@ -14,6 +14,7 @@
   import X from '@lucide/svelte/icons/x';
   import Search from '@lucide/svelte/icons/search';
   import ChevronLeft from '@lucide/svelte/icons/chevron-left';
+  import Columns from '@lucide/svelte/icons/columns';
 
   let { children } = $props();
 
@@ -62,6 +63,7 @@
     { href: '/contacts', label: 'Kontakte', icon: Users },
     { href: '/companies', label: 'Firmen', icon: Building2 },
     { href: '/prospects', label: 'Outreach', icon: Send },
+    { href: '/outreach', label: 'Outreach-Überblick', icon: Columns },
     { href: '/#scan', label: 'Scan & Import', icon: ScanLine },
   ];
 
