@@ -3,32 +3,74 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import Search from '@lucide/svelte/icons/search';
+  import ChevronDown from '@lucide/svelte/icons/chevron-down';
+  import ChevronRight from '@lucide/svelte/icons/chevron-right';
 
   let { data }: { data: PageData } = $props();
 
   let searchValue = $state(data.q);
   let debounceTimer: ReturnType<typeof setTimeout>;
 
-  const STATUS_GROUPS = [
-    { id: 'recherche', label: 'Recherche', bulletColor: 'bg-slate-400' },
-    { id: 'entwurf', label: 'Entwurf', bulletColor: 'bg-blue-400' },
-    { id: 'gesendet', label: 'Gesendet', bulletColor: 'bg-indigo-400' },
-    { id: 'auto_reply', label: 'Auto-Reply', bulletColor: 'bg-amber-500' },
-    { id: 'geantwortet', label: 'Geantwortet', bulletColor: 'bg-teal-400' },
-    { id: 'gespräch_geführt', label: 'Gespräch geführt', bulletColor: 'bg-emerald-400' },
-    { id: 'termin_gebucht', label: 'Termin gebucht', bulletColor: 'bg-green-500' },
-    { id: 'nicht_gesendet', label: 'Nicht gesendet', bulletColor: 'bg-neutral-500' },
-    { id: 'abgelehnt', label: 'Abgelehnt', bulletColor: 'bg-rose-400' },
-    { id: 'gesperrt', label: 'Gesperrt', bulletColor: 'bg-red-500' },
+  let expanded = $state<Record<string, boolean>>({
+    entwurf: false,
+    gesendet: false,
+    recherche: false,
+    nicht_gesendet: false,
+    abgelehnt: false,
+    gesperrt: false
+  });
+
+  // 1. Calculate Overdue items (follow-up date in the past and follow-up sent is false)
+  let overdueItems = $derived.by(() => {
+    return data.outreach
+      .filter(item => isOverdue(item.followUpFaellig, item.followUpGesendet))
+      .sort((a, b) => {
+        if (!a.followUpFaellig) return 1;
+        if (!b.followUpFaellig) return -1;
+        return new Date(a.followUpFaellig).getTime() - new Date(b.followUpFaellig).getTime();
+      });
+  });
+
+  // 2. Im Urlaub (status auto_reply, and not overdue)
+  let awayItems = $derived.by(() => {
+    return data.outreach.filter(item => item.status === 'auto_reply' && !isOverdue(item.followUpFaellig, item.followUpGesendet));
+  });
+
+  // 3. Geantwortet (status antwort / gespräch_geführt, and not overdue)
+  let answeredItems = $derived.by(() => {
+    return data.outreach.filter(item => 
+      (item.status === 'geantwortet' || item.status === 'gespräch_geführt') && 
+      !isOverdue(item.followUpFaellig, item.followUpGesendet)
+    );
+  });
+
+  // 4. Termine (status termin_gebucht)
+  let bookedItems = $derived.by(() => {
+    return data.outreach.filter(item => item.status === 'termin_gebucht');
+  });
+
+  // Archive groups
+  const ARCHIVED_GROUPS = [
+    { id: 'entwurf', label: 'Entwürfe' },
+    { id: 'gesendet', label: 'Gesendet (Kein Follow-up fällig)' },
+    { id: 'recherche', label: 'Recherche' },
+    { id: 'nicht_gesendet', label: 'Nicht gesendet' },
+    { id: 'abgelehnt', label: 'Abgelehnt' },
+    { id: 'gesperrt', label: 'Gesperrt' }
   ];
 
-  // Group items by status
-  let groupedItems = $derived.by(() => {
+  // Helper to get archived list filtered by search
+  let archivedItems = $derived.by(() => {
     const groups: Record<string, typeof data.outreach> = {};
     for (const item of data.outreach) {
-      const status = item.status || 'recherche';
-      if (!groups[status]) groups[status] = [];
-      groups[status].push(item);
+      const isArchived = ['entwurf', 'gesendet', 'recherche', 'nicht_gesendet', 'abgelehnt', 'gesperrt'].includes(item.status);
+      const isItemOverdue = isOverdue(item.followUpFaellig, item.followUpGesendet);
+      
+      // If it's in a normal state but not overdue, it's archived
+      if (isArchived && !isItemOverdue && item.status !== 'auto_reply') {
+        if (!groups[item.status]) groups[item.status] = [];
+        groups[item.status].push(item);
+      }
     }
     return groups;
   });
@@ -60,18 +102,35 @@
     d.setHours(0,0,0,0);
     return d < today;
   }
+
+  function getOverdueDays(dateStr: string | undefined): number {
+    if (!dateStr) return 0;
+    const d = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    d.setHours(0,0,0,0);
+    const diffTime = today.getTime() - d.getTime();
+    return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  }
+
+  function scrollToSection(id: string) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 </script>
 
 <svelte:head>
   <title>Outreach-Überblick · Hirschfeld CRM</title>
 </svelte:head>
 
-<div class="px-4 py-6 md:px-6 md:py-6 max-w-[1400px] mx-auto space-y-6">
+<div class="px-4 py-6 md:px-6 md:py-6 max-w-[1400px] mx-auto space-y-8">
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <h1 class="font-sans font-bold text-2xl text-ink">Outreach-Überblick</h1>
-      <p class="text-sm text-ink/50 mt-1">Status der Kaltakquise-Kampagne (StB/WP-Outreach)</p>
+      <h1 class="font-sans font-bold text-2xl text-ink">Outreach · StB/WP-Kampagne</h1>
+      <p class="text-sm text-ink/50 mt-1">Status der Kaltakquise-Kampagne</p>
     </div>
 
     <!-- Search -->
@@ -87,72 +146,271 @@
     </div>
   </div>
 
-  <!-- Grid of Status Columns -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-    {#each STATUS_GROUPS as group}
-      {@const groupItems = groupedItems[group.id] || []}
-      {#if groupItems.length > 0}
-        <div class="flex flex-col space-y-3 bg-surface/30 p-4 rounded-xl border border-line h-fit min-w-[250px]">
-          <!-- Column Header -->
-          <div class="flex items-center justify-between border-b border-line pb-2.5 mb-1">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full {group.bulletColor}"></span>
-              <h2 class="font-sans font-semibold text-sm text-ink">{group.label}</h2>
-            </div>
-            <span class="text-xs font-numeric bg-ink/5 px-2 py-0.5 rounded-full text-ink/50 font-medium">{groupItems.length}</span>
-          </div>
+  <!-- Ampel-Leiste (Signatur-Element) -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <!-- Überfällig -->
+    <button
+      onclick={() => scrollToSection('section-overdue')}
+      class="bg-surface/40 p-5 rounded-xl border border-line flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface/80 hover:border-status-critical/30 transition-all select-none group"
+    >
+      <span class="text-4xl font-mono font-bold text-status-critical transition-transform group-hover:scale-105">{overdueItems.length}</span>
+      <div class="flex items-center gap-2 mt-1.5">
+        <span class="w-2 h-2 rounded-full bg-status-critical"></span>
+        <span class="text-xs uppercase font-semibold tracking-wider text-ink/50 group-hover:text-ink/75 transition-colors">Überfällig</span>
+      </div>
+    </button>
 
-          <!-- Cards List -->
-          <div class="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
-            {#each groupItems as item}
-              <div class="bg-surface p-4 rounded-lg border border-line shadow-sm hover:border-terracotta/30 transition-all space-y-3">
-                <!-- Name & Kanzlei -->
-                <div>
-                  <div class="font-semibold text-sm text-ink leading-snug">{item.kontaktName}</div>
+    <!-- Im Urlaub -->
+    <button
+      onclick={() => scrollToSection('section-away')}
+      class="bg-surface/40 p-5 rounded-xl border border-line flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface/80 hover:border-status-away/30 transition-all select-none group"
+    >
+      <span class="text-4xl font-mono font-bold text-status-away transition-transform group-hover:scale-105">{awayItems.length}</span>
+      <div class="flex items-center gap-2 mt-1.5">
+        <span class="w-2 h-2 rounded-full bg-status-away"></span>
+        <span class="text-xs uppercase font-semibold tracking-wider text-ink/50 group-hover:text-ink/75 transition-colors">Im Urlaub</span>
+      </div>
+    </button>
+
+    <!-- Geantwortet -->
+    <button
+      onclick={() => scrollToSection('section-answered')}
+      class="bg-surface/40 p-5 rounded-xl border border-line flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface/80 hover:border-status-positive/30 transition-all select-none group"
+    >
+      <span class="text-4xl font-mono font-bold text-status-positive transition-transform group-hover:scale-105">{answeredItems.length}</span>
+      <div class="flex items-center gap-2 mt-1.5">
+        <span class="w-2 h-2 rounded-full bg-status-positive"></span>
+        <span class="text-xs uppercase font-semibold tracking-wider text-ink/50 group-hover:text-ink/75 transition-colors">Geantwortet</span>
+      </div>
+    </button>
+
+    <!-- Termine -->
+    <button
+      onclick={() => scrollToSection('section-booked')}
+      class="bg-surface/40 p-5 rounded-xl border border-line flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface/80 hover:border-terracotta/30 transition-all select-none group"
+    >
+      <span class="text-4xl font-mono font-bold text-terracotta transition-transform group-hover:scale-105">{bookedItems.length}</span>
+      <div class="flex items-center gap-2 mt-1.5">
+        <span class="w-2 h-2 rounded-full bg-terracotta"></span>
+        <span class="text-xs uppercase font-semibold tracking-wider text-ink/50 group-hover:text-ink/75 transition-colors">Termine</span>
+      </div>
+    </button>
+  </div>
+
+  <!-- JETZT WICHTIG -->
+  <div class="space-y-6">
+    <h2 class="text-xs uppercase font-bold tracking-wider text-ink/40 border-b border-line pb-2 mt-2">Jetzt wichtig</h2>
+
+    <!-- Sub-Section: Überfällig -->
+    {#if overdueItems.length > 0}
+      <div id="section-overdue" class="space-y-3 scroll-mt-6">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-status-critical"></span>
+          <h3 class="font-sans font-bold text-sm text-ink">Follow-up überfällig</h3>
+          <span class="text-[10px] font-mono bg-status-critical/10 text-status-critical px-2 py-0.5 rounded-full font-bold">{overdueItems.length}</span>
+        </div>
+        <div class="space-y-2">
+          {#each overdueItems as item}
+            {@const days = getOverdueDays(item.followUpFaellig)}
+            <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 pl-4 bg-surface/30 hover:bg-surface/75 border border-line border-l-status-critical border-l-[3px] rounded-r-lg transition-colors gap-3">
+              <!-- Contact Detail -->
+              <div class="min-w-0 flex-1">
+                <div class="font-semibold text-sm text-ink">{item.kontaktName}</div>
+                {#if item.kanzlei}
                   <div class="text-xs text-ink/40 mt-0.5 font-medium">{item.kanzlei}</div>
-                </div>
-
-                <!-- Email / Meta -->
-                <div class="text-xs text-ink/50 space-y-1 border-t border-line/40 pt-2.5 font-mono">
-                  {#if item.email && item.email !== '—'}
-                    <div class="truncate text-ink/40 hover:text-ink/65 transition-colors" title={item.email}>{item.email}</div>
-                  {/if}
-                  {#if item.versandtAm}
-                    <div class="text-[10px]">Versandt: {formatDate(item.versandtAm)}</div>
-                  {/if}
-                  {#if item.gesendetUeber}
-                    <div class="text-[10px] text-ink/35">Über: {item.gesendetUeber}</div>
-                  {/if}
-                </div>
-
-                <!-- Conditionally render info depending on status -->
-                {#if item.status === 'auto_reply' && item.notiz}
-                  <div class="text-xs bg-amber-500/5 text-amber-500 border border-amber-500/10 p-2.5 rounded font-sans whitespace-pre-wrap leading-relaxed">
-                    {item.notiz}
-                  </div>
                 {/if}
-
-                {#if (item.status === 'geantwortet' || item.status === 'termin_gebucht') && item.antwortKurzfassung}
-                  <div class="text-xs bg-emerald-500/5 text-emerald-400 border border-emerald-500/10 p-2.5 rounded font-sans whitespace-pre-wrap leading-relaxed">
-                    {item.antwortKurzfassung}
-                  </div>
+                {#if item.email && item.email !== '—'}
+                  <div class="text-[11px] text-ink/40 font-mono mt-1 select-all">{item.email}</div>
                 {/if}
+              </div>
 
-                <!-- Follow-up Alert badge -->
-                {#if (item.status === 'gesendet' || item.status === 'auto_reply') && item.followUpFaellig}
-                  {@const overdue = isOverdue(item.followUpFaellig, item.followUpGesendet)}
-                  <div class="flex items-center justify-between border-t border-line/40 pt-2.5">
-                    <span class="text-[10px] uppercase font-semibold tracking-wider text-ink/30">Follow-up:</span>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-medium border {overdue ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-ink/5 text-ink/50 border-line'}">
-                      {formatDate(item.followUpFaellig)} {overdue ? '(Fällig)' : ''}
-                    </span>
+              <!-- Context note -->
+              <div class="flex-[2] min-w-0">
+                {#if item.notiz}
+                  <div class="text-xs text-ink/60 line-clamp-2 bg-ink/[2%] px-2.5 py-1.5 rounded border border-line/30 italic font-sans" title={item.notiz}>
+                    "{item.notiz}"
                   </div>
                 {/if}
               </div>
-            {/each}
-          </div>
+
+              <!-- Time context -->
+              <div class="flex flex-col items-end justify-center text-right font-mono text-xs shrink-0">
+                <span class="text-status-critical font-bold">Fällig {days === 0 ? 'heute' : `vor ${days} Tag${days > 1 ? 'en' : ''}`}</span>
+                <span class="text-[10px] text-ink/30 mt-0.5">Sollte: {formatDate(item.followUpFaellig)}</span>
+              </div>
+            </div>
+          {/each}
         </div>
-      {/if}
-    {/each}
+      </div>
+    {/if}
+
+    <!-- Sub-Section: Im Urlaub -->
+    {#if awayItems.length > 0}
+      <div id="section-away" class="space-y-3 scroll-mt-6">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-status-away"></span>
+          <h3 class="font-sans font-bold text-sm text-ink">Im Urlaub / Auto-Reply</h3>
+          <span class="text-[10px] font-mono bg-status-away/10 text-status-away px-2 py-0.5 rounded-full font-bold">{awayItems.length}</span>
+        </div>
+        <div class="space-y-2">
+          {#each awayItems as item}
+            <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 pl-4 bg-surface/30 hover:bg-surface/75 border border-line border-l-status-away border-l-[3px] rounded-r-lg transition-colors gap-3">
+              <div class="min-w-0 flex-1">
+                <div class="font-semibold text-sm text-ink">{item.kontaktName}</div>
+                {#if item.kanzlei}
+                  <div class="text-xs text-ink/40 mt-0.5 font-medium">{item.kanzlei}</div>
+                {/if}
+              </div>
+              <div class="flex-[2] min-w-0">
+                {#if item.notiz}
+                  <div class="text-xs text-status-away/95 bg-status-away/5 px-2.5 py-1.5 rounded border border-status-away/10 font-sans whitespace-pre-wrap">
+                    {item.notiz}
+                  </div>
+                {/if}
+              </div>
+              <div class="flex flex-col items-end justify-center text-right font-mono text-xs shrink-0 text-ink/40">
+                <span>Auto-Reply</span>
+                {#if item.followUpFaellig}
+                  <span class="text-[10px] mt-0.5">WV: {formatDate(item.followUpFaellig)}</span>
+                {/if}
+              </div>
+            </div>
+          {/each}
+        </div>
+      </div>
+    {/if}
+
+    <!-- Sub-Section: Geantwortet -->
+    {#if answeredItems.length > 0}
+      <div id="section-answered" class="space-y-3 scroll-mt-6">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-status-positive"></span>
+          <h3 class="font-sans font-bold text-sm text-ink">Geantwortet</h3>
+          <span class="text-[10px] font-mono bg-status-positive/10 text-status-positive px-2 py-0.5 rounded-full font-bold">{answeredItems.length}</span>
+        </div>
+        <div class="space-y-2">
+          {#each answeredItems as item}
+            <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 pl-4 bg-surface/30 hover:bg-surface/75 border border-line border-l-status-positive border-l-[3px] rounded-r-lg transition-colors gap-3">
+              <div class="min-w-0 flex-1">
+                <div class="font-semibold text-sm text-ink">{item.kontaktName}</div>
+                {#if item.kanzlei}
+                  <div class="text-xs text-ink/40 mt-0.5 font-medium">{item.kanzlei}</div>
+                {/if}
+              </div>
+              <div class="flex-[2] min-w-0">
+                {#if item.antwortKurzfassung}
+                  <div class="text-xs text-status-positive bg-status-positive/5 px-2.5 py-1.5 rounded border border-status-positive/10 font-sans">
+                    {item.antwortKurzfassung}
+                  </div>
+                {:else if item.notiz}
+                  <div class="text-xs text-ink/50 italic font-sans truncate">
+                    "{item.notiz.slice(0, 100)}..."
+                  </div>
+                {/if}
+              </div>
+              <div class="flex flex-col items-end justify-center text-right font-mono text-xs shrink-0 text-ink/40">
+                <span class="text-status-positive font-medium">Interesse</span>
+                {#if item.versandtAm}
+                  <span class="text-[10px] mt-0.5">Mail: {formatDate(item.versandtAm)}</span>
+                {/if}
+              </div>
+            </div>
+          {/each}
+        </div>
+      </div>
+    {/if}
+
+    <!-- Sub-Section: Termine -->
+    {#if bookedItems.length > 0}
+      <div id="section-booked" class="space-y-3 scroll-mt-6">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-terracotta"></span>
+          <h3 class="font-sans font-bold text-sm text-ink">Termin gebucht</h3>
+          <span class="text-[10px] font-mono bg-terracotta/10 text-terracotta px-2 py-0.5 rounded-full font-bold">{bookedItems.length}</span>
+        </div>
+        <div class="space-y-2">
+          {#each bookedItems as item}
+            <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 pl-4 bg-surface/30 hover:bg-surface/75 border border-line border-l-terracotta border-l-[3px] rounded-r-lg transition-colors gap-3">
+              <div class="min-w-0 flex-1">
+                <div class="font-semibold text-sm text-ink">{item.kontaktName}</div>
+                {#if item.kanzlei}
+                  <div class="text-xs text-ink/40 mt-0.5 font-medium">{item.kanzlei}</div>
+                {/if}
+              </div>
+              <div class="flex-[2] min-w-0">
+                {#if item.antwortKurzfassung}
+                  <div class="text-xs text-terracotta bg-terracotta/5 px-2.5 py-1.5 rounded border border-terracotta/10 font-sans">
+                    {item.antwortKurzfassung}
+                  </div>
+                {:else if item.notiz}
+                  <div class="text-xs text-ink/50 italic font-sans truncate">
+                    "{item.notiz.slice(0, 100)}..."
+                  </div>
+                {/if}
+              </div>
+              <div class="flex flex-col items-end justify-center text-right font-mono text-xs shrink-0 text-terracotta">
+                <span class="font-bold">Termin</span>
+                {#if item.versandtAm}
+                  <span class="text-[10px] text-ink/40 mt-0.5">Versandt: {formatDate(item.versandtAm)}</span>
+                {/if}
+              </div>
+            </div>
+          {/each}
+        </div>
+      </div>
+    {/if}
+  </div>
+
+  <!-- ARCHIV (standardmäßig eingeklappt) -->
+  <div class="space-y-4 pt-4">
+    <h2 class="text-xs uppercase font-bold tracking-wider text-ink/40 border-b border-line pb-2">Archiv & Massenstände</h2>
+    
+    <div class="divide-y divide-line/40 border border-line/40 rounded-xl overflow-hidden bg-surface/10">
+      {#each ARCHIVED_GROUPS as group}
+        {@const groupItems = archivedItems[group.id] || []}
+        <div class="flex flex-col">
+          <!-- Accordion Header -->
+          <button
+            onclick={() => expanded[group.id] = !expanded[group.id]}
+            class="flex items-center justify-between p-3.5 px-4 text-xs font-semibold text-ink/60 hover:bg-surface/30 hover:text-ink transition-colors cursor-pointer select-none"
+          >
+            <div class="flex items-center gap-2">
+              {#if expanded[group.id]}
+                <ChevronDown class="w-3.5 h-3.5 text-ink/30" />
+              {:else}
+                <ChevronRight class="w-3.5 h-3.5 text-ink/30" />
+              {/if}
+              <span>{group.label}</span>
+            </div>
+            <span class="font-mono text-ink/30 bg-ink/[3%] px-2 py-0.5 rounded-full text-[10px]">{groupItems.length}</span>
+          </button>
+
+          <!-- Accordion Content -->
+          {#if expanded[group.id]}
+            <div class="p-3 px-4 border-t border-line/20 bg-surface/5 space-y-1.5 transition-all">
+              {#if groupItems.length === 0}
+                <div class="text-[11px] text-ink/30 italic py-1">Keine Datensätze in dieser Gruppe.</div>
+              {:else}
+                <div class="divide-y divide-line/20 max-h-[40vh] overflow-y-auto pr-1">
+                  {#each groupItems as item}
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between py-2 text-xs text-ink/75 hover:bg-surface/20 rounded px-1.5 transition-colors gap-2">
+                      <div class="font-semibold truncate sm:w-1/3 shrink-0">{item.kontaktName}</div>
+                      <div class="text-ink/40 truncate sm:w-1/3">{item.kanzlei || '—'}</div>
+                      <div class="text-ink/30 font-mono text-[10px] sm:w-1/3 text-right">
+                        {#if item.versandtAm}
+                          Versandt: {formatDate(item.versandtAm)}
+                        {:else if item.followUpFaellig}
+                          WV: {formatDate(item.followUpFaellig)}
+                        {/if}
+                      </div>
+                    </div>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          {/if}
+        </div>
+      {/each}
+    </div>
   </div>
 </div>

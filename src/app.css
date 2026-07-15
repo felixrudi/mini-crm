@@ -9,6 +9,10 @@
   --color-sage:           var(--accent-sand);
   --color-sage-100:       var(--bg-elevated);
   --color-line:           var(--border);
+
+  --color-status-critical: var(--status-critical);
+  --color-status-away:     var(--status-away);
+  --color-status-positive: var(--status-positive);
   
   --font-sans:    "Inter", system-ui, -apple-system, sans-serif;
   --font-display: "Inter", system-ui, -apple-system, sans-serif;
@@ -42,6 +46,9 @@
   --accent-foreground: #e6c5a8;
   --destructive: #904446;
   --destructive-foreground: #ffffff;
+  --status-critical: #904446;
+  --status-away: #c98a3e;
+  --status-positive: #e6c5a8;
   --input: #3a302a;
   --ring: #d9686a;
   --radius: 0.75rem;
@@ -73,6 +80,9 @@
   --accent-foreground: #c9825f;
   --destructive: #904446;
   --destructive-foreground: #ffffff;
+  --status-critical: #904446;
+  --status-away: #c98a3e;
+  --status-positive: #c9825f;
   --input: #3a2e26;
   --ring: #a8524f;
 }
@@ -103,6 +113,9 @@
   --accent-foreground: #99a3c2;
   --destructive: #5b7cff;
   --destructive-foreground: #ffffff;
+  --status-critical: #ff5b5b;
+  --status-away: #f59e0b;
+  --status-positive: #10b981;
   --input: #dfe2e7;
   --ring: #7c9cff;
 }
@@ -133,6 +146,9 @@
   --accent-foreground: #6b6660;
   --destructive: #9b6b2f;
   --destructive-foreground: #ffffff;
+  --status-critical: #d13b3b;
+  --status-away: #df8b1a;
+  --status-positive: #0f7b58;
   --input: #eeeeee;
   --ring: #b8823f;
 }

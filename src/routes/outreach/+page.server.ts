@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ url }) => {
       id: r.id,
       nr: r.fields.Nr as number | undefined,
       kontaktName: r.fields.Kontakt?.title ?? 'Unbekannt',
-      kanzlei: (scraper?.Kanzlei || '—') as string,
+      kanzlei: (scraper?.Kanzlei || '') as string,
       email: (scraper?.Email || '—') as string,
       status: (r.fields.Status || 'recherche') as string,
       versandtAm: r.fields['Versandt am'] as string | undefined,
