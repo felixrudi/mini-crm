@@ -212,7 +212,7 @@
   </div>
 {/snippet}
 
-<div class="p-6 max-w-4xl mx-auto">
+<div class="p-6 max-w-[1400px] mx-auto">
   <div class="flex items-center justify-between mb-6">
     <div>
       <h1 class="font-display font-bold text-2xl text-ink">Firmen</h1>

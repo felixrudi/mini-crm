@@ -13,11 +13,30 @@
   import Menu from '@lucide/svelte/icons/menu';
   import X from '@lucide/svelte/icons/x';
   import Search from '@lucide/svelte/icons/search';
+  import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 
   let { children } = $props();
 
   let mobileMenuOpen = $state(false);
   let paletteOpen = $state(false);
+  let sidebarCollapsed = $state(false);
+
+  // Restore sidebar state from localStorage on mount (browser only)
+  $effect(() => {
+    if (browser) {
+      const stored = localStorage.getItem('crm_sidebar_collapsed');
+      if (stored !== null) {
+        sidebarCollapsed = stored === 'true';
+      }
+    }
+  });
+
+  // Persist sidebar state to localStorage whenever it changes
+  $effect(() => {
+    if (browser) {
+      localStorage.setItem('crm_sidebar_collapsed', String(sidebarCollapsed));
+    }
+  });
 
   const navItems = [
     { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -53,8 +72,8 @@
 
 <div class="h-app-shell flex bg-cream overflow-hidden">
   <!-- Sidebar Desktop -->
-  <aside class="hidden md:flex flex-col w-56 bg-surface border-r border-line flex-shrink-0">
-    <div class="px-4 py-4 border-b border-line">
+  <aside class="hidden md:flex flex-col bg-surface border-r border-line flex-shrink-0 transition-all duration-200 {sidebarCollapsed ? 'w-0 overflow-hidden border-r-0 opacity-0' : 'w-56'}">
+    <div class="px-4 py-4 border-b border-line flex items-center justify-between">
       <div class="flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-lg bg-terracotta flex items-center justify-center flex-shrink-0">
           <span class="text-white font-bold text-sm font-display">H</span>
@@ -64,6 +83,13 @@
           <div class="text-[10px] text-ink/40 leading-tight tracking-wide uppercase">CRM</div>
         </div>
       </div>
+      <button
+        onclick={() => sidebarCollapsed = true}
+        class="p-1 rounded-lg text-ink/40 hover:bg-cream hover:text-ink transition-colors ml-auto"
+        title="Sidebar einklappen"
+      >
+        <ChevronLeft class="w-4 h-4" />
+      </button>
     </div>
 
     <nav class="flex-1 py-3 px-3 space-y-0.5">
@@ -132,7 +158,18 @@
   {/if}
 
   <!-- Main Content -->
-  <main class="flex-1 overflow-y-auto overflow-x-hidden md:pt-0 pt-[calc(57px+env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)]">
-    {@render children()}
+  <main class="flex-1 overflow-y-auto overflow-x-hidden md:pt-0 pt-[calc(57px+env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)] relative">
+    {#if sidebarCollapsed}
+      <button
+        onclick={() => sidebarCollapsed = false}
+        class="hidden md:flex absolute top-4 left-4 z-30 p-2 bg-surface rounded-lg border border-line text-ink/60 hover:text-ink shadow-sm hover:bg-cream transition-colors"
+        title="Sidebar ausklappen"
+      >
+        <Menu class="w-4 h-4" />
+      </button>
+    {/if}
+    <div class="{sidebarCollapsed ? 'md:pl-16' : ''} transition-all duration-200">
+      {@render children()}
+    </div>
   </main>
 </div>

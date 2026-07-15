@@ -1,29 +1,40 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cream:          #FAF6EF;
-  --color-surface:        #FFFDF9;
-  --color-ink:            #33302B;
-  --color-terracotta:     #C2674A;
-  --color-terracotta-200: #DDA08C;
-  --color-sage:           #88997B;
-  --color-sage-100:       #E7ECDF;
-  --color-line:           #E7DFD3;
-  --font-sans:    "Noto Sans", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Roboto", "Noto Sans", sans-serif;
+  --color-cream:          #1a1410;   /* --bg */
+  --color-surface:        #2a201c;   /* --bg-card */
+  --color-ink:            #ffffff;   /* --text */
+  --color-terracotta:     #d9686a;   /* --red-bright */
+  --color-terracotta-200: #904446;   /* --red */
+  --color-sage:           #e6c5a8;   /* --sand */
+  --color-sage-100:       #221a17;   /* --bg-elevated */
+  --color-line:           #3a302a;   /* --border */
+  
+  --font-sans:    "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Roboto Mono", monospace;
   --radius: 0.75rem;
 }
 
 :root {
-  --background: #FAF6EF;   --foreground: #33302B;
-  --card: #FFFDF9;         --card-foreground: #33302B;
-  --popover: #FFFDF9;      --popover-foreground: #33302B;
-  --primary: #C2674A;      --primary-foreground: #FFF9F4;
-  --secondary: #E7ECDF;    --secondary-foreground: #4E5A41;
-  --muted: #F1EBE0;        --muted-foreground: #7A726A;
-  --accent: #E7ECDF;       --accent-foreground: #4E5A41;
-  --destructive: #B4452F;  --destructive-foreground: #FFF9F4;
-  --border: #E7DFD3;       --input: #E7DFD3;   --ring: #C2674A;
+  --background: #1a1410;
+  --foreground: #ffffff;
+  --card: #2a201c;
+  --card-foreground: #ffffff;
+  --popover: #2a201c;
+  --popover-foreground: #ffffff;
+  --primary: #d9686a;
+  --primary-foreground: #ffffff;
+  --secondary: #221a17;
+  --secondary-foreground: #e6c5a8;
+  --muted: #221a17;
+  --muted-foreground: #d4c8c0;
+  --accent: #221a17;
+  --accent-foreground: #e6c5a8;
+  --destructive: #904446;
+  --destructive-foreground: #ffffff;
+  --border: #3a302a;
+  --input: #3a302a;
+  --ring: #d9686a;
   --radius: 0.75rem;
 }
 
@@ -32,7 +43,6 @@
 }
 
 html {
-  /* iOS Safari: verhindert Font-Auto-Vergrößerung nach Rotation */
   -webkit-text-size-adjust: 100%;
 }
 
@@ -41,10 +51,24 @@ body {
   color: var(--foreground);
 }
 
-/* iOS Safari 100vh-Bug: Adressleiste ein-/ausklappend verändert 100vh.
-   100dvh berücksichtigt die tatsächlich sichtbare Höhe; Fallback für
-   ältere Browser ohne dvh-Support via CSS-Redeklaration. */
 .h-app-shell {
   height: 100vh;
   height: 100dvh;
+}
+
+/* 
+ * Custom hover overrides to match the dark-hirschfeld theme.
+ * Svelte components use hover:bg-cream and hover:bg-cream/50 for lists/rows.
+ */
+.hover\:bg-cream:hover {
+  background-color: #332824 !important;
+}
+
+.hover\:bg-cream\/50:hover {
+  background-color: rgba(51, 40, 36, 0.5) !important;
+}
+
+/* Sidebar transition classes */
+aside {
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1), padding 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease;
 }

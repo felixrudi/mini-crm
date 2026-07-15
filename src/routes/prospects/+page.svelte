@@ -103,7 +103,7 @@
 
 <input bind:this={csvInput} type="file" accept=".csv" class="hidden" onchange={handleCsvFile} />
 
-<div class="px-4 py-4 md:px-6 md:py-6 max-w-5xl mx-auto">
+<div class="px-4 py-4 md:px-6 md:py-6 max-w-[1400px] mx-auto">
   <!-- Header -->
   <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
     <div>
