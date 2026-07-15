@@ -3,12 +3,11 @@
   import { enhance } from '$app/forms';
   import { toast } from '$lib/toast';
   import { invalidateAll } from '$app/navigation';
-  import { formatDate, isOverdue } from '$lib/utils';
+  import { formatDate } from '$lib/utils';
   import TimelineItem from '$lib/components/TimelineItem.svelte';
   import InteractionDialog from '$lib/components/InteractionDialog.svelte';
   import EmailDialog from '$lib/components/EmailDialog.svelte';
   import ContactForm from '$lib/components/ContactForm.svelte';
-  import type { Action } from '$lib/types';
   import ArrowLeft from '@lucide/svelte/icons/arrow-left';
   import Link from '@lucide/svelte/icons/link';
   import Paperclip from '@lucide/svelte/icons/paperclip';
@@ -24,9 +23,6 @@
   import Plus from '@lucide/svelte/icons/plus';
   import Download from '@lucide/svelte/icons/download';
   import Pencil from '@lucide/svelte/icons/pencil';
-  import CheckCircle2 from '@lucide/svelte/icons/check-circle-2';
-  import Circle from '@lucide/svelte/icons/circle';
-  import CalendarClock from '@lucide/svelte/icons/calendar-clock';
   import Trash2 from '@lucide/svelte/icons/trash-2';
   import Check from '@lucide/svelte/icons/check';
   import X from '@lucide/svelte/icons/x';
@@ -35,18 +31,10 @@
 
   let { data }: { data: PageData } = $props();
 
-  let activeTab = $state<'timeline' | 'actions' | 'details' | 'dateien'>('timeline');
+  let activeTab = $state<'timeline' | 'details' | 'dateien'>('timeline');
   let showInteractionDialog = $state(false);
   let showEmailDialog = $state(false);
   let showEditContact = $state(false);
-  let showAddAction = $state(false);
-  let newActionTitel = $state('');
-  let newActionDate = $state('');
-  let newActionNotes = $state('');
-  let editingActionId = $state<string | null>(null);
-  let editActionTitel = $state('');
-  let editActionDate = $state('');
-  let editActionNotes = $state('');
 
   // --- Dateien ---
   type CrmFile = { id: string; filename: string; mimetype: string; data: string | null; created_at: string };
@@ -92,15 +80,6 @@
     if (activeTab === 'dateien') loadFiles();
   });
 
-  function startEditAction(a: Action) {
-    editingActionId = a.id;
-    editActionTitel = a.titel;
-    editActionDate = a.faellig_am ? a.faellig_am.slice(0, 10) : '';
-    editActionNotes = a.notizen ?? '';
-  }
-
-  let openActions = $derived(data.actions_list.filter((a: Action) => a.status === 'offen'));
-  let doneActions = $derived(data.actions_list.filter((a: Action) => a.status === 'erledigt'));
 
   let photo = $state(data.contact.photo ?? null);
   let photoFileInput: HTMLInputElement;
@@ -288,7 +267,7 @@
 
   <!-- Tabs -->
   <div class="flex gap-1 bg-surface border border-line rounded-lg p-1 mb-6 w-full overflow-x-auto">
-    {#each [['timeline', 'Timeline'], ['actions', `Aufgaben (${openActions.length})`], ['details', 'Details'], ['dateien', 'Dateien']] as [tab, label]}
+    {#each [['timeline', 'Timeline'], ['details', 'Details'], ['dateien', 'Dateien']] as [tab, label]}
       <button
         onclick={() => activeTab = tab as typeof activeTab}
         class="px-3 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap {activeTab === tab ? 'bg-terracotta text-white font-medium' : 'text-ink/60 hover:text-ink hover:bg-cream'}"
@@ -316,17 +295,6 @@
     </div>
   {/if}
 
-  {#if activeTab === 'actions'}
-    <div class="flex justify-end mb-4">
-      <button
-        onclick={() => showAddAction = !showAddAction}
-        class="flex items-center gap-1.5 px-3 py-1.5 bg-terracotta text-white rounded-lg text-sm font-medium hover:bg-terracotta/90 transition-colors"
-      >
-        <Plus class="w-3.5 h-3.5" /> Aufgabe
-      </button>
-    </div>
-  {/if}
-
   <!-- Tab Content -->
   {#if activeTab === 'timeline'}
     <div class="bg-surface rounded-xl border border-line">
@@ -340,172 +308,6 @@
           {#each data.timeline as entry}
             <TimelineItem {entry} contactId={data.contact.id} />
           {/each}
-        </div>
-      {/if}
-    </div>
-
-  {:else if activeTab === 'actions'}
-    {#if showAddAction}
-      <form
-        method="POST"
-        action="?/add_action"
-        class="bg-surface rounded-xl border border-terracotta/30 p-4 mb-4"
-        use:enhance={() => {
-          return async ({ result, update }) => {
-            if (result.type === 'success') {
-              toast.success('Aufgabe erstellt');
-              showAddAction = false;
-              newActionTitel = '';
-              newActionDate = '';
-              newActionNotes = '';
-            }
-            await update();
-          };
-        }}
-      >
-        <div class="grid grid-cols-2 gap-3 mb-3">
-          <div class="col-span-2">
-            <input
-              type="text"
-              name="titel"
-              bind:value={newActionTitel}
-              required
-              placeholder="Aufgabe beschreiben..."
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
-            />
-          </div>
-          <div>
-            <label class="block text-xs text-ink/50 mb-1">Fällig am</label>
-            <input
-              type="date"
-              name="faellig_am"
-              bind:value={newActionDate}
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
-            />
-          </div>
-          <div>
-            <label class="block text-xs text-ink/50 mb-1">Notizen</label>
-            <input
-              type="text"
-              name="notizen"
-              bind:value={newActionNotes}
-              placeholder="Optional..."
-              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
-            />
-          </div>
-        </div>
-        <div class="flex gap-2">
-          <button type="button" onclick={() => showAddAction = false} class="px-3 py-1.5 border border-line rounded-lg text-sm text-ink/60 hover:bg-cream transition-colors">Abbrechen</button>
-          <button type="submit" class="px-3 py-1.5 bg-terracotta text-white rounded-lg text-sm font-medium hover:bg-terracotta/90 transition-colors">Erstellen</button>
-        </div>
-      </form>
-    {/if}
-
-    <div class="bg-surface rounded-xl border border-line">
-      {#if openActions.length === 0 && doneActions.length === 0}
-        <div class="py-16 text-center">
-          <p class="text-sm text-ink/40">Keine Aufgaben</p>
-        </div>
-      {:else}
-        <div class="px-5 py-2">
-          {#if openActions.length > 0}
-            <p class="text-xs font-medium text-ink/40 uppercase tracking-wide py-2">Offen ({openActions.length})</p>
-            {#each openActions as action}
-              <div class="flex items-start gap-3 py-2.5 border-b border-line last:border-0 group">
-                <form method="POST" action="?/toggle_action" use:enhance={() => async ({ result, update }) => { if (result.type === 'success') toast.success('Erledigt!'); await update(); }}>
-                  <input type="hidden" name="id" value={action.id} />
-                  <button type="submit" class="mt-0.5 text-ink/30 hover:text-terracotta transition-colors" title="Als erledigt markieren">
-                    <Circle class="w-5 h-5" />
-                  </button>
-                </form>
-                <div class="flex-1 min-w-0">
-                  {#if editingActionId === action.id}
-                    <form method="POST" action="?/update_action"
-                      use:enhance={() => async ({ result, update }) => {
-                        if (result.type === 'success') { toast.success('Gespeichert'); editingActionId = null; }
-                        else toast.error('Fehler');
-                        await update();
-                      }}
-                    >
-                      <input type="hidden" name="id" value={action.id} />
-                      <div class="space-y-1.5 mb-2">
-                        <input type="text" name="titel" bind:value={editActionTitel} required
-                          class="w-full px-2 py-1.5 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
-                        <div class="grid grid-cols-2 gap-2">
-                          <input type="date" name="faellig_am" bind:value={editActionDate}
-                            class="px-2 py-1.5 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
-                          <input type="text" name="notizen" bind:value={editActionNotes} placeholder="Notizen"
-                            class="px-2 py-1.5 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
-                        </div>
-                      </div>
-                      <div class="flex gap-1.5">
-                        <button type="submit" class="flex items-center gap-1 px-2.5 py-1 bg-terracotta text-white rounded-lg text-xs font-medium hover:bg-terracotta/90 transition-colors">
-                          <Check class="w-3 h-3" /> Speichern
-                        </button>
-                        <button type="button" onclick={() => editingActionId = null} class="flex items-center gap-1 px-2.5 py-1 border border-line text-ink/60 rounded-lg text-xs hover:bg-cream transition-colors">
-                          <X class="w-3 h-3" /> Abbrechen
-                        </button>
-                      </div>
-                    </form>
-                  {:else}
-                    <div class="flex items-start justify-between gap-2">
-                      <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-ink">{action.titel}</p>
-                        {#if action.faellig_am}
-                          <span class="flex items-center gap-1 text-xs mt-0.5 {isOverdue(action.faellig_am) ? 'text-red-500 font-medium' : 'text-ink/40'}">
-                            <CalendarClock class="w-3 h-3" />
-                            {formatDate(action.faellig_am)}
-                            {#if isOverdue(action.faellig_am)}<span>(überfällig)</span>{/if}
-                          </span>
-                        {/if}
-                        {#if action.notizen}
-                          <p class="text-xs text-ink/50 mt-0.5">{action.notizen}</p>
-                        {/if}
-                      </div>
-                      <div class="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button type="button" onclick={() => startEditAction(action)} class="p-1 text-ink/30 hover:text-terracotta transition-colors" title="Bearbeiten">
-                          <Pencil class="w-3.5 h-3.5" />
-                        </button>
-                        <form method="POST" action="?/delete_action"
-                          use:enhance={() => async ({ result, update }) => { if (result.type === 'success') toast.success('Gelöscht'); await update(); }}
-                          onsubmit={(e) => { if (!confirm('Aufgabe löschen?')) e.preventDefault(); }}
-                        >
-                          <input type="hidden" name="id" value={action.id} />
-                          <button type="submit" class="p-1 text-ink/30 hover:text-red-500 transition-colors" title="Löschen">
-                            <Trash2 class="w-3.5 h-3.5" />
-                          </button>
-                        </form>
-                      </div>
-                    </div>
-                  {/if}
-                </div>
-              </div>
-            {/each}
-          {/if}
-
-          {#if doneActions.length > 0}
-            <p class="text-xs font-medium text-ink/40 uppercase tracking-wide py-2 mt-2">Erledigt ({doneActions.length})</p>
-            {#each doneActions as action}
-              <div class="flex items-start gap-3 py-2.5 border-b border-line last:border-0 opacity-60 group">
-                <form method="POST" action="?/toggle_action" use:enhance={() => async ({ result, update }) => { if (result.type === 'success') toast.success('Wieder offen'); await update(); }}>
-                  <input type="hidden" name="id" value={action.id} />
-                  <button type="submit" class="mt-0.5 text-sage hover:text-terracotta transition-colors" title="Wieder öffnen">
-                    <CheckCircle2 class="w-5 h-5" />
-                  </button>
-                </form>
-                <p class="text-sm text-ink/50 line-through flex-1">{action.titel}</p>
-                <form method="POST" action="?/delete_action"
-                  use:enhance={() => async ({ result, update }) => { if (result.type === 'success') toast.success('Gelöscht'); await update(); }}
-                  onsubmit={(e) => { if (!confirm('Aufgabe löschen?')) e.preventDefault(); }}
-                >
-                  <input type="hidden" name="id" value={action.id} />
-                  <button type="submit" class="p-1 text-ink/30 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100" title="Löschen">
-                    <Trash2 class="w-3.5 h-3.5" />
-                  </button>
-                </form>
-              </div>
-            {/each}
-          {/if}
         </div>
       {/if}
     </div>

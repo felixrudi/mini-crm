@@ -6,8 +6,8 @@ import {
   deleteRecord,
   linkId
 } from '$lib/server/teable';
-import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS, AUFGABEN_FIELDS } from '$lib/server/teable-schema';
-import { mapContact, mapTimelineEntry, mapAction } from '$lib/server/teable-map';
+import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS } from '$lib/server/teable-schema';
+import { mapContact, mapTimelineEntry } from '$lib/server/teable-map';
 import { error } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -15,12 +15,11 @@ export const load: PageServerLoad = async ({ params }) => {
   const contact = await getRecord(TABLES.kontakteReal, params.id);
   if (!contact) throw error(404, 'Kontakt nicht gefunden');
 
-  const [firma, allInteractions, allActions, firmenRecs] = await Promise.all([
+  const [firma, allInteractions, firmenRecs] = await Promise.all([
     linkId(contact.fields[KONTAKTE_FIELDS.firma])
       ? getRecord(TABLES.firmen, linkId(contact.fields[KONTAKTE_FIELDS.firma])!)
       : Promise.resolve(null),
     listRecords(TABLES.interaktionenReal),
-    listRecords(TABLES.aufgabenReal),
     listRecords(TABLES.firmen)
   ]);
 
@@ -33,15 +32,6 @@ export const load: PageServerLoad = async ({ params }) => {
     .map(mapTimelineEntry)
     .sort((a, b) => b.datum.localeCompare(a.datum));
 
-  const actions_list = allActions
-    .filter((r) => linkId(r.fields[AUFGABEN_FIELDS.kontakt]) === params.id)
-    .map((r) => mapAction(r))
-    .sort((a, b) => {
-      if (!a.faellig_am) return 1;
-      if (!b.faellig_am) return -1;
-      return a.faellig_am.localeCompare(b.faellig_am);
-    });
-
   const companies = firmenRecs
     .map((f) => ({ id: f.id, name: f.fields[FIRMEN_FIELDS.name] }))
     .sort((a, b) => String(a.name).localeCompare(String(b.name)));
@@ -49,7 +39,6 @@ export const load: PageServerLoad = async ({ params }) => {
   return {
     contact: mapContact(contact, (firma?.fields[FIRMEN_FIELDS.name] as string) ?? null),
     timeline,
-    actions_list,
     companies
   };
 };
@@ -77,41 +66,6 @@ export const actions: Actions = {
       [INTERAKTIONEN_FIELDS.text]: d.get('body_text') || null,
       [INTERAKTIONEN_FIELDS.datum]: d.get('datum') || new Date().toISOString()
     });
-    return { success: true };
-  },
-  add_action: async ({ request, params }) => {
-    const d = await request.formData();
-    await createRecord(TABLES.aufgabenReal, {
-      [AUFGABEN_FIELDS.kontakt]: [{ id: params.id }],
-      [AUFGABEN_FIELDS.titel]: d.get('titel'),
-      [AUFGABEN_FIELDS.faelligAm]: d.get('faellig_am') || null,
-      [AUFGABEN_FIELDS.notizen]: d.get('notizen') || null
-    });
-    return { success: true };
-  },
-  toggle_action: async ({ request }) => {
-    const d = await request.formData();
-    const id = d.get('id') as string;
-    const existing = await getRecord(TABLES.aufgabenReal, id);
-    const current = existing?.fields[AUFGABEN_FIELDS.status];
-    await updateRecord(TABLES.aufgabenReal, id, {
-      [AUFGABEN_FIELDS.status]: current === 'offen' ? 'erledigt' : 'offen'
-    });
-    return { success: true };
-  },
-  update_action: async ({ request }) => {
-    const d = await request.formData();
-    const id = d.get('id') as string;
-    await updateRecord(TABLES.aufgabenReal, id, {
-      [AUFGABEN_FIELDS.titel]: d.get('titel') || null,
-      [AUFGABEN_FIELDS.faelligAm]: d.get('faellig_am') || null,
-      [AUFGABEN_FIELDS.notizen]: d.get('notizen') || null
-    });
-    return { success: true };
-  },
-  delete_action: async ({ request }) => {
-    const d = await request.formData();
-    await deleteRecord(TABLES.aufgabenReal, d.get('id') as string);
     return { success: true };
   },
   delete_interaction: async ({ request }) => {

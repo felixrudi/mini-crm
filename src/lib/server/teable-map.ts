@@ -4,7 +4,7 @@
 // predate the Teable migration and are preserved so no .svelte file changes.
 import type { TeableRecord, TeableAttachment } from './teable';
 import { linkId, attachmentUrl } from './teable';
-import { KONTAKTE_FIELDS, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS, AUFGABEN_FIELDS, PROSPECT_FIELDS } from './teable-schema';
+import { KONTAKTE_FIELDS, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS, PROSPECT_FIELDS } from './teable-schema';
 
 function firstAttachmentUrl(field: unknown): string | null {
   const atts = field as TeableAttachment[] | undefined;
@@ -75,19 +75,6 @@ export function mapTimelineEntry(r: TeableRecord) {
   };
 }
 
-export function mapAction(r: TeableRecord, contactName: string | null = null) {
-  const f = r.fields as Record<string, unknown>;
-  return {
-    id: r.id,
-    contact_id: linkId(f[AUFGABEN_FIELDS.kontakt]),
-    contact_name: contactName,
-    titel: f[AUFGABEN_FIELDS.titel] as string,
-    status: f[AUFGABEN_FIELDS.status] as 'offen' | 'erledigt',
-    faellig_am: (f[AUFGABEN_FIELDS.faelligAm] as string) ?? null,
-    notizen: (f[AUFGABEN_FIELDS.notizen] as string) ?? null,
-    created_at: r.createdTime ?? null
-  };
-}
 
 export function mapProspect(r: TeableRecord, companyName: string | null = null) {
   const f = r.fields as Record<string, unknown>;

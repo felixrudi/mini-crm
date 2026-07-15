@@ -66,16 +66,6 @@ export type Email = {
   created_at: string;
 }
 
-export type Action = {
-  id: string;
-  contact_id: string | null;
-  titel: string;
-  status: 'offen' | 'erledigt';
-  faellig_am: string | null;
-  notizen: string | null;
-  created_at: string;
-  contact_name?: string | null;
-}
 
 export type ProspectStatus = 'gesendet' | 'geantwortet' | 'termin' | 'kein_interesse' | 'bounce' | 'abgesagt';
 

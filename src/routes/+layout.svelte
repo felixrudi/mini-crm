@@ -8,7 +8,6 @@
   import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
   import Users from '@lucide/svelte/icons/users';
   import Building2 from '@lucide/svelte/icons/building-2';
-  import CheckSquare from '@lucide/svelte/icons/check-square';
   import Send from '@lucide/svelte/icons/send';
   import ScanLine from '@lucide/svelte/icons/scan-line';
   import Menu from '@lucide/svelte/icons/menu';
@@ -24,7 +23,6 @@
     { href: '/', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/contacts', label: 'Kontakte', icon: Users },
     { href: '/companies', label: 'Firmen', icon: Building2 },
-    { href: '/actions', label: 'Aufgaben', icon: CheckSquare },
     { href: '/prospects', label: 'Outreach', icon: Send },
     { href: '/#scan', label: 'Scan & Import', icon: ScanLine },
   ];

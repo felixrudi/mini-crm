@@ -7,7 +7,6 @@ export const TABLES = {
   firmen: 'tbl58ahoWar7wVxWHjA',
   kontakteReal: 'tblnTqgSMBRZLWINOp6',
   interaktionenReal: 'tblNE3WqZkqafOGS9f1',
-  aufgabenReal: 'tblZBgkRKvvVeckzZaP',
   prospects: 'tbl6LjxihnKhe0I5A1L',
   ansichten: 'tblXQi0wnkZPOWtqh4i'
 } as const;
@@ -57,14 +56,6 @@ export const INTERAKTIONEN_FIELDS = {
   text: 'Text',
   von: 'Von',
   an: 'An'
-} as const;
-
-export const AUFGABEN_FIELDS = {
-  kontakt: 'Kontakt',
-  titel: 'Titel',
-  status: 'Status',
-  faelligAm: 'Fällig am',
-  notizen: 'Notizen'
 } as const;
 
 export const PROSPECT_FIELDS = {
