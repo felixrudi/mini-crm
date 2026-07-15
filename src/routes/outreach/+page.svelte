@@ -11,6 +11,8 @@
   let searchValue = $state(data.q);
   let debounceTimer: ReturnType<typeof setTimeout>;
 
+  let activeTab = $state<'overdue' | 'away' | 'answered' | 'booked'>('overdue');
+
   let expanded = $state<Record<string, boolean>>({
     entwurf: false,
     gesendet: false,
@@ -113,11 +115,14 @@
     return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
   }
 
-  function scrollToSection(id: string) {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+  function selectTab(tab: 'overdue' | 'away' | 'answered' | 'booked') {
+    activeTab = tab;
+    setTimeout(() => {
+      const el = document.getElementById('outreach-tabs-container');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
   }
 </script>
 
@@ -150,8 +155,8 @@
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
     <!-- Überfällig -->
     <button
-      onclick={() => scrollToSection('section-overdue')}
-      class="bg-surface/40 p-5 rounded-xl border border-line flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface/80 hover:border-status-critical/30 transition-all select-none group"
+      onclick={() => selectTab('overdue')}
+      class="bg-surface/40 p-5 rounded-xl border border-line flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface/80 hover:border-status-critical/30 transition-all select-none group {activeTab === 'overdue' ? 'ring-2 ring-status-critical ring-offset-2 ring-offset-background' : ''}"
     >
       <span class="text-4xl font-mono font-bold text-status-critical transition-transform group-hover:scale-105">{overdueItems.length}</span>
       <div class="flex items-center gap-2 mt-1.5">
@@ -162,8 +167,8 @@
 
     <!-- Im Urlaub -->
     <button
-      onclick={() => scrollToSection('section-away')}
-      class="bg-surface/40 p-5 rounded-xl border border-line flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface/80 hover:border-status-away/30 transition-all select-none group"
+      onclick={() => selectTab('away')}
+      class="bg-surface/40 p-5 rounded-xl border border-line flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface/80 hover:border-status-away/30 transition-all select-none group {activeTab === 'away' ? 'ring-2 ring-status-away ring-offset-2 ring-offset-background' : ''}"
     >
       <span class="text-4xl font-mono font-bold text-status-away transition-transform group-hover:scale-105">{awayItems.length}</span>
       <div class="flex items-center gap-2 mt-1.5">
@@ -174,8 +179,8 @@
 
     <!-- Geantwortet -->
     <button
-      onclick={() => scrollToSection('section-answered')}
-      class="bg-surface/40 p-5 rounded-xl border border-line flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface/80 hover:border-status-positive/30 transition-all select-none group"
+      onclick={() => selectTab('answered')}
+      class="bg-surface/40 p-5 rounded-xl border border-line flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface/80 hover:border-status-positive/30 transition-all select-none group {activeTab === 'answered' ? 'ring-2 ring-status-positive ring-offset-2 ring-offset-background' : ''}"
     >
       <span class="text-4xl font-mono font-bold text-status-positive transition-transform group-hover:scale-105">{answeredItems.length}</span>
       <div class="flex items-center gap-2 mt-1.5">
@@ -186,8 +191,8 @@
 
     <!-- Termine -->
     <button
-      onclick={() => scrollToSection('section-booked')}
-      class="bg-surface/40 p-5 rounded-xl border border-line flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface/80 hover:border-terracotta/30 transition-all select-none group"
+      onclick={() => selectTab('booked')}
+      class="bg-surface/40 p-5 rounded-xl border border-line flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface/80 hover:border-terracotta/30 transition-all select-none group {activeTab === 'booked' ? 'ring-2 ring-terracotta ring-offset-2 ring-offset-background' : ''}"
     >
       <span class="text-4xl font-mono font-bold text-terracotta transition-transform group-hover:scale-105">{bookedItems.length}</span>
       <div class="flex items-center gap-2 mt-1.5">
@@ -197,168 +202,180 @@
     </button>
   </div>
 
-  <!-- JETZT WICHTIG -->
-  <div class="space-y-6">
-    <h2 class="text-xs uppercase font-bold tracking-wider text-ink/40 border-b border-line pb-2 mt-2">Jetzt wichtig</h2>
+  <!-- TAB-STEUERUNG & LISTE -->
+  <div id="outreach-tabs-container" class="space-y-6 scroll-mt-6">
+    <!-- Tab Bar -->
+    <div class="flex border-b border-line gap-4 sm:gap-6 overflow-x-auto pb-px">
+      <button
+        onclick={() => activeTab = 'overdue'}
+        class="pb-2.5 text-xs sm:text-sm font-semibold border-b-2 cursor-pointer transition-colors whitespace-nowrap {activeTab === 'overdue' ? 'border-status-critical text-ink font-bold' : 'border-transparent text-ink/40 hover:text-ink/70'}"
+      >
+        Zu schreiben ({overdueItems.length})
+      </button>
+      <button
+        onclick={() => activeTab = 'away'}
+        class="pb-2.5 text-xs sm:text-sm font-semibold border-b-2 cursor-pointer transition-colors whitespace-nowrap {activeTab === 'away' ? 'border-status-away text-ink font-bold' : 'border-transparent text-ink/40 hover:text-ink/70'}"
+      >
+        Im Urlaub ({awayItems.length})
+      </button>
+      <button
+        onclick={() => activeTab = 'answered'}
+        class="pb-2.5 text-xs sm:text-sm font-semibold border-b-2 cursor-pointer transition-colors whitespace-nowrap {activeTab === 'answered' ? 'border-status-positive text-ink font-bold' : 'border-transparent text-ink/40 hover:text-ink/70'}"
+      >
+        Geantwortet ({answeredItems.length})
+      </button>
+      <button
+        onclick={() => activeTab = 'booked'}
+        class="pb-2.5 text-xs sm:text-sm font-semibold border-b-2 cursor-pointer transition-colors whitespace-nowrap {activeTab === 'booked' ? 'border-terracotta text-ink font-bold' : 'border-transparent text-ink/40 hover:text-ink/70'}"
+      >
+        Termine ({bookedItems.length})
+      </button>
+    </div>
 
-    <!-- Sub-Section: Überfällig -->
-    {#if overdueItems.length > 0}
-      <div id="section-overdue" class="space-y-3 scroll-mt-6">
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-status-critical"></span>
-          <h3 class="font-sans font-bold text-sm text-ink">Follow-up überfällig</h3>
-          <span class="text-[10px] font-mono bg-status-critical/10 text-status-critical px-2 py-0.5 rounded-full font-bold">{overdueItems.length}</span>
-        </div>
-        <div class="space-y-2">
-          {#each overdueItems as item}
-            {@const days = getOverdueDays(item.followUpFaellig)}
-            <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 pl-4 bg-surface/30 hover:bg-surface/75 border border-line border-l-status-critical border-l-[3px] rounded-r-lg transition-colors gap-3">
-              <!-- Contact Detail -->
-              <div class="min-w-0 flex-1">
-                <div class="font-semibold text-sm text-ink">{item.kontaktName}</div>
-                {#if item.kanzlei}
-                  <div class="text-xs text-ink/40 mt-0.5 font-medium">{item.kanzlei}</div>
-                {/if}
-                {#if item.email && item.email !== '—'}
-                  <div class="text-[11px] text-ink/40 font-mono mt-1 select-all">{item.email}</div>
-                {/if}
-              </div>
+    <!-- Active Tab List -->
+    <div class="space-y-4">
+      {#if activeTab === 'overdue'}
+        {#if overdueItems.length === 0}
+          <div class="text-sm text-ink/40 italic py-8 text-center bg-surface/10 rounded-xl border border-line/35">
+            Keine überfälligen Follow-ups. Alles erledigt! 🎉
+          </div>
+        {:else}
+          <div class="space-y-2">
+            {#each overdueItems as item}
+              {@const days = getOverdueDays(item.followUpFaellig)}
+              <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 pl-4 bg-surface/30 hover:bg-surface/75 border border-line border-l-status-critical border-l-[3px] rounded-r-lg transition-colors gap-3">
+                <div class="min-w-0 flex-1">
+                  <div class="font-semibold text-sm text-ink">{item.kontaktName}</div>
+                  {#if item.kanzlei}
+                    <div class="text-xs text-ink/40 mt-0.5 font-medium">{item.kanzlei}</div>
+                  {/if}
+                  {#if item.email && item.email !== '—'}
+                    <div class="text-[11px] text-ink/40 font-mono mt-1 select-all">{item.email}</div>
+                  {/if}
+                </div>
 
-              <!-- Context note -->
-              <div class="flex-[2] min-w-0">
-                {#if item.notiz}
-                  <div class="text-xs text-ink/60 line-clamp-2 bg-ink/[2%] px-2.5 py-1.5 rounded border border-line/30 italic font-sans" title={item.notiz}>
-                    "{item.notiz}"
-                  </div>
-                {/if}
-              </div>
+                <div class="flex-[2] min-w-0">
+                  {#if item.notiz}
+                    <div class="text-xs text-ink/60 line-clamp-2 bg-ink/[2%] px-2.5 py-1.5 rounded border border-line/30 italic font-sans" title={item.notiz}>
+                      "{item.notiz}"
+                    </div>
+                  {/if}
+                </div>
 
-              <!-- Time context -->
-              <div class="flex flex-col items-end justify-center text-right font-mono text-xs shrink-0">
-                <span class="text-status-critical font-bold">Fällig {days === 0 ? 'heute' : `vor ${days} Tag${days > 1 ? 'en' : ''}`}</span>
-                <span class="text-[10px] text-ink/30 mt-0.5">Sollte: {formatDate(item.followUpFaellig)}</span>
+                <div class="flex flex-col items-end justify-center text-right font-mono text-xs shrink-0">
+                  <span class="text-status-critical font-bold">Fällig {days === 0 ? 'heute' : `vor ${days} Tag${days > 1 ? 'en' : ''}`}</span>
+                  <span class="text-[10px] text-ink/30 mt-0.5">Sollte: {formatDate(item.followUpFaellig)}</span>
+                </div>
               </div>
-            </div>
-          {/each}
-        </div>
-      </div>
-    {/if}
-
-    <!-- Sub-Section: Im Urlaub -->
-    {#if awayItems.length > 0}
-      <div id="section-away" class="space-y-3 scroll-mt-6">
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-status-away"></span>
-          <h3 class="font-sans font-bold text-sm text-ink">Im Urlaub / Auto-Reply</h3>
-          <span class="text-[10px] font-mono bg-status-away/10 text-status-away px-2 py-0.5 rounded-full font-bold">{awayItems.length}</span>
-        </div>
-        <div class="space-y-2">
-          {#each awayItems as item}
-            <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 pl-4 bg-surface/30 hover:bg-surface/75 border border-line border-l-status-away border-l-[3px] rounded-r-lg transition-colors gap-3">
-              <div class="min-w-0 flex-1">
-                <div class="font-semibold text-sm text-ink">{item.kontaktName}</div>
-                {#if item.kanzlei}
-                  <div class="text-xs text-ink/40 mt-0.5 font-medium">{item.kanzlei}</div>
-                {/if}
+            {/each}
+          </div>
+        {/if}
+      {:else if activeTab === 'away'}
+        {#if awayItems.length === 0}
+          <div class="text-sm text-ink/40 italic py-8 text-center bg-surface/10 rounded-xl border border-line/35">
+            Aktuell niemand im Urlaub.
+          </div>
+        {:else}
+          <div class="space-y-2">
+            {#each awayItems as item}
+              <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 pl-4 bg-surface/30 hover:bg-surface/75 border border-line border-l-status-away border-l-[3px] rounded-r-lg transition-colors gap-3">
+                <div class="min-w-0 flex-1">
+                  <div class="font-semibold text-sm text-ink">{item.kontaktName}</div>
+                  {#if item.kanzlei}
+                    <div class="text-xs text-ink/40 mt-0.5 font-medium">{item.kanzlei}</div>
+                  {/if}
+                </div>
+                <div class="flex-[2] min-w-0">
+                  {#if item.notiz}
+                    <div class="text-xs text-status-away/95 bg-status-away/5 px-2.5 py-1.5 rounded border border-status-away/10 font-sans whitespace-pre-wrap">
+                      {item.notiz}
+                    </div>
+                  {/if}
+                </div>
+                <div class="flex flex-col items-end justify-center text-right font-mono text-xs shrink-0 text-ink/40">
+                  <span>Auto-Reply</span>
+                  {#if item.followUpFaellig}
+                    <span class="text-[10px] mt-0.5">WV: {formatDate(item.followUpFaellig)}</span>
+                  {/if}
+                </div>
               </div>
-              <div class="flex-[2] min-w-0">
-                {#if item.notiz}
-                  <div class="text-xs text-status-away/95 bg-status-away/5 px-2.5 py-1.5 rounded border border-status-away/10 font-sans whitespace-pre-wrap">
-                    {item.notiz}
-                  </div>
-                {/if}
+            {/each}
+          </div>
+        {/if}
+      {:else if activeTab === 'answered'}
+        {#if answeredItems.length === 0}
+          <div class="text-sm text-ink/40 italic py-8 text-center bg-surface/10 rounded-xl border border-line/35">
+            Keine offenen Antworten.
+          </div>
+        {:else}
+          <div class="space-y-2">
+            {#each answeredItems as item}
+              <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 pl-4 bg-surface/30 hover:bg-surface/75 border border-line border-l-status-positive border-l-[3px] rounded-r-lg transition-colors gap-3">
+                <div class="min-w-0 flex-1">
+                  <div class="font-semibold text-sm text-ink">{item.kontaktName}</div>
+                  {#if item.kanzlei}
+                    <div class="text-xs text-ink/40 mt-0.5 font-medium">{item.kanzlei}</div>
+                  {/if}
+                </div>
+                <div class="flex-[2] min-w-0">
+                  {#if item.antwortKurzfassung}
+                    <div class="text-xs text-status-positive bg-status-positive/5 px-2.5 py-1.5 rounded border border-status-positive/10 font-sans">
+                      {item.antwortKurzfassung}
+                    </div>
+                  {:else if item.notiz}
+                    <div class="text-xs text-ink/50 italic font-sans truncate">
+                      "{item.notiz.slice(0, 100)}..."
+                    </div>
+                  {/if}
+                </div>
+                <div class="flex flex-col items-end justify-center text-right font-mono text-xs shrink-0 text-ink/40">
+                  <span class="text-status-positive font-medium">Interesse</span>
+                  {#if item.versandtAm}
+                    <span class="text-[10px] mt-0.5">Mail: {formatDate(item.versandtAm)}</span>
+                  {/if}
+                </div>
               </div>
-              <div class="flex flex-col items-end justify-center text-right font-mono text-xs shrink-0 text-ink/40">
-                <span>Auto-Reply</span>
-                {#if item.followUpFaellig}
-                  <span class="text-[10px] mt-0.5">WV: {formatDate(item.followUpFaellig)}</span>
-                {/if}
+            {/each}
+          </div>
+        {/if}
+      {:else if activeTab === 'booked'}
+        {#if bookedItems.length === 0}
+          <div class="text-sm text-ink/40 italic py-8 text-center bg-surface/10 rounded-xl border border-line/35">
+            Noch keine gebuchten Termine.
+          </div>
+        {:else}
+          <div class="space-y-2">
+            {#each bookedItems as item}
+              <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 pl-4 bg-surface/30 hover:bg-surface/75 border border-line border-l-terracotta border-l-[3px] rounded-r-lg transition-colors gap-3">
+                <div class="min-w-0 flex-1">
+                  <div class="font-semibold text-sm text-ink">{item.kontaktName}</div>
+                  {#if item.kanzlei}
+                    <div class="text-xs text-ink/40 mt-0.5 font-medium">{item.kanzlei}</div>
+                  {/if}
+                </div>
+                <div class="flex-[2] min-w-0">
+                  {#if item.antwortKurzfassung}
+                    <div class="text-xs text-terracotta bg-terracotta/5 px-2.5 py-1.5 rounded border border-terracotta/10 font-sans">
+                      {item.antwortKurzfassung}
+                    </div>
+                  {:else if item.notiz}
+                    <div class="text-xs text-ink/50 italic font-sans truncate">
+                      "{item.notiz.slice(0, 100)}..."
+                    </div>
+                  {/if}
+                </div>
+                <div class="flex flex-col items-end justify-center text-right font-mono text-xs shrink-0 text-terracotta">
+                  <span class="font-bold">Termin</span>
+                  {#if item.versandtAm}
+                    <span class="text-[10px] text-ink/40 mt-0.5">Versandt: {formatDate(item.versandtAm)}</span>
+                  {/if}
+                </div>
               </div>
-            </div>
-          {/each}
-        </div>
-      </div>
-    {/if}
-
-    <!-- Sub-Section: Geantwortet -->
-    {#if answeredItems.length > 0}
-      <div id="section-answered" class="space-y-3 scroll-mt-6">
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-status-positive"></span>
-          <h3 class="font-sans font-bold text-sm text-ink">Geantwortet</h3>
-          <span class="text-[10px] font-mono bg-status-positive/10 text-status-positive px-2 py-0.5 rounded-full font-bold">{answeredItems.length}</span>
-        </div>
-        <div class="space-y-2">
-          {#each answeredItems as item}
-            <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 pl-4 bg-surface/30 hover:bg-surface/75 border border-line border-l-status-positive border-l-[3px] rounded-r-lg transition-colors gap-3">
-              <div class="min-w-0 flex-1">
-                <div class="font-semibold text-sm text-ink">{item.kontaktName}</div>
-                {#if item.kanzlei}
-                  <div class="text-xs text-ink/40 mt-0.5 font-medium">{item.kanzlei}</div>
-                {/if}
-              </div>
-              <div class="flex-[2] min-w-0">
-                {#if item.antwortKurzfassung}
-                  <div class="text-xs text-status-positive bg-status-positive/5 px-2.5 py-1.5 rounded border border-status-positive/10 font-sans">
-                    {item.antwortKurzfassung}
-                  </div>
-                {:else if item.notiz}
-                  <div class="text-xs text-ink/50 italic font-sans truncate">
-                    "{item.notiz.slice(0, 100)}..."
-                  </div>
-                {/if}
-              </div>
-              <div class="flex flex-col items-end justify-center text-right font-mono text-xs shrink-0 text-ink/40">
-                <span class="text-status-positive font-medium">Interesse</span>
-                {#if item.versandtAm}
-                  <span class="text-[10px] mt-0.5">Mail: {formatDate(item.versandtAm)}</span>
-                {/if}
-              </div>
-            </div>
-          {/each}
-        </div>
-      </div>
-    {/if}
-
-    <!-- Sub-Section: Termine -->
-    {#if bookedItems.length > 0}
-      <div id="section-booked" class="space-y-3 scroll-mt-6">
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-terracotta"></span>
-          <h3 class="font-sans font-bold text-sm text-ink">Termin gebucht</h3>
-          <span class="text-[10px] font-mono bg-terracotta/10 text-terracotta px-2 py-0.5 rounded-full font-bold">{bookedItems.length}</span>
-        </div>
-        <div class="space-y-2">
-          {#each bookedItems as item}
-            <div class="flex flex-col md:flex-row md:items-center justify-between p-3.5 pl-4 bg-surface/30 hover:bg-surface/75 border border-line border-l-terracotta border-l-[3px] rounded-r-lg transition-colors gap-3">
-              <div class="min-w-0 flex-1">
-                <div class="font-semibold text-sm text-ink">{item.kontaktName}</div>
-                {#if item.kanzlei}
-                  <div class="text-xs text-ink/40 mt-0.5 font-medium">{item.kanzlei}</div>
-                {/if}
-              </div>
-              <div class="flex-[2] min-w-0">
-                {#if item.antwortKurzfassung}
-                  <div class="text-xs text-terracotta bg-terracotta/5 px-2.5 py-1.5 rounded border border-terracotta/10 font-sans">
-                    {item.antwortKurzfassung}
-                  </div>
-                {:else if item.notiz}
-                  <div class="text-xs text-ink/50 italic font-sans truncate">
-                    "{item.notiz.slice(0, 100)}..."
-                  </div>
-                {/if}
-              </div>
-              <div class="flex flex-col items-end justify-center text-right font-mono text-xs shrink-0 text-terracotta">
-                <span class="font-bold">Termin</span>
-                {#if item.versandtAm}
-                  <span class="text-[10px] text-ink/40 mt-0.5">Versandt: {formatDate(item.versandtAm)}</span>
-                {/if}
-              </div>
-            </div>
-          {/each}
-        </div>
-      </div>
-    {/if}
+            {/each}
+          </div>
+        {/if}
+      {/if}
+    </div>
   </div>
 
   <!-- ARCHIV (standardmäßig eingeklappt) -->
