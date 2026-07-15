@@ -1,28 +1,37 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cream:          #1a1410;   /* --bg */
-  --color-surface:        #2a201c;   /* --bg-card */
-  --color-ink:            #ffffff;   /* --text */
-  --color-terracotta:     #d9686a;   /* --red-bright */
-  --color-terracotta-200: #904446;   /* --red */
-  --color-sage:           #e6c5a8;   /* --sand */
-  --color-sage-100:       #221a17;   /* --bg-elevated */
-  --color-line:           #3a302a;   /* --border */
+  --color-cream:          var(--background);
+  --color-surface:        var(--card);
+  --color-ink:            var(--foreground);
+  --color-terracotta:     var(--primary);
+  --color-terracotta-200: var(--primary-dark);
+  --color-sage:           var(--accent-sand);
+  --color-sage-100:       var(--bg-elevated);
+  --color-line:           var(--border);
   
   --font-sans:    "Inter", system-ui, -apple-system, sans-serif;
   --font-display: "Roboto Mono", monospace;
   --radius: 0.75rem;
 }
 
-:root {
+/* Theme 1: Dunkel (Hirschfeld) - Default */
+:root, [data-theme='dark-hirschfeld'] {
   --background: #1a1410;
-  --foreground: #ffffff;
+  --bg-elevated: #221a17;
   --card: #2a201c;
+  --card-hover: #332824;
   --card-foreground: #ffffff;
+  --foreground: #ffffff;
+  --foreground-dim: #d4c8c0;
+  --primary: #d9686a;
+  --primary-dark: #904446;
+  --accent-sand: #e6c5a8;
+  --border: #3a302a;
+  --border-bright: #4a3e36;
+
   --popover: #2a201c;
   --popover-foreground: #ffffff;
-  --primary: #d9686a;
   --primary-foreground: #ffffff;
   --secondary: #221a17;
   --secondary-foreground: #e6c5a8;
@@ -32,10 +41,99 @@
   --accent-foreground: #e6c5a8;
   --destructive: #904446;
   --destructive-foreground: #ffffff;
-  --border: #3a302a;
   --input: #3a302a;
   --ring: #d9686a;
   --radius: 0.75rem;
+}
+
+/* Theme 2: Hell (Swiss Editorial Mono structure + Warm Paper palette) */
+[data-theme='light-hybrid'] {
+  --background: #fbf6f0;
+  --bg-elevated: #f4ebe1;
+  --card: #ffffff;
+  --card-hover: #f4ebe1;
+  --card-foreground: #3a2e26;
+  --foreground: #3a2e26;
+  --foreground-dim: #7a6a5c;
+  --primary: #a8524f;
+  --primary-dark: #904446;
+  --accent-sand: #c9825f;
+  --border: #3a2e26;
+  --border-bright: #56453a;
+
+  --popover: #ffffff;
+  --popover-foreground: #3a2e26;
+  --primary-foreground: #ffffff;
+  --secondary: #f4ebe1;
+  --secondary-foreground: #c9825f;
+  --muted: #f4ebe1;
+  --muted-foreground: #7a6a5c;
+  --accent: #f4ebe1;
+  --accent-foreground: #c9825f;
+  --destructive: #904446;
+  --destructive-foreground: #ffffff;
+  --input: #3a2e26;
+  --ring: #a8524f;
+}
+
+/* Theme 3: Hell (Neumorphic) */
+[data-theme='light-neumorphic'] {
+  --background: #eef0f3;
+  --bg-elevated: #eef0f3;
+  --card: #ffffff;
+  --card-hover: #f5f6f8;
+  --card-foreground: #333333;
+  --foreground: #333333;
+  --foreground-dim: #667088;
+  --primary: #7c9cff;
+  --primary-dark: #5b7cff;
+  --accent-sand: #99a3c2;
+  --border: #dfe2e7;
+  --border-bright: #c7cbd3;
+
+  --popover: #ffffff;
+  --popover-foreground: #333333;
+  --primary-foreground: #ffffff;
+  --secondary: #eef0f3;
+  --secondary-foreground: #99a3c2;
+  --muted: #eef0f3;
+  --muted-foreground: #667088;
+  --accent: #eef0f3;
+  --accent-foreground: #99a3c2;
+  --destructive: #5b7cff;
+  --destructive-foreground: #ffffff;
+  --input: #dfe2e7;
+  --ring: #7c9cff;
+}
+
+/* Theme 4: Hell (Flat Notion Style) */
+[data-theme='light-flat'] {
+  --background: #ffffff;
+  --bg-elevated: #f7f6f4;
+  --card: #ffffff;
+  --card-hover: #f1f0ee;
+  --card-foreground: #37352f;
+  --foreground: #37352f;
+  --foreground-dim: #6b6660;
+  --primary: #b8823f;
+  --primary-dark: #9b6b2f;
+  --accent-sand: #6b6660;
+  --border: #eeeeee;
+  --border-bright: #dddddd;
+
+  --popover: #ffffff;
+  --popover-foreground: #37352f;
+  --primary-foreground: #ffffff;
+  --secondary: #f7f6f4;
+  --secondary-foreground: #6b6660;
+  --muted: #f7f6f4;
+  --muted-foreground: #6b6660;
+  --accent: #f7f6f4;
+  --accent-foreground: #6b6660;
+  --destructive: #9b6b2f;
+  --destructive-foreground: #ffffff;
+  --input: #eeeeee;
+  --ring: #b8823f;
 }
 
 * {
@@ -61,11 +159,12 @@ body {
  * Svelte components use hover:bg-cream and hover:bg-cream/50 for lists/rows.
  */
 .hover\:bg-cream:hover {
-  background-color: #332824 !important;
+  background-color: var(--card-hover) !important;
 }
 
 .hover\:bg-cream\/50:hover {
-  background-color: rgba(51, 40, 36, 0.5) !important;
+  background-color: var(--card-hover) !important;
+  opacity: 0.85;
 }
 
 /* Sidebar transition classes */

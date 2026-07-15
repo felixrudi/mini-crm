@@ -20,6 +20,7 @@
   let mobileMenuOpen = $state(false);
   let paletteOpen = $state(false);
   let sidebarCollapsed = $state(false);
+  let currentTheme = $state('dark-hirschfeld');
 
   // Restore sidebar state from localStorage on mount (browser only)
   $effect(() => {
@@ -35,6 +36,24 @@
   $effect(() => {
     if (browser) {
       localStorage.setItem('crm_sidebar_collapsed', String(sidebarCollapsed));
+    }
+  });
+
+  // Restore theme from localStorage on mount (browser only)
+  $effect(() => {
+    if (browser) {
+      const stored = localStorage.getItem('theme');
+      if (stored !== null) {
+        currentTheme = stored;
+      }
+    }
+  });
+
+  // Apply theme to document element and persist when it changes
+  $effect(() => {
+    if (browser) {
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      localStorage.setItem('theme', currentTheme);
     }
   });
 
@@ -105,7 +124,27 @@
       {/each}
     </nav>
 
-    <div class="px-3 py-3 border-t border-line">
+    <div class="px-3 py-3 border-t border-line space-y-3">
+      <!-- Theme Switcher -->
+      <div class="flex items-center justify-between px-1">
+        <span class="text-[10px] text-ink/40 uppercase font-semibold tracking-wider">Theme</span>
+        <div class="flex gap-1.5">
+          {#each [
+            { id: 'dark-hirschfeld', color: 'bg-[#1a1410] border-[#3a302a]', title: 'Dunkel (Hirschfeld)' },
+            { id: 'light-hybrid', color: 'bg-[#fbf6f0] border-[#3a2e26]', title: 'Hell' },
+            { id: 'light-neumorphic', color: 'bg-[#eef0f3] border-[#dfe2e7]', title: 'Hell (Neumorphic)' },
+            { id: 'light-flat', color: 'bg-[#ffffff] border-[#eeeeee]', title: 'Hell (Flat)' }
+          ] as t}
+            <button
+              onclick={() => currentTheme = t.id}
+              class="w-4 h-4 rounded-full border {t.color} {currentTheme === t.id ? 'ring-2 ring-terracotta ring-offset-2 ring-offset-surface' : 'opacity-70 hover:opacity-100'} transition-all cursor-pointer"
+              title={t.title}
+              aria-label={t.title}
+            ></button>
+          {/each}
+        </div>
+      </div>
+
       <button
         onclick={() => paletteOpen = true}
         class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-ink/40 hover:bg-cream hover:text-ink transition-colors border border-line"
