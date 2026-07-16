@@ -8,7 +8,6 @@
   import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
   import Users from '@lucide/svelte/icons/users';
   import Building2 from '@lucide/svelte/icons/building-2';
-  import Send from '@lucide/svelte/icons/send';
   import ScanLine from '@lucide/svelte/icons/scan-line';
   import Menu from '@lucide/svelte/icons/menu';
   import X from '@lucide/svelte/icons/x';
@@ -21,7 +20,7 @@
   let mobileMenuOpen = $state(false);
   let paletteOpen = $state(false);
   let sidebarCollapsed = $state(false);
-  let currentTheme = $state('dark-hirschfeld');
+  let currentTheme = $state('light-hybrid');
 
   // Restore sidebar state from localStorage on mount (browser only)
   $effect(() => {
@@ -62,13 +61,11 @@
     { href: '/', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/contacts', label: 'Kontakte', icon: Users },
     { href: '/companies', label: 'Firmen', icon: Building2 },
-    { href: '/prospects', label: 'Outreach', icon: Send },
     { href: '/outreach', label: 'Outreach-Überblick', icon: Columns },
-    { href: '/#scan', label: 'Scan & Import', icon: ScanLine },
+    { href: '/scan', label: 'Scan & Import', icon: ScanLine },
   ];
 
   function isActive(href: string): boolean {
-    if (href.includes('#')) return false;
     if (href === '/') return page.url.pathname === '/';
     return page.url.pathname.startsWith(href);
   }
@@ -132,8 +129,8 @@
         <span class="text-[10px] text-ink/40 uppercase font-semibold tracking-wider">Theme</span>
         <div class="flex gap-1.5">
           {#each [
+            { id: 'light-hybrid', color: 'bg-[#f9f6f2] border-[#e6c5a8]', title: 'Hirschfeld Cream' },
             { id: 'dark-hirschfeld', color: 'bg-[#1a1410] border-[#3a302a]', title: 'Dunkel (Hirschfeld)' },
-            { id: 'light-hybrid', color: 'bg-[#fbf6f0] border-[#3a2e26]', title: 'Hell' },
             { id: 'light-neumorphic', color: 'bg-[#eef0f3] border-[#dfe2e7]', title: 'Hell (Neumorphic)' },
             { id: 'light-flat', color: 'bg-[#ffffff] border-[#eeeeee]', title: 'Hell (Flat)' }
           ] as t}

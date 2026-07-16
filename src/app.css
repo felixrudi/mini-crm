@@ -20,8 +20,41 @@
   --radius: 0.75rem;
 }
 
-/* Theme 1: Dunkel (Hirschfeld) - Default */
-:root, [data-theme='dark-hirschfeld'] {
+/* Theme 1: Hirschfeld Cream (Mockup 1:1) - Default */
+:root, [data-theme='light-hybrid'] {
+  --background: #f9f6f2;
+  --bg-elevated: #f0e6db;
+  --card: #ffffff;
+  --card-hover: #f0e6db;
+  --card-foreground: #2b221d;
+  --foreground: #2b221d;
+  --foreground-dim: #70625a;
+  --primary: #904446;
+  --primary-dark: #904446;
+  --accent-sand: #e6c5a8;
+  --border: #e6c5a8;
+  --border-bright: #d9686a;
+
+  --popover: #ffffff;
+  --popover-foreground: #2b221d;
+  --primary-foreground: #ffffff;
+  --secondary: #f0e6db;
+  --secondary-foreground: #904446;
+  --muted: #f0e6db;
+  --muted-foreground: #70625a;
+  --accent: #f0e6db;
+  --accent-foreground: #904446;
+  --destructive: #904446;
+  --destructive-foreground: #ffffff;
+  --status-critical: #d9383a;
+  --status-away: #c98a3e;
+  --status-positive: #2e7d32;
+  --input: #e6c5a8;
+  --ring: #904446;
+}
+
+/* Theme 2: Dunkel (Hirschfeld) */
+[data-theme='dark-hirschfeld'] {
   --background: #1a1410;
   --bg-elevated: #221a17;
   --card: #2a201c;
@@ -52,39 +85,6 @@
   --input: #3a302a;
   --ring: #d9686a;
   --radius: 0.75rem;
-}
-
-/* Theme 2: Hell (Swiss Editorial Mono structure + Warm Paper palette) */
-[data-theme='light-hybrid'] {
-  --background: #fbf6f0;
-  --bg-elevated: #f4ebe1;
-  --card: #ffffff;
-  --card-hover: #f4ebe1;
-  --card-foreground: #3a2e26;
-  --foreground: #3a2e26;
-  --foreground-dim: #7a6a5c;
-  --primary: #a8524f;
-  --primary-dark: #904446;
-  --accent-sand: #c9825f;
-  --border: #3a2e26;
-  --border-bright: #56453a;
-
-  --popover: #ffffff;
-  --popover-foreground: #3a2e26;
-  --primary-foreground: #ffffff;
-  --secondary: #f4ebe1;
-  --secondary-foreground: #c9825f;
-  --muted: #f4ebe1;
-  --muted-foreground: #7a6a5c;
-  --accent: #f4ebe1;
-  --accent-foreground: #c9825f;
-  --destructive: #904446;
-  --destructive-foreground: #ffffff;
-  --status-critical: #904446;
-  --status-away: #c98a3e;
-  --status-positive: #c9825f;
-  --input: #3a2e26;
-  --ring: #a8524f;
 }
 
 /* Theme 3: Hell (Neumorphic) */

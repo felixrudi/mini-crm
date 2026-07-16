@@ -8,7 +8,20 @@ export const TABLES = {
   kontakteReal: 'tblnTqgSMBRZLWINOp6',
   interaktionenReal: 'tblNE3WqZkqafOGS9f1',
   prospects: 'tbl6LjxihnKhe0I5A1L',
-  ansichten: 'tblXQi0wnkZPOWtqh4i'
+  ansichten: 'tblXQi0wnkZPOWtqh4i',
+  outreach: 'tblLHWeNN9dq1ObUE0D'
+} as const;
+
+export const OUTREACH_FIELDS = {
+  kontakt: 'Kontakt',
+  status: 'Status',
+  versandtAm: 'Versandt am',
+  gesendetUeber: 'Gesendet über',
+  kanal: 'Kanal',
+  followUpFaellig: 'Follow-up fällig',
+  followUpGesendet: 'Follow-up gesendet',
+  antwortKurzfassung: 'Antwort (Kurzfassung)',
+  notiz: 'Notiz'
 } as const;
 
 export const FIRMEN_FIELDS = {

@@ -95,6 +95,20 @@
     }
   }
 
+  // Deep-Link von der Kontakte-Seite (Tab "Outreach-Marketing"): ?edit=<id> öffnet
+  // direkt die Bearbeiten-Form, ?new=1 die Neuanlage — Form bleibt hier die einzige
+  // Quelle, statt sie auf der Kontakte-Seite zu duplizieren.
+  $effect(() => {
+    const editId = $page.url.searchParams.get('edit');
+    if (editId) {
+      const p = data.prospects.find((pr) => pr.id === editId);
+      if (p) { editProspect = p; showForm = true; }
+    } else if ($page.url.searchParams.get('new') === '1') {
+      editProspect = null;
+      showForm = true;
+    }
+  });
+
   function isOverdue(date: string | null) {
     if (!date) return false;
     return new Date(date) < new Date();

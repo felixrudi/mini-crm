@@ -81,6 +81,14 @@ export const actions: Actions = {
     return { success: true };
   },
 
+  set_followup: async ({ request }) => {
+    const d = await request.formData();
+    await updateRecord(TABLES.prospects, d.get('id') as string, {
+      [PROSPECT_FIELDS.followupAm]: (d.get('followup_am') as string) || null
+    });
+    return { success: true };
+  },
+
   update: async ({ request }) => {
     const d = await request.formData();
     const id = d.get('id') as string;

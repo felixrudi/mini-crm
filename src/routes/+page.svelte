@@ -1,90 +1,24 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { enhance } from '$app/forms';
-  import { toast } from '$lib/toast';
   import { formatDate } from '$lib/utils';
   import type { Contact } from '$lib/types';
   import Users from '@lucide/svelte/icons/users';
   import Building2 from '@lucide/svelte/icons/building-2';
   import ArrowRight from '@lucide/svelte/icons/arrow-right';
-  import User from '@lucide/svelte/icons/user';
-  import Plus from '@lucide/svelte/icons/plus';
+  import UserPlus from '@lucide/svelte/icons/user-plus';
   import Camera from '@lucide/svelte/icons/camera';
-  import { goto } from '$app/navigation';
-  import Loader from '@lucide/svelte/icons/loader';
+  import Send from '@lucide/svelte/icons/send';
   import MessageCircle from '@lucide/svelte/icons/message-circle';
   import MessagesSquare from '@lucide/svelte/icons/messages-square';
   import Filter from '@lucide/svelte/icons/filter';
   import X from '@lucide/svelte/icons/x';
   import Mail from '@lucide/svelte/icons/mail';
   import Phone from '@lucide/svelte/icons/phone';
+  import Megaphone from '@lucide/svelte/icons/megaphone';
+  import CalendarClock from '@lucide/svelte/icons/calendar-clock';
+  import TrendingUp from '@lucide/svelte/icons/trending-up';
 
   let { data }: { data: PageData } = $props();
-
-  // --- Schnellkontakt ---
-  let quickName = $state('');
-  let quickTelefon = $state('');
-  let quickNotizen = $state('');
-
-  // --- Scankontakt ---
-  let scanDisplayName = $state('');
-  let scanVorname = $state('');
-  let scanNachname = $state('');
-  let scanFirma = $state('');
-  let scanRolle = $state('');
-  let scanEmail = $state('');
-  let scanTelefon = $state('');
-  let scanWhatsapp = $state('');
-  let scanWechatId = $state('');
-  let scanNotizen = $state('');
-  let scanScanning = $state(false);
-  let scanFileInput: HTMLInputElement;
-  let scanDirty = $state(false);
-
-  let scanName = $derived(
-    [scanVorname, scanNachname].filter(Boolean).join(' ') || scanDisplayName || scanFirma || 'Unbekannt'
-  );
-
-  async function handleScan(e: Event) {
-    const file = (e.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    scanScanning = true;
-    try {
-      const fd = new FormData();
-      fd.append('image', file);
-      const res = await fetch('/api/extract-card', { method: 'POST', body: fd });
-      if (!res.ok) { const t = await res.text(); throw new Error(t); }
-      const d = await res.json();
-      scanDisplayName = d.name ?? '';
-      scanVorname = d.vorname ?? '';
-      scanNachname = d.nachname ?? '';
-      scanFirma = d.firma ?? '';
-      scanRolle = d.rolle ?? '';
-      scanEmail = d.email ?? '';
-      scanTelefon = d.telefon ?? '';
-      scanWhatsapp = d.whatsapp ?? '';
-      scanWechatId = d.wechat_id ?? '';
-      // Zusatzinfos in Notizen
-      const extra = [
-        d.chinesischer_name ? `CN: ${d.chinesischer_name}` : '',
-        d.region ? `Region: ${d.region}` : '',
-      ].filter(Boolean).join('\n');
-      scanNotizen = extra;
-      scanDirty = true;
-      toast.success('Erkannt');
-    } catch (err: any) {
-      toast.error(err?.message?.slice(0, 120) || 'Erkennung fehlgeschlagen');
-    } finally {
-      scanScanning = false;
-      (e.target as HTMLInputElement).value = '';
-    }
-  }
-
-  function resetScan() {
-    scanDisplayName = scanVorname = scanNachname = scanFirma = scanRolle = '';
-    scanEmail = scanTelefon = scanWhatsapp = scanWechatId = scanNotizen = '';
-    scanDirty = false;
-  }
 
   // --- Filter ---
   const TAG_COLORS = [
@@ -134,10 +68,58 @@
   <!-- Header -->
   <div>
     <h1 class="font-display font-bold text-2xl text-ink">Dashboard</h1>
-    <p class="text-sm text-ink/50 mt-1">Übersicht</p>
+    <p class="text-sm text-ink/50 mt-1">Operative Steuerungszentrale — Übersicht &amp; anstehende Aufgaben</p>
   </div>
 
-  <!-- Stats -->
+  <!-- Outreach-KPIs (Woche vs. Monat) -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="bg-surface rounded-xl border border-line p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-xs font-semibold text-ink/40 uppercase tracking-wide">Outreach</p>
+        <Send class="w-4 h-4 text-terracotta" />
+      </div>
+      <div class="flex items-end justify-between">
+        <span class="text-xs text-ink/40">Woche</span>
+        <span class="font-display font-bold text-2xl text-ink">{data.outreachStats.outreachWoche}</span>
+      </div>
+      <div class="flex items-end justify-between mt-1">
+        <span class="text-xs text-ink/40">Monat</span>
+        <span class="font-display font-semibold text-lg text-ink/70">{data.outreachStats.outreachMonat}</span>
+      </div>
+    </div>
+
+    <div class="bg-surface rounded-xl border border-line p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-xs font-semibold text-ink/40 uppercase tracking-wide">Antworten</p>
+        <MessageCircle class="w-4 h-4 text-terracotta" />
+      </div>
+      <div class="flex items-end justify-between">
+        <span class="text-xs text-ink/40">Woche</span>
+        <span class="font-display font-bold text-2xl text-ink">{data.outreachStats.antwortenWoche}</span>
+      </div>
+      <div class="flex items-end justify-between mt-1">
+        <span class="text-xs text-ink/40">Monat</span>
+        <span class="font-display font-semibold text-lg text-ink/70">{data.outreachStats.antwortenMonat}</span>
+      </div>
+    </div>
+
+    <div class="bg-surface rounded-xl border border-line p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-xs font-semibold text-ink/40 uppercase tracking-wide">Rücklaufquote</p>
+        <TrendingUp class="w-4 h-4 text-terracotta" />
+      </div>
+      <div class="flex items-end justify-between">
+        <span class="text-xs text-ink/40">Woche</span>
+        <span class="font-display font-bold text-2xl text-ink">{data.outreachStats.rücklaufWoche}%</span>
+      </div>
+      <div class="flex items-end justify-between mt-1">
+        <span class="text-xs text-ink/40">Monat</span>
+        <span class="font-display font-semibold text-lg text-ink/70">{data.outreachStats.rücklaufMonat}%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kontakte/Firmen-Stats -->
   <div class="grid grid-cols-2 gap-4">
     <a href="/contacts" class="bg-surface rounded-xl border border-line p-5 hover:border-terracotta/30 transition-colors group">
       <div class="flex items-center justify-between mb-2">
@@ -157,112 +139,91 @@
     </a>
   </div>
 
-  <!-- Schnellkontakt + Scankontakt -->
+  <!-- Quick Actions + Zuletzt aktiv (links) / Antwort-Wiedervorlagen (rechts) -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-    <!-- Schnellkontakt -->
-    <div class="bg-surface rounded-xl border border-line p-5">
-      <h2 class="font-display font-semibold text-base text-ink mb-4 flex items-center gap-2">
-        <Plus class="w-4 h-4 text-terracotta" /> Schnellkontakt
-      </h2>
-      <form
-        method="POST"
-        action="/contacts?/create"
-        use:enhance={() => async ({ result, update }) => {
-          if (result.type === 'success') {
-            toast.success('Kontakt erstellt');
-            quickName = ''; quickTelefon = ''; quickNotizen = '';
-          } else { toast.error('Fehler'); }
-          await update();
-        }}
-      >
-        <input type="hidden" name="name" value={quickName || 'Unbekannt'} />
-        <div class="space-y-2.5">
-          <input type="text" bind:value={quickName} placeholder="Name *" required
-            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
-          <input type="tel" name="telefon" bind:value={quickTelefon} placeholder="Telefon"
-            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
-          <input type="text" name="notizen" bind:value={quickNotizen} placeholder="Notiz (optional)"
-            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
-          <button type="submit"
-            class="w-full px-4 py-2 bg-terracotta text-white rounded-lg text-sm font-medium hover:bg-terracotta/90 transition-colors">
-            Kontakt anlegen
-          </button>
+    <div class="space-y-6">
+      <!-- Quick Actions -->
+      <div class="bg-surface rounded-xl border border-line p-5">
+        <h2 class="font-display font-semibold text-base text-ink mb-4">⚡ Quick Actions</h2>
+        <div class="grid grid-cols-3 gap-3">
+          <a href="/scan" class="flex flex-col items-center justify-center gap-2 px-3 py-4 border border-line rounded-lg text-ink/70 hover:border-terracotta/40 hover:text-terracotta transition-colors text-center">
+            <UserPlus class="w-5 h-5" />
+            <span class="text-xs font-medium">+ Kontakt</span>
+          </a>
+          <a href="/scan" class="flex flex-col items-center justify-center gap-2 px-3 py-4 border border-line rounded-lg text-ink/70 hover:border-terracotta/40 hover:text-terracotta transition-colors text-center">
+            <Camera class="w-5 h-5" />
+            <span class="text-xs font-medium">Scan &amp; Import</span>
+          </a>
+          <a href="/contacts?db=outreach" class="flex flex-col items-center justify-center gap-2 px-3 py-4 border border-line rounded-lg text-ink/70 hover:border-terracotta/40 hover:text-terracotta transition-colors text-center">
+            <Send class="w-5 h-5" />
+            <span class="text-xs font-medium">Outreach starten</span>
+          </a>
         </div>
-      </form>
+      </div>
+
+      <!-- Zuletzt aktiv -->
+      <div class="bg-surface rounded-xl border border-line">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-line">
+          <h2 class="font-display font-semibold text-base text-ink flex items-center gap-2">
+            <Megaphone class="w-4 h-4 text-sage" /> Zuletzt aktiv
+          </h2>
+          <a href="/contacts" class="text-xs text-terracotta hover:underline">Alle →</a>
+        </div>
+        <div class="divide-y divide-line">
+          {#if data.recent_contacts.length === 0}
+            <div class="px-5 py-8 text-center">
+              <Users class="w-8 h-8 text-ink/20 mx-auto mb-2" />
+              <p class="text-sm text-ink/40">Noch keine Kontakte</p>
+            </div>
+          {:else}
+            {#each data.recent_contacts as contact}
+              <a href="/contacts/{contact.id}" class="flex items-center gap-3 px-5 py-3 hover:bg-cream transition-colors">
+                <div class="w-8 h-8 rounded-full bg-terracotta/10 flex items-center justify-center flex-shrink-0">
+                  <span class="text-sm font-semibold text-terracotta">{contact.name?.charAt(0)?.toUpperCase()}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-ink truncate">{contact.name}</p>
+                  <p class="text-xs text-ink/40 truncate">{contact.company_name ?? contact.rolle ?? '—'}</p>
+                </div>
+                {#if contact.last_activity}
+                  <span class="text-xs text-ink/30 flex-shrink-0">{formatDate(contact.last_activity)}</span>
+                {/if}
+              </a>
+            {/each}
+          {/if}
+        </div>
+      </div>
     </div>
 
-    <!-- Scankontakt -->
-    <div id="scan" class="bg-surface rounded-xl border border-line p-5">
-      <h2 class="font-display font-semibold text-base text-ink mb-4 flex items-center gap-2">
-        <Camera class="w-4 h-4 text-terracotta" /> Scan &amp; Import
-      </h2>
-      <form
-        method="POST"
-        action="/contacts?/create"
-        use:enhance={() => async ({ result, update }) => {
-          if (result.type === 'success' && result.data?.id) {
-            toast.success('Kontakt erstellt');
-            resetScan();
-            goto(`/contacts/${result.data.id}`);
-          } else if (result.type === 'success') {
-            toast.success('Kontakt erstellt');
-            resetScan();
-            goto('/contacts');
-          } else { toast.error('Fehler'); }
-          await update({ reset: false });
-        }}
-      >
-        <input type="hidden" name="name" value={scanName} />
-        <input bind:this={scanFileInput} type="file" accept="image/*" class="hidden" onchange={handleScan} />
-        <div class="space-y-2.5">
-          <!-- Scan-Button -->
-          <button
-            type="button"
-            onclick={() => scanFileInput.click()}
-            disabled={scanScanning}
-            class="w-full flex items-center justify-center gap-2 px-3 py-2.5 border border-dashed border-line rounded-lg text-sm text-ink/50 hover:border-terracotta/40 hover:text-terracotta transition-colors disabled:opacity-50 {scanDirty ? 'border-green-300 text-green-700 hover:border-green-400' : ''}"
-          >
-            {#if scanScanning}
-              <Loader class="w-4 h-4 animate-spin" /> Erkenne…
-            {:else if scanDirty}
-              <Camera class="w-4 h-4" /> Nochmal scannen
-            {:else}
-              <Camera class="w-4 h-4" /> Visitenkarte / WeChat / WhatsApp scannen
-            {/if}
-          </button>
-
-          <!-- Felder (immer sichtbar, nach Scan befüllt) -->
-          <input type="text" bind:value={scanDisplayName} placeholder="Anzeigename (z.B. Elon CQ Tinder)"
-            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
-          <div class="grid grid-cols-2 gap-2">
-            <input type="text" name="vorname" bind:value={scanVorname} placeholder="Vorname"
-              class="px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
-            <input type="text" name="nachname" bind:value={scanNachname} placeholder="Nachname"
-              class="px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+    <!-- Antwort-Wiedervorlagen -->
+    <div class="bg-surface rounded-xl border border-line">
+      <div class="px-5 py-4 border-b border-line">
+        <h2 class="font-display font-semibold text-base text-ink flex items-center gap-2">
+          <CalendarClock class="w-4 h-4 text-terracotta" /> Antwort-Wiedervorlagen
+        </h2>
+        <p class="text-xs text-ink/40 mt-1">Beantwortet, aber noch kein Follow-up raus — am schnellsten weitermachen</p>
+      </div>
+      <div class="divide-y divide-line">
+        {#if data.wiedervorlagen.length === 0}
+          <div class="px-5 py-8 text-center">
+            <CalendarClock class="w-8 h-8 text-ink/20 mx-auto mb-2" />
+            <p class="text-sm text-ink/40">Nichts offen — sauber.</p>
           </div>
-          <input type="text" name="firma_name" bind:value={scanFirma} placeholder="Firma"
-            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
-          <div class="grid grid-cols-2 gap-2">
-            <input type="email" name="email" bind:value={scanEmail} placeholder="E-Mail"
-              class="px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
-            <input type="tel" name="telefon" bind:value={scanTelefon} placeholder="Telefon"
-              class="px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <input type="text" name="whatsapp" bind:value={scanWhatsapp} placeholder="WhatsApp"
-              class="px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
-            <input type="text" name="wechat_id" bind:value={scanWechatId} placeholder="WeChat ID"
-              class="px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
-          </div>
-          <textarea name="notizen" bind:value={scanNotizen} placeholder="Notizen (CN-Name, Region, …)" rows="2"
-            class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta resize-none"></textarea>
-          <button type="submit"
-            class="w-full px-4 py-2 bg-terracotta text-white rounded-lg text-sm font-medium hover:bg-terracotta/90 transition-colors">
-            Kontakt anlegen
-          </button>
-        </div>
-      </form>
+        {:else}
+          {#each data.wiedervorlagen as w}
+            <a href="/outreach" class="block px-5 py-3 hover:bg-cream transition-colors">
+              <div class="flex items-center justify-between gap-2">
+                <p class="text-sm font-medium text-ink truncate">{w.name}</p>
+                {#if w.followUpFaellig}
+                  <span class="text-xs text-ink/40 flex-shrink-0">{formatDate(w.followUpFaellig)}</span>
+                {/if}
+              </div>
+              <p class="text-xs text-ink/50 mt-0.5 line-clamp-2">{w.antwort}</p>
+            </a>
+          {/each}
+        {/if}
+      </div>
     </div>
   </div>
 
@@ -370,36 +331,5 @@
       {/if}
     </div>
   {/if}
-
-  <!-- Zuletzt aktive Kontakte -->
-  <div class="bg-surface rounded-xl border border-line">
-    <div class="flex items-center justify-between px-5 py-4 border-b border-line">
-      <h2 class="font-display font-semibold text-base text-ink">Zuletzt aktiv</h2>
-      <a href="/contacts" class="text-xs text-terracotta hover:underline">Alle →</a>
-    </div>
-    <div class="divide-y divide-line">
-      {#if data.recent_contacts.length === 0}
-        <div class="px-5 py-8 text-center">
-          <Users class="w-8 h-8 text-ink/20 mx-auto mb-2" />
-          <p class="text-sm text-ink/40">Noch keine Kontakte</p>
-        </div>
-      {:else}
-        {#each data.recent_contacts as contact}
-          <a href="/contacts/{contact.id}" class="flex items-center gap-3 px-5 py-3 hover:bg-cream transition-colors">
-            <div class="w-8 h-8 rounded-full bg-terracotta/10 flex items-center justify-center flex-shrink-0">
-              <span class="text-sm font-semibold text-terracotta">{contact.name?.charAt(0)?.toUpperCase()}</span>
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-ink truncate">{contact.name}</p>
-              <p class="text-xs text-ink/40 truncate">{contact.company_name ?? contact.rolle ?? '—'}</p>
-            </div>
-            {#if contact.last_activity}
-              <span class="text-xs text-ink/30 flex-shrink-0">{formatDate(contact.last_activity)}</span>
-            {/if}
-          </a>
-        {/each}
-      {/if}
-    </div>
-  </div>
 
 </div>
