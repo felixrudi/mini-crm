@@ -77,11 +77,11 @@
   }
 </script>
 
-<div class="flex flex-wrap items-center gap-1.5 mb-4">
+<div class="flex flex-wrap items-center gap-1 mb-2">
   <button
     type="button"
     onclick={() => onselect({})}
-    class="px-3 py-1.5 rounded-full text-xs font-medium border transition-colors {isDefaultFilter(currentFilter)
+    class="px-2.5 py-1 rounded-full text-xs font-medium border transition-colors {isDefaultFilter(currentFilter)
       ? 'bg-terracotta text-white border-terracotta'
       : 'bg-surface text-ink/60 border-line hover:border-ink/30'}"
   >
@@ -94,13 +94,13 @@
         <input
           bind:value={renameValue}
           onkeydown={(e) => e.key === 'Enter' && confirmRename(view.id)}
-          class="px-2 py-1 bg-cream border border-terracotta/40 rounded-full text-xs w-28"
+          class="px-1.5 py-0.5 bg-cream border border-terracotta/40 rounded-full text-xs w-28"
         />
         <button type="button" onclick={() => confirmRename(view.id)} class="text-xs text-terracotta">✓</button>
         <button type="button" onclick={() => (renaming = null)} class="text-xs text-ink/40">✕</button>
       </div>
     {:else if deleteConfirm === view.id}
-      <div class="flex items-center gap-1 px-2 py-1 bg-red-50 border border-red-200 rounded-full text-xs">
+      <div class="flex items-center gap-1 px-1.5 py-0.5 bg-red-50 border border-red-200 rounded-full text-xs">
         <span>„{view.name}" löschen?</span>
         <button type="button" onclick={() => confirmDelete(view.id)} class="text-red-600 font-medium">Ja</button>
         <button type="button" onclick={() => (deleteConfirm = null)} class="text-ink/40">Nein</button>
@@ -110,7 +110,7 @@
         <button
           type="button"
           onclick={() => onselect(view.filter)}
-          class="px-3 py-1.5 rounded-full text-xs font-medium border transition-colors {filtersEqual(currentFilter, view.filter)
+          class="px-2.5 py-1 rounded-full text-xs font-medium border transition-colors {filtersEqual(currentFilter, view.filter)
             ? 'bg-terracotta text-white border-terracotta'
             : 'bg-surface text-ink/60 border-line hover:border-ink/30'}"
         >
@@ -134,7 +134,7 @@
         bind:value={newName}
         onkeydown={(e) => e.key === 'Enter' && saveCurrentAsView()}
         placeholder="Name der Ansicht"
-        class="px-2 py-1 bg-cream border border-terracotta/40 rounded-full text-xs w-32"
+        class="px-1.5 py-0.5 bg-cream border border-terracotta/40 rounded-full text-xs w-32"
       />
       <button type="button" onclick={saveCurrentAsView} class="text-xs text-terracotta">✓</button>
       <button type="button" onclick={() => (saving = false)} class="text-xs text-ink/40"><X class="w-3 h-3" /></button>
@@ -143,7 +143,7 @@
     <button
       type="button"
       onclick={() => (saving = true)}
-      class="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border border-dashed border-line text-ink/40 hover:border-terracotta hover:text-terracotta transition-colors"
+      class="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border border-dashed border-line text-ink/40 hover:border-terracotta hover:text-terracotta transition-colors"
     >
       <Plus class="w-3 h-3" /> Ansicht speichern
     </button>
