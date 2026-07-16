@@ -7,6 +7,7 @@ export type SortKey = 'name' | 'company' | 'tags';
 export type ContactFilterParams = {
   q: string;
   tags: string[];
+  tagsExclude?: string[];
   tagMode: TagMode;
   kanal: string;
   ort: string;
@@ -14,19 +15,22 @@ export type ContactFilterParams = {
 
 export function matchesContactFilters(
   fields: Record<string, unknown>,
-  { q, tags, tagMode, kanal, ort }: ContactFilterParams
+  { q, tags, tagsExclude, tagMode, kanal, ort }: ContactFilterParams
 ): boolean {
   if (q) {
     const hay = `${fields[KONTAKTE_FIELDS.name] ?? ''} ${fields[KONTAKTE_FIELDS.email] ?? ''}`.toLowerCase();
     if (!hay.includes(q.toLowerCase())) return false;
   }
+  const recordTags = (fields[KONTAKTE_FIELDS.tags] as string[] | undefined) ?? [];
   if (tags.length > 0) {
-    const recordTags = (fields[KONTAKTE_FIELDS.tags] as string[] | undefined) ?? [];
     const matches =
       tagMode === 'and'
         ? tags.every((t) => recordTags.includes(t))
         : tags.some((t) => recordTags.includes(t));
     if (!matches) return false;
+  }
+  if (tagsExclude && tagsExclude.length > 0) {
+    if (tagsExclude.some((t) => recordTags.includes(t))) return false;
   }
   if (kanal === 'whatsapp' && !fields[KONTAKTE_FIELDS.whatsapp]) return false;
   if (kanal === 'wechat' && !fields[KONTAKTE_FIELDS.wechatId]) return false;

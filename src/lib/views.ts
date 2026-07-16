@@ -6,11 +6,17 @@ function norm(f: ViewFilter): string {
   return JSON.stringify({
     q: f.q ?? '',
     tags: [...(f.tags ?? [])].sort(),
+    tagsExclude: [...(f.tagsExclude ?? [])].sort(),
     tagMode: f.tagMode ?? 'or',
     kanal: f.kanal ?? '',
     ort: f.ort ?? '',
     sort: f.sort ?? 'name',
-    group: f.group ?? ''
+    group: f.group ?? '',
+    pstatus: f.pstatus ?? '',
+    psort: f.psort ?? 'versandt',
+    pgroup: f.pgroup ?? '',
+    osort: f.osort ?? 'name',
+    ogroup: f.ogroup ?? ''
   });
 }
 

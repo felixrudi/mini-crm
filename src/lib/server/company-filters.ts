@@ -6,21 +6,25 @@ export type CompanySortKey = 'name' | 'contacts' | 'tags';
 
 export type CompanyFilterParams = {
   tags: string[];
+  tagsExclude?: string[];
   tagMode: TagMode;
   ort: string;
 };
 
 export function matchesCompanyFilters(
   fields: Record<string, unknown>,
-  { tags, tagMode, ort }: CompanyFilterParams
+  { tags, tagsExclude, tagMode, ort }: CompanyFilterParams
 ): boolean {
+  const recordTags = (fields[FIRMEN_FIELDS.tags] as string[] | undefined) ?? [];
   if (tags.length > 0) {
-    const recordTags = (fields[FIRMEN_FIELDS.tags] as string[] | undefined) ?? [];
     const matches =
       tagMode === 'and'
         ? tags.every((t) => recordTags.includes(t))
         : tags.some((t) => recordTags.includes(t));
     if (!matches) return false;
+  }
+  if (tagsExclude && tagsExclude.length > 0) {
+    if (tagsExclude.some((t) => recordTags.includes(t))) return false;
   }
   if (ort && fields[FIRMEN_FIELDS.ort] !== ort) return false;
   return true;
