@@ -3,8 +3,10 @@
   import { page } from '$app/state';
   import { browser } from '$app/environment';
   import { afterNavigate } from '$app/navigation';
+  import { pwaInfo } from 'virtual:pwa-info';
   import ToastContainer from '$lib/components/ToastContainer.svelte';
   import CommandPalette from '$lib/components/CommandPalette.svelte';
+  import UpdatePrompt from '$lib/components/UpdatePrompt.svelte';
   import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
   import Users from '@lucide/svelte/icons/users';
   import Building2 from '@lucide/svelte/icons/building-2';
@@ -85,7 +87,14 @@
   });
 </script>
 
+<svelte:head>
+  {#if pwaInfo}
+    {@html pwaInfo.webManifest.linkTag}
+  {/if}
+</svelte:head>
+
 <ToastContainer />
+<UpdatePrompt />
 {#if browser}
   <CommandPalette bind:open={paletteOpen} />
 {/if}
