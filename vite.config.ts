@@ -42,6 +42,22 @@ export default defineConfig({
         navigateFallback: null,
         runtimeCaching: [
           {
+            // Explicit belt-and-suspenders: every /api/* route (src/routes/api/**)
+            // returns per-request, cookie/Bearer-token-gated JSON — never cache it,
+            // even though Workbox's default behavior already leaves unmatched
+            // requests untouched (this rule documents the intent explicitly so a
+            // future broader runtimeCaching rule can't accidentally shadow it).
+            // Workbox matches urlPattern against the full url.href (e.g.
+            // "https://crm.hirschfeld.at/api/contacts"), not just the pathname,
+            // so the pattern is intentionally unanchored — it matches "/api/"
+            // as a substring anywhere in the href. Kept FIRST in this array (ahead
+            // of the Google Fonts rules) so it always gets first refusal on
+            // /api/* requests, regardless of what broader same-origin rules are
+            // ever added below it — earlier rules win in Workbox.
+            urlPattern: /\/api\//,
+            handler: 'NetworkOnly'
+          },
+          {
             // Google Fonts stylesheet (src/app.html <link> to fonts.googleapis.com) —
             // this is the "gecachter App-Shell" fix: without this, every page
             // re-fetches the @font-face CSS from Google on every load.
@@ -59,15 +75,6 @@ export default defineConfig({
               expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
               cacheableResponse: { statuses: [0, 200] }
             }
-          },
-          {
-            // Explicit belt-and-suspenders: every /api/* route (src/routes/api/**)
-            // returns per-request, cookie/Bearer-token-gated JSON — never cache it,
-            // even though Workbox's default behavior already leaves unmatched
-            // requests untouched (this rule documents the intent explicitly so a
-            // future broader runtimeCaching rule can't accidentally shadow it).
-            urlPattern: /^\/api\/.*/,
-            handler: 'NetworkOnly'
           }
         ]
       }
