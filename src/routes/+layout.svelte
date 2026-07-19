@@ -7,6 +7,7 @@
   import ToastContainer from '$lib/components/ToastContainer.svelte';
   import CommandPalette from '$lib/components/CommandPalette.svelte';
   import UpdatePrompt from '$lib/components/UpdatePrompt.svelte';
+  import InstallPrompt from '$lib/components/InstallPrompt.svelte';
   import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
   import Users from '@lucide/svelte/icons/users';
   import Building2 from '@lucide/svelte/icons/building-2';
@@ -95,6 +96,7 @@
 
 <ToastContainer />
 <UpdatePrompt />
+<InstallPrompt />
 {#if browser}
   <CommandPalette bind:open={paletteOpen} />
 {/if}
