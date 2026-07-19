@@ -130,7 +130,7 @@
   <title>Outreach-Überblick · Hirschfeld CRM</title>
 </svelte:head>
 
-<div class="px-4 py-6 md:px-6 md:py-6 max-w-[1400px] mx-auto space-y-8">
+<div class="px-4 py-6 md:px-6 md:py-6 max-w-[1400px] mx-auto space-y-8 overflow-x-hidden">
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>

@@ -390,7 +390,7 @@
   </tr>
 {/snippet}
 
-<div class="px-4 py-4 md:px-6 md:py-6 max-w-[1400px] mx-auto">
+<div class="px-4 py-4 md:px-6 md:py-6 max-w-[1400px] mx-auto overflow-x-hidden">
   <div class="flex items-start justify-between mb-4 flex-wrap gap-3">
     <div>
       <h1 class="font-display font-bold text-2xl text-ink">

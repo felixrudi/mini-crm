@@ -40,7 +40,7 @@
   }
 </script>
 
-<div class="px-4 py-4 md:px-6 md:py-6 max-w-[1400px] mx-auto">
+<div class="px-4 py-4 md:px-6 md:py-6 max-w-[1400px] mx-auto overflow-x-hidden">
   <a href="/companies" class="inline-flex items-center gap-1.5 text-sm text-ink/50 hover:text-ink transition-colors mb-6">
     <ArrowLeft class="w-4 h-4" />
     Alle Firmen

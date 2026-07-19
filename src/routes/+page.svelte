@@ -63,7 +63,7 @@
   let hasFilter = $derived(!!activeTag || !!activeKanal);
 </script>
 
-<div class="p-6 max-w-[1400px] mx-auto space-y-6">
+<div class="p-6 max-w-[1400px] mx-auto space-y-6 overflow-x-hidden">
 
   <!-- Header -->
   <div>
