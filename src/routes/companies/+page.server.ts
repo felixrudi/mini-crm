@@ -14,6 +14,7 @@ function parseTags(d: FormData): string[] {
 
 export const load: PageServerLoad = async ({ url }) => {
   const db = url.searchParams.get('db') === 'outreach' ? 'outreach' : 'crm';
+  const q = url.searchParams.get('q') || '';
   const tagsParam = url.searchParams.get('tags');
   const tags = tagsParam ? tagsParam.split(',').map((t) => t.trim()).filter(Boolean) : [];
   const tagsExcludeParam = url.searchParams.get('tagsExclude');
@@ -54,8 +55,10 @@ export const load: PageServerLoad = async ({ url }) => {
     }
   }
 
+  const needle = q.trim().toLowerCase();
   const companies = sortCompanies(
     firmenRecs
+      // Tag/Ort-Filter zuerst; Textsuche (inkl. Kontaktnamen) nach dem Map.
       .filter((r) => matchesCompanyFilters(r.fields, { tags, tagsExclude, tagMode, ort }))
       .map((r) => ({
         id: r.id,
@@ -71,7 +74,25 @@ export const load: PageServerLoad = async ({ url }) => {
         created_at: r.createdTime ?? '',
         contact_count: contactCountByCompany.get(r.id) ?? 0,
         contact_names: contactNamesByCompany.get(r.id) ?? []
-      })),
+      }))
+      .filter((c) => {
+        if (!needle) return true;
+        const hay = [
+          c.name,
+          c.website,
+          c.telefon,
+          c.notizen,
+          c.ort,
+          c.strasse,
+          c.plz,
+          (c.tags ?? []).join(' '),
+          (c.contact_names ?? []).join(' ')
+        ]
+          .map((v) => (v ?? '').toString())
+          .join(' ')
+          .toLowerCase();
+        return hay.includes(needle);
+      }),
     sort
   );
 
@@ -140,6 +161,7 @@ export const load: PageServerLoad = async ({ url }) => {
   return {
     db,
     companies,
+    q,
     tags,
     tagsExclude,
     tagMode,

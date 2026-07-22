@@ -11,6 +11,19 @@ test('matchesCompanyFilters: ort-Filter schließt andere Städte aus', () => {
   assert.equal(matchesCompanyFilters(fields, { ...base, ort: 'Graz' }), true);
 });
 
+test('matchesCompanyFilters: Textsuche findet Name und Notizen', () => {
+  const fields = {
+    [FIRMEN_FIELDS.name]: 'A1 Telekom Austria AG',
+    [FIRMEN_FIELDS.notizen]: 'Mobilfunk Vertrag 380103837',
+    [FIRMEN_FIELDS.website]: 'https://www.a1.net',
+    [FIRMEN_FIELDS.telefon]: '0800 664 664'
+  };
+  assert.equal(matchesCompanyFilters(fields, { ...base, q: 'telekom' }), true);
+  assert.equal(matchesCompanyFilters(fields, { ...base, q: '380103837' }), true);
+  assert.equal(matchesCompanyFilters(fields, { ...base, q: 'a1.net' }), true);
+  assert.equal(matchesCompanyFilters(fields, { ...base, q: 'xyz-nicht-da' }), false);
+});
+
 test('matchesCompanyFilters: Tag-UND-Modus verlangt jeden gewählten Tag', () => {
   const fields = { [FIRMEN_FIELDS.tags]: ['stb', 'wien'] };
   assert.equal(matchesCompanyFilters(fields, { ...base, tags: ['stb', 'wp'], tagMode: 'and' }), false);

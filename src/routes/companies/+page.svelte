@@ -111,6 +111,19 @@
   let editTags = $state<string[]>([]);
   let createTags = $state<string[]>([]);
 
+  // CRM-Textsuche (Name, Website, Telefon, Notizen, Kontaktnamen)
+  let searchValue = $state(data.q ?? '');
+  let crmSearchDebounce: ReturnType<typeof setTimeout>;
+  function handleCrmSearch() {
+    clearTimeout(crmSearchDebounce);
+    crmSearchDebounce = setTimeout(() => {
+      const url = new URL($page.url);
+      if (searchValue.trim()) url.searchParams.set('q', searchValue.trim());
+      else url.searchParams.delete('q');
+      goto(url.toString(), { replaceState: true, keepFocus: true, noScroll: true, invalidateAll: true });
+    }, 300);
+  }
+
   function startEdit(company: Company) {
     editId = company.id;
     editName = company.name;
@@ -129,7 +142,7 @@
   let ort = $state(data.ort ?? '');
   let sortBy = $state<'name' | 'contacts' | 'tags'>(data.sort ?? 'name');
   let group = $state<'' | 'tags'>(data.group === 'tags' ? 'tags' : '');
-  let hasFilter = $derived(selectedTags.length > 0 || excludedTags.length > 0 || ort !== '');
+  let hasFilter = $derived(selectedTags.length > 0 || excludedTags.length > 0 || ort !== '' || !!searchValue.trim());
 
   // Eingeklappte Gruppen (nur clientseitig, kein Teable-Persist nötig).
   let collapsedGroups = $state<Set<string>>(new Set());
@@ -140,10 +153,12 @@
     collapsedGroups = next;
   }
 
-  let currentFilter = $derived<ViewFilter>({ tags: selectedTags, tagsExclude: excludedTags, tagMode, sort: sortBy, ort, group });
+  let currentFilter = $derived<ViewFilter>({ q: searchValue, tags: selectedTags, tagsExclude: excludedTags, tagMode, sort: sortBy, ort, group });
 
   function updateUrl() {
     const url = new URL($page.url);
+    if (searchValue.trim()) url.searchParams.set('q', searchValue.trim());
+    else url.searchParams.delete('q');
     if (selectedTags.length > 0) url.searchParams.set('tags', selectedTags.join(','));
     else url.searchParams.delete('tags');
     if (excludedTags.length > 0) url.searchParams.set('tagsExclude', excludedTags.join(','));
@@ -193,8 +208,9 @@
   function setOrt(o: string) { ort = o; updateUrl(); }
   function setSort(s: 'name' | 'contacts' | 'tags') { sortBy = s; updateUrl(); }
   function setGroup(g: '' | 'tags') { group = g; updateUrl(); }
-  function clearFilter() { selectedTags = []; excludedTags = []; tagMode = 'or'; ort = ''; updateUrl(); }
+  function clearFilter() { searchValue = ''; selectedTags = []; excludedTags = []; tagMode = 'or'; ort = ''; updateUrl(); }
   function applyView(filter: ViewFilter) {
+    searchValue = filter.q ?? '';
     selectedTags = filter.tags ?? [];
     excludedTags = filter.tagsExclude ?? [];
     tagMode = filter.tagMode === 'and' ? 'and' : 'or';
@@ -360,6 +376,15 @@
 
     <!-- Filterleiste -->
     <div class="bg-surface rounded-xl border border-line p-3 mb-3">
+      <div class="mb-2">
+        <p class="text-[11px] font-bold text-ink/40 uppercase tracking-wide mb-1">🔍 Live-Suche</p>
+        <div class="relative max-w-sm">
+          <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink/30" />
+          <input type="text" bind:value={searchValue} oninput={handleCrmSearch}
+            placeholder="Name, Website, Telefon, Notiz, Kontakt…"
+            class="w-full pl-8 pr-3 py-1 bg-cream border border-line rounded-lg text-xs text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+        </div>
+      </div>
       {#if data.allTags.length > 0}
         <p class="text-[11px] font-bold text-ink/40 uppercase tracking-wide mb-1">🏷 Tags</p>
         <div class="flex flex-wrap gap-1">
@@ -461,7 +486,11 @@
     {#if data.companies.length === 0}
       <div class="bg-surface rounded-xl border border-line py-16 text-center">
         <Building2 class="w-10 h-10 text-ink/15 mx-auto mb-3" />
-        <p class="text-sm font-medium text-ink/50">{hasFilter ? 'Keine Firmen für diesen Filter' : 'Noch keine Firmen'}</p>
+        <p class="text-sm font-medium text-ink/50">
+          {#if data.q}Keine Ergebnisse für „{data.q}"
+          {:else if hasFilter}Keine Firmen für diesen Filter
+          {:else}Noch keine Firmen{/if}
+        </p>
       </div>
     {:else if companyGroups}
       <div class="space-y-4">

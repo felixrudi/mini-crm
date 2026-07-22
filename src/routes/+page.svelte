@@ -17,8 +17,64 @@
   import Megaphone from '@lucide/svelte/icons/megaphone';
   import CalendarClock from '@lucide/svelte/icons/calendar-clock';
   import TrendingUp from '@lucide/svelte/icons/trending-up';
+  import Search from '@lucide/svelte/icons/search';
+  import User from '@lucide/svelte/icons/user';
 
   let { data }: { data: PageData } = $props();
+
+  // --- Globale Suche (Kontakte + Firmen) ---
+  type SearchCompany = {
+    id: string;
+    name: string;
+    website: string | null;
+    telefon: string | null;
+    ort: string | null;
+    notizen: string | null;
+  };
+
+  let globalQuery = $state('');
+  let globalContacts = $state<Contact[]>([]);
+  let globalCompanies = $state<SearchCompany[]>([]);
+  let globalLoading = $state(false);
+  let globalDebounce: ReturnType<typeof setTimeout>;
+  let searchInputEl: HTMLInputElement;
+
+  let hasGlobalResults = $derived(globalContacts.length > 0 || globalCompanies.length > 0);
+  let showGlobalPanel = $derived(!!globalQuery.trim());
+
+  function handleGlobalSearch() {
+    clearTimeout(globalDebounce);
+    const q = globalQuery.trim();
+    if (!q) {
+      globalContacts = [];
+      globalCompanies = [];
+      globalLoading = false;
+      return;
+    }
+    globalLoading = true;
+    globalDebounce = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+        if (res.ok) {
+          const d = await res.json();
+          globalContacts = d.contacts ?? [];
+          globalCompanies = d.companies ?? [];
+        }
+      } catch {
+        // ignore network blips
+      } finally {
+        globalLoading = false;
+      }
+    }, 250);
+  }
+
+  function clearGlobalSearch() {
+    globalQuery = '';
+    globalContacts = [];
+    globalCompanies = [];
+    globalLoading = false;
+    searchInputEl?.focus();
+  }
 
   // --- Filter ---
   const TAG_COLORS = [
@@ -69,6 +125,112 @@
   <div>
     <h1 class="font-display font-bold text-2xl text-ink">Dashboard</h1>
     <p class="text-sm text-ink/50 mt-1">Operative Steuerungszentrale — Übersicht &amp; anstehende Aufgaben</p>
+  </div>
+
+  <!-- Globale Suche über alles -->
+  <div class="bg-surface rounded-xl border border-line p-4 sm:p-5">
+    <div class="relative">
+      <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink/35" />
+      <input
+        bind:this={searchInputEl}
+        bind:value={globalQuery}
+        oninput={handleGlobalSearch}
+        type="search"
+        placeholder="Suche über alles — Kontakte, Firmen, Telefon, E-Mail, Notizen…"
+        class="w-full pl-10 pr-10 py-3 bg-cream border border-line rounded-xl text-sm text-ink placeholder-ink/35 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+        autocomplete="off"
+      />
+      {#if globalQuery}
+        <button
+          type="button"
+          onclick={clearGlobalSearch}
+          class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ink/35 hover:text-ink transition-colors rounded"
+          aria-label="Suche leeren"
+        >
+          <X class="w-4 h-4" />
+        </button>
+      {/if}
+    </div>
+
+    {#if showGlobalPanel}
+      <div class="mt-4 border-t border-line pt-4">
+        {#if globalLoading && !hasGlobalResults}
+          <div class="py-6 text-center">
+            <div class="w-5 h-5 border-2 border-terracotta border-t-transparent rounded-full animate-spin mx-auto"></div>
+          </div>
+        {:else if !hasGlobalResults}
+          <p class="text-sm text-ink/40 text-center py-4">Keine Treffer für „{globalQuery.trim()}"</p>
+        {:else}
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Kontakte -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-[11px] font-bold text-ink/40 uppercase tracking-wide flex items-center gap-1.5">
+                  <User class="w-3.5 h-3.5" /> Kontakte
+                </p>
+                <span class="text-xs text-ink/35">{globalContacts.length}</span>
+              </div>
+              {#if globalContacts.length === 0}
+                <p class="text-xs text-ink/30 py-2">Keine Kontakte</p>
+              {:else}
+                <div class="divide-y divide-line rounded-lg border border-line overflow-hidden">
+                  {#each globalContacts as contact}
+                    <a href="/contacts/{contact.id}" class="flex items-center gap-3 px-3 py-2.5 hover:bg-cream transition-colors">
+                      <div class="w-8 h-8 rounded-full bg-terracotta/10 flex items-center justify-center flex-shrink-0">
+                        <span class="text-xs font-semibold text-terracotta">{contact.name?.charAt(0)?.toUpperCase()}</span>
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <p class="text-sm font-medium text-ink truncate">{contact.name}</p>
+                        <p class="text-xs text-ink/40 truncate">{contact.company_name ?? contact.rolle ?? contact.email ?? '—'}</p>
+                      </div>
+                      {#if contact.telefon}
+                        <span class="text-[11px] font-mono text-ink/35 flex-shrink-0 hidden sm:inline">{contact.telefon}</span>
+                      {/if}
+                    </a>
+                  {/each}
+                </div>
+                <a href="/contacts?q={encodeURIComponent(globalQuery.trim())}" class="inline-flex items-center gap-1 mt-2 text-xs text-terracotta hover:underline">
+                  Alle Kontakte →
+                </a>
+              {/if}
+            </div>
+
+            <!-- Firmen -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-[11px] font-bold text-ink/40 uppercase tracking-wide flex items-center gap-1.5">
+                  <Building2 class="w-3.5 h-3.5" /> Firmen
+                </p>
+                <span class="text-xs text-ink/35">{globalCompanies.length}</span>
+              </div>
+              {#if globalCompanies.length === 0}
+                <p class="text-xs text-ink/30 py-2">Keine Firmen</p>
+              {:else}
+                <div class="divide-y divide-line rounded-lg border border-line overflow-hidden">
+                  {#each globalCompanies as company}
+                    <a href="/companies/{company.id}" class="flex items-center gap-3 px-3 py-2.5 hover:bg-cream transition-colors">
+                      <div class="w-8 h-8 rounded-lg bg-sage-100 flex items-center justify-center flex-shrink-0">
+                        <Building2 class="w-4 h-4 text-sage" />
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <p class="text-sm font-medium text-ink truncate">{company.name}</p>
+                        <p class="text-xs text-ink/40 truncate">{company.ort ?? company.website?.replace(/^https?:\/\//, '') ?? company.notizen ?? '—'}</p>
+                      </div>
+                      {#if company.telefon}
+                        <span class="text-[11px] font-mono text-ink/35 flex-shrink-0 hidden sm:inline">{company.telefon}</span>
+                      {/if}
+                    </a>
+                  {/each}
+                </div>
+                <a href="/companies?q={encodeURIComponent(globalQuery.trim())}" class="inline-flex items-center gap-1 mt-2 text-xs text-terracotta hover:underline">
+                  Alle Firmen →
+                </a>
+              {/if}
+            </div>
+          </div>
+        {/if}
+      </div>
+    {/if}
   </div>
 
   <!-- Outreach-KPIs (Woche vs. Monat) -->

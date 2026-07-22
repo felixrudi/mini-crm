@@ -6,13 +6,32 @@
   import User from '@lucide/svelte/icons/user';
   import Building2 from '@lucide/svelte/icons/building-2';
 
+  type SearchCompany = {
+    id: string;
+    name: string;
+    website: string | null;
+    telefon: string | null;
+    ort: string | null;
+    notizen: string | null;
+  };
+
+  type ResultItem =
+    | { kind: 'contact'; data: Contact }
+    | { kind: 'company'; data: SearchCompany };
+
   let { open = $bindable(false) }: { open: boolean } = $props();
 
   let query = $state('');
-  let results = $state<Contact[]>([]);
+  let contacts = $state<Contact[]>([]);
+  let companies = $state<SearchCompany[]>([]);
   let selectedIndex = $state(0);
   let loading = $state(false);
   let inputEl: HTMLInputElement;
+
+  let results = $derived<ResultItem[]>([
+    ...contacts.map((data) => ({ kind: 'contact' as const, data })),
+    ...companies.map((data) => ({ kind: 'company' as const, data }))
+  ]);
 
   $effect(() => {
     if (open && inputEl) {
@@ -20,7 +39,8 @@
     }
     if (!open) {
       query = '';
-      results = [];
+      contacts = [];
+      companies = [];
       selectedIndex = 0;
     }
   });
@@ -30,16 +50,18 @@
   function handleInput() {
     clearTimeout(debounceTimer);
     if (!query.trim()) {
-      results = [];
+      contacts = [];
+      companies = [];
       return;
     }
     loading = true;
     debounceTimer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/contacts/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
         if (res.ok) {
           const data = await res.json();
-          results = data.contacts ?? [];
+          contacts = data.contacts ?? [];
+          companies = data.companies ?? [];
           selectedIndex = 0;
         }
       } catch {
@@ -50,26 +72,24 @@
     }, 200);
   }
 
+  function openResult(item: ResultItem) {
+    if (item.kind === 'contact') goto(`/contacts/${item.data.id}`);
+    else goto(`/companies/${item.data.id}`);
+    open = false;
+  }
+
   function handleKeydown(e: KeyboardEvent) {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      selectedIndex = Math.min(selectedIndex + 1, results.length - 1);
+      selectedIndex = Math.min(selectedIndex + 1, Math.max(results.length - 1, 0));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       selectedIndex = Math.max(selectedIndex - 1, 0);
     } else if (e.key === 'Enter') {
-      if (results[selectedIndex]) {
-        goto(`/contacts/${results[selectedIndex].id}`);
-        open = false;
-      }
+      if (results[selectedIndex]) openResult(results[selectedIndex]);
     } else if (e.key === 'Escape') {
       open = false;
     }
-  }
-
-  function selectContact(contact: Contact) {
-    goto(`/contacts/${contact.id}`);
-    open = false;
   }
 </script>
 
@@ -96,7 +116,7 @@
           oninput={handleInput}
           onkeydown={handleKeydown}
           type="text"
-          placeholder="Kontakt suchen..."
+          placeholder="Kontakte & Firmen suchen…"
           class="flex-1 bg-transparent text-base text-ink placeholder-ink/30 focus:outline-none"
         />
         {#if loading}
@@ -109,32 +129,43 @@
       </div>
 
       {#if results.length > 0}
-        <ul class="py-2 max-h-72 overflow-y-auto">
-          {#each results as contact, i}
+        <ul class="py-2 max-h-80 overflow-y-auto">
+          {#each results as item, i}
             <li>
               <button
                 class="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-cream transition-colors {i === selectedIndex ? 'bg-cream' : ''}"
-                onclick={() => selectContact(contact)}
+                onclick={() => openResult(item)}
               >
-                <div class="w-8 h-8 rounded-full bg-terracotta/10 flex items-center justify-center flex-shrink-0">
-                  <User class="w-4 h-4 text-terracotta" />
-                </div>
-                <div class="min-w-0">
-                  <p class="text-sm font-medium text-ink truncate">{contact.name}</p>
-                  {#if contact.company_name}
-                    <p class="text-xs text-ink/50 flex items-center gap-1 truncate">
-                      <Building2 class="w-3 h-3" />
-                      {contact.company_name}
+                {#if item.kind === 'contact'}
+                  <div class="w-8 h-8 rounded-full bg-terracotta/10 flex items-center justify-center flex-shrink-0">
+                    <User class="w-4 h-4 text-terracotta" />
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm font-medium text-ink truncate">{item.data.name}</p>
+                    <p class="text-xs text-ink/50 truncate">
+                      {item.data.company_name ?? item.data.rolle ?? item.data.email ?? 'Kontakt'}
                     </p>
-                  {/if}
-                </div>
+                  </div>
+                  <span class="text-[10px] uppercase tracking-wide text-ink/30 flex-shrink-0">Kontakt</span>
+                {:else}
+                  <div class="w-8 h-8 rounded-lg bg-sage-100 flex items-center justify-center flex-shrink-0">
+                    <Building2 class="w-4 h-4 text-sage" />
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm font-medium text-ink truncate">{item.data.name}</p>
+                    <p class="text-xs text-ink/50 truncate">
+                      {item.data.ort ?? item.data.website?.replace(/^https?:\/\//, '') ?? item.data.telefon ?? 'Firma'}
+                    </p>
+                  </div>
+                  <span class="text-[10px] uppercase tracking-wide text-ink/30 flex-shrink-0">Firma</span>
+                {/if}
               </button>
             </li>
           {/each}
         </ul>
       {:else if query.trim() && !loading}
         <div class="py-8 text-center">
-          <p class="text-sm text-ink/40">Keine Kontakte gefunden für „{query}"</p>
+          <p class="text-sm text-ink/40">Keine Treffer für „{query}"</p>
         </div>
       {:else if !query.trim()}
         <div class="py-6 text-center">
