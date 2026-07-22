@@ -1,42 +1,17 @@
 import {
-  getRecord,
-  listRecords,
   createRecord,
   updateRecord,
-  deleteRecord,
-  linkId
+  deleteRecord
 } from '$lib/server/teable';
-import { TABLES, FIRMEN_FIELDS, KONTAKTE_FIELDS, INTERAKTIONEN_FIELDS } from '$lib/server/teable-schema';
-import { mapCompany, mapContact, mapTimelineEntry } from '$lib/server/teable-map';
+import { TABLES, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS } from '$lib/server/teable-schema';
+import { loadCompanyDetail } from '$lib/server/detail-loaders';
 import { error } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
-  const company = await getRecord(TABLES.firmen, params.id);
-  if (!company) throw error(404, 'Firma nicht gefunden');
-
-  const [allContacts, allInteractions] = await Promise.all([
-    listRecords(TABLES.kontakteReal),
-    listRecords(TABLES.interaktionenReal)
-  ]);
-
-  const contacts = allContacts
-    .filter((c) => linkId(c.fields[KONTAKTE_FIELDS.firma]) === params.id)
-    .map((c) => mapContact(c))
-    .sort((a, b) => String(a.name).localeCompare(String(b.name)));
-
-  // Firmen-eigene Interaktionen (Link-Feld Firma) — unabhängig von Kontakten,
-  // damit Service-Anrufe ohne Dummy-Kontakt vermerkt werden können.
-  const timeline = allInteractions
-    .filter((r) => linkId(r.fields[INTERAKTIONEN_FIELDS.firma]) === params.id)
-    .map(mapTimelineEntry)
-    .sort((a, b) => b.datum.localeCompare(a.datum));
-
-  return {
-    company: mapCompany(company),
-    contacts,
-    timeline
-  };
+  const data = await loadCompanyDetail(params.id);
+  if (!data) throw error(404, 'Firma nicht gefunden');
+  return data;
 };
 
 export const actions: Actions = {

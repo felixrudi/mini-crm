@@ -29,7 +29,13 @@ export const load: PageServerLoad = async () => {
     if (!cur || datum > cur) lastActivityByContact.set(cid, datum);
   }
 
-  const recent_contacts = kontakteRecs
+  // Standard-Listen ohne Archiv-Kontakte
+  const activeKontakte = kontakteRecs.filter((c) => {
+    const tags = (c.fields[KONTAKTE_FIELDS.tags] as string[] | undefined) ?? [];
+    return !tags.includes('archiv');
+  });
+
+  const recent_contacts = activeKontakte
     .map((c) => ({
       ...mapContact(c, firmaNameById.get(linkId(c.fields[KONTAKTE_FIELDS.firma]) ?? '') ?? null),
       last_activity: lastActivityByContact.get(c.id) ?? null
@@ -42,7 +48,7 @@ export const load: PageServerLoad = async () => {
     .slice(0, 8);
 
   const stats = {
-    contacts: kontakteRecs.length,
+    contacts: activeKontakte.length,
     companies: firmenRecs.length
   };
 

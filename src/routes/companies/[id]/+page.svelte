@@ -3,6 +3,7 @@
   import { enhance } from '$app/forms';
   import { toast } from '$lib/toast';
   import { invalidateAll } from '$app/navigation';
+  import { openContact } from '$lib/detail-panel';
   import TimelineItem from '$lib/components/TimelineItem.svelte';
   import InteractionDialog from '$lib/components/InteractionDialog.svelte';
   import EmailDialog from '$lib/components/EmailDialog.svelte';
@@ -261,7 +262,7 @@
       {:else}
         <div class="divide-y divide-line">
           {#each data.contacts as contact}
-            <a href="/contacts/{contact.id}" class="flex items-center gap-3 px-5 py-3 hover:bg-cream transition-colors">
+            <a href="/contacts/{contact.id}" onclick={(e) => { e.preventDefault(); openContact(contact.id); }} class="flex items-center gap-3 px-5 py-3 hover:bg-cream transition-colors">
               <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0">
                 {#if contact.photo}
                   <img src={contact.photo} alt="" class="w-full h-full object-cover" />

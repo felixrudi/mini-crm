@@ -3,6 +3,7 @@
   import { formatDate, isOverdue } from '$lib/utils';
   import { enhance } from '$app/forms';
   import { toast } from '$lib/toast';
+  import { openContact } from '$lib/detail-panel';
   import CheckCircle2 from '@lucide/svelte/icons/check-circle-2';
   import Circle from '@lucide/svelte/icons/circle';
   import CalendarClock from '@lucide/svelte/icons/calendar-clock';
@@ -47,7 +48,7 @@
         </span>
       {/if}
       {#if showContact && action.contact_name}
-        <a href="/contacts/{action.contact_id}" class="flex items-center gap-1 text-xs text-terracotta hover:underline">
+        <a href="/contacts/{action.contact_id}" onclick={(e) => { e.preventDefault(); openContact(action.contact_id); }} class="flex items-center gap-1 text-xs text-terracotta hover:underline">
           <User class="w-3 h-3" />
           {action.contact_name}
         </a>

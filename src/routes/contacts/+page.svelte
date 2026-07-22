@@ -4,10 +4,11 @@
   import { toast } from '$lib/toast';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import { openContact } from '$lib/detail-panel';
   import ContactForm from '$lib/components/ContactForm.svelte';
   import ViewTabs from '$lib/components/ViewTabs.svelte';
   import EditableTagChip from '$lib/components/EditableTagChip.svelte';
-  import { groupByTags, tagColor } from '$lib/tags';
+  import { groupByTags, tagColor, DEFAULT_TAGS_EXCLUDE } from '$lib/tags';
   import type { Contact, Prospect, ProspectStatus, ViewFilter } from '$lib/types';
   import Users from '@lucide/svelte/icons/users';
   import Plus from '@lucide/svelte/icons/plus';
@@ -69,7 +70,13 @@
   let ort = $state(data.ort ?? '');
   let sortBy = $state<'name' | 'company' | 'tags'>(data.sort ?? 'name');
   let group = $state<'' | 'tags'>(data.group === 'tags' ? 'tags' : '');
-  let hasTagFilter = $derived(selectedTags.length > 0 || excludedTags.length > 0 || ort !== '');
+  // „Filter aktiv“ nur wenn mehr als der Standard-Archiv-Ausschluss gesetzt ist
+  let hasTagFilter = $derived(
+    selectedTags.length > 0 ||
+      ort !== '' ||
+      excludedTags.length !== DEFAULT_TAGS_EXCLUDE.length ||
+      DEFAULT_TAGS_EXCLUDE.some((t) => !excludedTags.includes(t))
+  );
 
   // Eingeklappte Gruppen (nur clientseitig, kein Teable-Persist nötig).
   let collapsedGroups = $state<Set<string>>(new Set());
@@ -87,8 +94,8 @@
     if (selectedTags.length > 0) url.searchParams.set('tags', selectedTags.join(','));
     else url.searchParams.delete('tags');
     url.searchParams.delete('tag');
-    if (excludedTags.length > 0) url.searchParams.set('tagsExclude', excludedTags.join(','));
-    else url.searchParams.delete('tagsExclude');
+    // Immer setzen: leer = bewusst alle inkl. Archiv; Default archiv kommt nur wenn Param fehlt
+    url.searchParams.set('tagsExclude', excludedTags.join(','));
     if (tagMode === 'and') url.searchParams.set('mode', 'and');
     else url.searchParams.delete('mode');
     if (sortBy !== 'name') url.searchParams.set('sort', sortBy);
@@ -143,10 +150,17 @@
   function setSort(s: 'name' | 'company' | 'tags') { sortBy = s; updateUrl(); }
   function setOrt(o: string) { ort = o; updateUrl(); }
   function setGroup(g: '' | 'tags') { group = g; updateUrl(); }
-  function clearTagFilter() { selectedTags = []; excludedTags = []; tagMode = 'or'; ort = ''; updateUrl(); }
+  function clearTagFilter() {
+    selectedTags = [];
+    excludedTags = [...DEFAULT_TAGS_EXCLUDE];
+    tagMode = 'or';
+    ort = '';
+    updateUrl();
+  }
   function applyView(filter: ViewFilter) {
     selectedTags = filter.tags ?? [];
-    excludedTags = filter.tagsExclude ?? [];
+    // Gespeicherte Ansicht ohne tagsExclude → Default (ohne Archiv)
+    excludedTags = filter.tagsExclude !== undefined ? (filter.tagsExclude ?? []) : [...DEFAULT_TAGS_EXCLUDE];
     tagMode = filter.tagMode === 'and' ? 'and' : 'or';
     sortBy = filter.sort === 'company' || filter.sort === 'tags' ? filter.sort : 'name';
     ort = filter.ort ?? '';
@@ -285,7 +299,7 @@
           {@render avatar(contact.name, contact.photo || photoCache[contact.id])}
         </button>
         <div class="min-w-0">
-          <a href="/contacts/{contact.id}" class="text-sm font-medium text-ink hover:text-terracotta transition-colors block truncate">{contact.name}</a>
+          <a href="/contacts/{contact.id}" onclick={(e) => { e.preventDefault(); openContact(contact.id); }} class="text-sm font-medium text-ink hover:text-terracotta transition-colors block truncate">{contact.name}</a>
           <span class="text-xs text-ink/40 truncate block">{contact.company_name ?? '—'}</span>
         </div>
       </div>

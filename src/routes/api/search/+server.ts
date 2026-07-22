@@ -22,6 +22,9 @@ export const GET: RequestHandler = async ({ url }) => {
 
   const contacts = kontakteRecs
     .filter((r) => {
+      // Globale Suche: Standard ohne Archiv (wie Listen)
+      const tags = (r.fields[KONTAKTE_FIELDS.tags] as string[] | undefined) ?? [];
+      if (tags.includes('archiv')) return false;
       const firmaId = linkId(r.fields[KONTAKTE_FIELDS.firma]);
       const firmaName = firmaId ? (firmaNameById.get(firmaId) ?? '') : '';
       const hay = [
@@ -34,7 +37,7 @@ export const GET: RequestHandler = async ({ url }) => {
         r.fields[KONTAKTE_FIELDS.wechatId],
         r.fields[KONTAKTE_FIELDS.ort],
         firmaName,
-        ((r.fields[KONTAKTE_FIELDS.tags] as string[] | undefined) ?? []).join(' ')
+        tags.join(' ')
       ]
         .map((v) => (v ?? '').toString())
         .join(' ')

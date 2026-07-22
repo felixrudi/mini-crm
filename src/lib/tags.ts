@@ -2,6 +2,9 @@
 // Geteilte Tag-Farb-Hash-Funktion + Tag-basierte Gruppierung, genutzt von
 // Kontakten und Firmen.
 
+/** Standard-Ausschluss in allen Aktuellen-Listen (ohne expliziten URL-Param). */
+export const DEFAULT_TAGS_EXCLUDE = ['archiv'] as const;
+
 const TAG_COLORS = [
   'bg-terracotta/10 text-terracotta border-terracotta/20',
   'bg-sage/10 text-sage border-sage/20',

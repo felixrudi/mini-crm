@@ -7,8 +7,10 @@
   import ToastContainer from '$lib/components/ToastContainer.svelte';
   import CommandPalette from '$lib/components/CommandPalette.svelte';
   import SidebarSearch from '$lib/components/SidebarSearch.svelte';
+  import DetailPanel from '$lib/components/DetailPanel.svelte';
   import UpdatePrompt from '$lib/components/UpdatePrompt.svelte';
   import InstallPrompt from '$lib/components/InstallPrompt.svelte';
+  import { parseDetailParam } from '$lib/detail-panel';
   import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
   import Users from '@lucide/svelte/icons/users';
   import Building2 from '@lucide/svelte/icons/building-2';
@@ -76,6 +78,8 @@
     return page.url.pathname.startsWith(href);
   }
 
+  let detailOpen = $derived(!!parseDetailParam(page.url.searchParams.get('detail')));
+
   // Bug-Fix (2026-07-14): mobiles Dropdown-Menü + CommandPalette leben im
   // Root-Layout, das wegen ssr=false (SPA-Mode) über SPA-Navigationen hinweg
   // bestehen bleibt. Ohne diesen Reset kann ein offen gebliebenes Overlay auf
@@ -83,6 +87,7 @@
   // schließen muss" bei jedem Routenwechsel auf iPhone). afterNavigate feuert
   // bei jeder Navigation (auch der initialen) und garantiert den Reset,
   // unabhängig davon, ob der einzelne Link-Klick-Handler zuverlässig lief.
+  // Detail-Panel (?detail=) bleibt absichtlich offen — nur Menü/Palette zu.
   afterNavigate(() => {
     mobileMenuOpen = false;
     paletteOpen = false;
@@ -216,8 +221,8 @@
     </div>
   {/if}
 
-  <!-- Main Content -->
-  <main class="flex-1 overflow-y-auto overflow-x-hidden md:pt-0 pt-[calc(57px+env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)] relative">
+  <!-- Main Content + optional right detail panel (list shrinks when open) -->
+  <div class="flex-1 flex min-w-0 min-h-0 md:pt-0 pt-[calc(57px+env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)] relative">
     {#if sidebarCollapsed}
       <button
         onclick={() => sidebarCollapsed = false}
@@ -227,8 +232,11 @@
         <Menu class="w-4 h-4" />
       </button>
     {/if}
-    <div class="{sidebarCollapsed ? 'md:pl-16' : ''} transition-all duration-200">
+    <main class="flex-1 min-w-0 overflow-y-auto overflow-x-hidden transition-[flex-basis,width] duration-200 {sidebarCollapsed ? 'md:pl-16' : ''}">
       {@render children()}
-    </div>
-  </main>
+    </main>
+    {#if browser && detailOpen}
+      <DetailPanel />
+    {/if}
+  </div>
 </div>

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
   import type { Contact } from '$lib/types';
+  import { openContact, openCompany } from '$lib/detail-panel';
   import Search from '@lucide/svelte/icons/search';
   import User from '@lucide/svelte/icons/user';
   import Building2 from '@lucide/svelte/icons/building-2';
@@ -83,8 +83,8 @@
   }
 
   function openResult(item: ResultItem) {
-    if (item.kind === 'contact') goto(`/contacts/${item.data.id}`);
-    else goto(`/companies/${item.data.id}`);
+    if (item.kind === 'contact') openContact(item.data.id);
+    else openCompany(item.data.id);
     query = '';
     contacts = [];
     companies = [];

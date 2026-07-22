@@ -2,7 +2,7 @@
   import { invalidateAll } from '$app/navigation';
   import { toast } from '$lib/toast';
   import type { SavedView, ViewFilter, Seite } from '$lib/types';
-  import { filtersEqual, isDefaultFilter } from '$lib/views';
+  import { filtersEqual, isDefaultFilter, defaultListFilter } from '$lib/views';
   import Plus from '@lucide/svelte/icons/plus';
   import Pencil from '@lucide/svelte/icons/pencil';
   import Trash2 from '@lucide/svelte/icons/trash-2';
@@ -80,12 +80,12 @@
 <div class="flex flex-wrap items-center gap-1 mb-2">
   <button
     type="button"
-    onclick={() => onselect({})}
-    class="px-2.5 py-1 rounded-full text-xs font-medium border transition-colors {isDefaultFilter(currentFilter)
+    onclick={() => onselect(defaultListFilter(seite))}
+    class="px-2.5 py-1 rounded-full text-xs font-medium border transition-colors {isDefaultFilter(currentFilter, seite)
       ? 'bg-terracotta text-white border-terracotta'
       : 'bg-surface text-ink/60 border-line hover:border-ink/30'}"
   >
-    Alle
+    {seite === 'kontakte-outreach' || seite === 'firmen-outreach' ? 'Alle' : 'Aktuell'}
   </button>
 
   {#each views as view (view.id)}

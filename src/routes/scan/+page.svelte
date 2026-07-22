@@ -2,6 +2,7 @@
   import { enhance } from '$app/forms';
   import { toast } from '$lib/toast';
   import { goto } from '$app/navigation';
+  import { openContact } from '$lib/detail-panel';
   import Plus from '@lucide/svelte/icons/plus';
   import Camera from '@lucide/svelte/icons/camera';
   import Loader from '@lucide/svelte/icons/loader';
@@ -92,7 +93,7 @@
         if (result.type === 'success' && result.data?.id) {
           toast.success('Kontakt erstellt');
           resetScan();
-          goto(`/contacts/${result.data.id}`);
+          openContact(result.data.id as string);
         } else if (result.type === 'success') {
           toast.success('Kontakt erstellt');
           resetScan();

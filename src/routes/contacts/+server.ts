@@ -15,7 +15,11 @@ export const GET: RequestHandler = async ({ url }) => {
   ]);
   const firmaNameById = new Map(firmenRecs.map((f) => [f.id, f.fields[FIRMEN_FIELDS.name] as string]));
 
-  let filtered = kontakteRecs;
+  let filtered = kontakteRecs.filter((r) => {
+    // Standard: Archiv aus Listen/Filter-Ergebnissen
+    const tags = (r.fields[KONTAKTE_FIELDS.tags] as string[] | undefined) ?? [];
+    return !tags.includes('archiv');
+  });
   if (q) {
     filtered = filtered.filter((r) => {
       const hay = `${r.fields[KONTAKTE_FIELDS.name] ?? ''} ${r.fields[KONTAKTE_FIELDS.email] ?? ''} ${r.fields[KONTAKTE_FIELDS.vorname] ?? ''} ${r.fields[KONTAKTE_FIELDS.nachname] ?? ''}`.toLowerCase();

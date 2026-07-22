@@ -1,46 +1,17 @@
 import {
-  getRecord,
-  listRecords,
   createRecord,
   updateRecord,
-  deleteRecord,
-  linkId
+  deleteRecord
 } from '$lib/server/teable';
-import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS } from '$lib/server/teable-schema';
-import { mapContact, mapTimelineEntry } from '$lib/server/teable-map';
+import { TABLES, KONTAKTE_FIELDS, INTERAKTIONEN_FIELDS } from '$lib/server/teable-schema';
+import { loadContactDetail } from '$lib/server/detail-loaders';
 import { error } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
-  const contact = await getRecord(TABLES.kontakteReal, params.id);
-  if (!contact) throw error(404, 'Kontakt nicht gefunden');
-
-  const [firma, allInteractions, firmenRecs] = await Promise.all([
-    linkId(contact.fields[KONTAKTE_FIELDS.firma])
-      ? getRecord(TABLES.firmen, linkId(contact.fields[KONTAKTE_FIELDS.firma])!)
-      : Promise.resolve(null),
-    listRecords(TABLES.interaktionenReal),
-    listRecords(TABLES.firmen)
-  ]);
-
-  // Replaces the contact_timeline VIEW: Interaktionen_Real already merges
-  // interactions+emails, so this is just a filter+sort, no UNION needed.
-  // mapTimelineEntry derives {art, subtyp, titel, inhalt, eintrag_id} from the
-  // merged table's Typ field — this is the exact shape TimelineItem.svelte expects.
-  const timeline = allInteractions
-    .filter((r) => linkId(r.fields[INTERAKTIONEN_FIELDS.kontakt]) === params.id)
-    .map(mapTimelineEntry)
-    .sort((a, b) => b.datum.localeCompare(a.datum));
-
-  const companies = firmenRecs
-    .map((f) => ({ id: f.id, name: f.fields[FIRMEN_FIELDS.name] }))
-    .sort((a, b) => String(a.name).localeCompare(String(b.name)));
-
-  return {
-    contact: mapContact(contact, (firma?.fields[FIRMEN_FIELDS.name] as string) ?? null),
-    timeline,
-    companies
-  };
+  const data = await loadContactDetail(params.id);
+  if (!data) throw error(404, 'Kontakt nicht gefunden');
+  return data;
 };
 
 export const actions: Actions = {

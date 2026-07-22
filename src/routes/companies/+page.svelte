@@ -4,8 +4,9 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { toast } from '$lib/toast';
+  import { openCompany } from '$lib/detail-panel';
   import type { Company, ViewFilter } from '$lib/types';
-  import { groupByTags, tagColor } from '$lib/tags';
+  import { groupByTags, tagColor, DEFAULT_TAGS_EXCLUDE } from '$lib/tags';
   import TagInput from '$lib/components/TagInput.svelte';
   import ViewTabs from '$lib/components/ViewTabs.svelte';
   import EditableTagChip from '$lib/components/EditableTagChip.svelte';
@@ -142,7 +143,13 @@
   let ort = $state(data.ort ?? '');
   let sortBy = $state<'name' | 'contacts' | 'tags'>(data.sort ?? 'name');
   let group = $state<'' | 'tags'>(data.group === 'tags' ? 'tags' : '');
-  let hasFilter = $derived(selectedTags.length > 0 || excludedTags.length > 0 || ort !== '' || !!searchValue.trim());
+  let hasFilter = $derived(
+    selectedTags.length > 0 ||
+      ort !== '' ||
+      !!searchValue.trim() ||
+      excludedTags.length !== DEFAULT_TAGS_EXCLUDE.length ||
+      DEFAULT_TAGS_EXCLUDE.some((t) => !excludedTags.includes(t))
+  );
 
   // Eingeklappte Gruppen (nur clientseitig, kein Teable-Persist nötig).
   let collapsedGroups = $state<Set<string>>(new Set());
@@ -161,8 +168,7 @@
     else url.searchParams.delete('q');
     if (selectedTags.length > 0) url.searchParams.set('tags', selectedTags.join(','));
     else url.searchParams.delete('tags');
-    if (excludedTags.length > 0) url.searchParams.set('tagsExclude', excludedTags.join(','));
-    else url.searchParams.delete('tagsExclude');
+    url.searchParams.set('tagsExclude', excludedTags.join(','));
     if (tagMode === 'and') url.searchParams.set('mode', 'and');
     else url.searchParams.delete('mode');
     if (ort) url.searchParams.set('ort', ort);
@@ -208,11 +214,18 @@
   function setOrt(o: string) { ort = o; updateUrl(); }
   function setSort(s: 'name' | 'contacts' | 'tags') { sortBy = s; updateUrl(); }
   function setGroup(g: '' | 'tags') { group = g; updateUrl(); }
-  function clearFilter() { searchValue = ''; selectedTags = []; excludedTags = []; tagMode = 'or'; ort = ''; updateUrl(); }
+  function clearFilter() {
+    searchValue = '';
+    selectedTags = [];
+    excludedTags = [...DEFAULT_TAGS_EXCLUDE];
+    tagMode = 'or';
+    ort = '';
+    updateUrl();
+  }
   function applyView(filter: ViewFilter) {
     searchValue = filter.q ?? '';
     selectedTags = filter.tags ?? [];
-    excludedTags = filter.tagsExclude ?? [];
+    excludedTags = filter.tagsExclude !== undefined ? (filter.tagsExclude ?? []) : [...DEFAULT_TAGS_EXCLUDE];
     tagMode = filter.tagMode === 'and' ? 'and' : 'or';
     ort = filter.ort ?? '';
     sortBy = filter.sort === 'contacts' || filter.sort === 'tags' ? filter.sort : 'name';
@@ -255,7 +268,7 @@
             <Building2 class="w-4 h-4 text-sage" />
           </div>
           <div class="min-w-0">
-            <a href="/companies/{company.id}" class="text-sm font-medium text-ink hover:text-terracotta transition-colors block truncate">{company.name}</a>
+            <a href="/companies/{company.id}" onclick={(e) => { e.preventDefault(); openCompany(company.id); }} class="text-sm font-medium text-ink hover:text-terracotta transition-colors block truncate">{company.name}</a>
             {#if company.website}
               <a href={company.website} target="_blank" rel="noopener" class="flex items-center gap-1 text-xs text-terracotta hover:underline font-mono">
                 <ExternalLink class="w-3 h-3" /> {company.website.replace(/^https?:\/\//, '')}

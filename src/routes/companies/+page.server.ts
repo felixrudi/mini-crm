@@ -17,8 +17,12 @@ export const load: PageServerLoad = async ({ url }) => {
   const q = url.searchParams.get('q') || '';
   const tagsParam = url.searchParams.get('tags');
   const tags = tagsParam ? tagsParam.split(',').map((t) => t.trim()).filter(Boolean) : [];
+  // Default: archiv ausblenden (wie Kontakte). `tagsExclude=` = alle inkl. Archiv.
   const tagsExcludeParam = url.searchParams.get('tagsExclude');
-  const tagsExclude = tagsExcludeParam ? tagsExcludeParam.split(',').map((t) => t.trim()).filter(Boolean) : [];
+  const tagsExclude =
+    tagsExcludeParam === null
+      ? ['archiv']
+      : tagsExcludeParam.split(',').map((t) => t.trim()).filter(Boolean);
   const tagMode: TagMode = url.searchParams.get('mode') === 'and' ? 'and' : 'or';
   const ort = url.searchParams.get('ort') || '';
   const group = url.searchParams.get('group') === 'tags' ? 'tags' : '';

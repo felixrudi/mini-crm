@@ -2,6 +2,7 @@
   import type { PageData } from './$types';
   import { formatDate } from '$lib/utils';
   import type { Contact } from '$lib/types';
+  import { openContact, openCompany } from '$lib/detail-panel';
   import Users from '@lucide/svelte/icons/users';
   import Building2 from '@lucide/svelte/icons/building-2';
   import ArrowRight from '@lucide/svelte/icons/arrow-right';
@@ -175,7 +176,7 @@
               {:else}
                 <div class="divide-y divide-line rounded-lg border border-line overflow-hidden">
                   {#each globalContacts as contact}
-                    <a href="/contacts/{contact.id}" class="flex items-center gap-3 px-3 py-2.5 hover:bg-cream transition-colors">
+                    <a href="/contacts/{contact.id}" onclick={(e) => { e.preventDefault(); openContact(contact.id); }} class="flex items-center gap-3 px-3 py-2.5 hover:bg-cream transition-colors">
                       <div class="w-8 h-8 rounded-full bg-terracotta/10 flex items-center justify-center flex-shrink-0">
                         <span class="text-xs font-semibold text-terracotta">{contact.name?.charAt(0)?.toUpperCase()}</span>
                       </div>
@@ -208,7 +209,7 @@
               {:else}
                 <div class="divide-y divide-line rounded-lg border border-line overflow-hidden">
                   {#each globalCompanies as company}
-                    <a href="/companies/{company.id}" class="flex items-center gap-3 px-3 py-2.5 hover:bg-cream transition-colors">
+                    <a href="/companies/{company.id}" onclick={(e) => { e.preventDefault(); openCompany(company.id); }} class="flex items-center gap-3 px-3 py-2.5 hover:bg-cream transition-colors">
                       <div class="w-8 h-8 rounded-lg bg-sage-100 flex items-center justify-center flex-shrink-0">
                         <Building2 class="w-4 h-4 text-sage" />
                       </div>
@@ -340,7 +341,7 @@
             </div>
           {:else}
             {#each data.recent_contacts as contact}
-              <a href="/contacts/{contact.id}" class="flex items-center gap-3 px-5 py-3 hover:bg-cream transition-colors">
+              <a href="/contacts/{contact.id}" onclick={(e) => { e.preventDefault(); openContact(contact.id); }} class="flex items-center gap-3 px-5 py-3 hover:bg-cream transition-colors">
                 <div class="w-8 h-8 rounded-full bg-terracotta/10 flex items-center justify-center flex-shrink-0">
                   <span class="text-sm font-semibold text-terracotta">{contact.name?.charAt(0)?.toUpperCase()}</span>
                 </div>
@@ -467,7 +468,7 @@
       {:else}
         <div class="divide-y divide-line">
           {#each filterResults as contact}
-            <a href="/contacts/{contact.id}" class="flex items-center gap-3 px-5 py-3 hover:bg-cream transition-colors">
+            <a href="/contacts/{contact.id}" onclick={(e) => { e.preventDefault(); openContact(contact.id); }} class="flex items-center gap-3 px-5 py-3 hover:bg-cream transition-colors">
               <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0">
                 {#if contact.photo}
                   <img src={contact.photo} alt="" class="w-full h-full object-cover" />

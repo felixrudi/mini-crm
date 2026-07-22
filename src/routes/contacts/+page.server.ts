@@ -31,12 +31,14 @@ export const load: PageServerLoad = async ({ url }) => {
       ? [legacyTag]
       : [];
 
-  // NICHT-Tags: Kontakte mit einem dieser Tags werden aus der Liste entfernt,
-  // unabhängig davon ob andere Filter-Tags matchen.
+  // NICHT-Tags: Kontakte mit einem dieser Tags werden aus der Liste entfernt.
+  // Default (Param fehlt): archiv ausblenden — „Aktuelle“ Liste.
+  // Explizit leer (`tagsExclude=`): alle inkl. Archiv.
   const tagsExcludeParam = url.searchParams.get('tagsExclude');
-  const tagsExclude = tagsExcludeParam
-    ? tagsExcludeParam.split(',').map((t) => t.trim()).filter(Boolean)
-    : [];
+  const tagsExclude =
+    tagsExcludeParam === null
+      ? ['archiv']
+      : tagsExcludeParam.split(',').map((t) => t.trim()).filter(Boolean);
 
   const pq = (url.searchParams.get('pq') || '').toLowerCase();
   const pstatus = url.searchParams.get('pstatus') || '';
