@@ -4,12 +4,12 @@
   import X from '@lucide/svelte/icons/x';
 
   let {
-    contactId,
+    contactId = '',
     action = '?/add_interaction',
     onclose,
     onsuccess
   }: {
-    contactId: string;
+    contactId?: string;
     action?: string;
     onclose?: () => void;
     onsuccess?: () => void;

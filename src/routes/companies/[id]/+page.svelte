@@ -3,6 +3,9 @@
   import { enhance } from '$app/forms';
   import { toast } from '$lib/toast';
   import { invalidateAll } from '$app/navigation';
+  import TimelineItem from '$lib/components/TimelineItem.svelte';
+  import InteractionDialog from '$lib/components/InteractionDialog.svelte';
+  import EmailDialog from '$lib/components/EmailDialog.svelte';
   import ArrowLeft from '@lucide/svelte/icons/arrow-left';
   import Building2 from '@lucide/svelte/icons/building-2';
   import ExternalLink from '@lucide/svelte/icons/external-link';
@@ -10,10 +13,11 @@
   import Check from '@lucide/svelte/icons/check';
   import X from '@lucide/svelte/icons/x';
   import Users from '@lucide/svelte/icons/users';
-  import MapPin from '@lucide/svelte/icons/map-pin';
   import User from '@lucide/svelte/icons/user';
   import Phone from '@lucide/svelte/icons/phone';
   import Mail from '@lucide/svelte/icons/mail';
+  import Plus from '@lucide/svelte/icons/plus';
+  import MessagesSquare from '@lucide/svelte/icons/messages-square';
 
   let { data }: { data: PageData } = $props();
 
@@ -26,6 +30,10 @@
   let editOrt = $state('');
   let editLand = $state('');
   let editNotizen = $state('');
+
+  let activeTab = $state<'timeline' | 'kontakte'>('timeline');
+  let showInteractionDialog = $state(false);
+  let showEmailDialog = $state(false);
 
   function startEdit() {
     editName = data.company.name;
@@ -126,6 +134,11 @@
           <span class="flex items-center gap-1 text-sm text-ink/50 mt-1">
             <Users class="w-3.5 h-3.5" />
             {data.contacts.length} Kontakt{data.contacts.length !== 1 ? 'e' : ''}
+            {#if data.timeline.length > 0}
+              <span class="text-ink/25">·</span>
+              <MessagesSquare class="w-3.5 h-3.5" />
+              {data.timeline.length} Eintrag{data.timeline.length !== 1 ? 'e' : ''}
+            {/if}
           </span>
         </div>
       </div>
@@ -182,51 +195,116 @@
     {/if}
   </div>
 
-  <!-- Kontakte -->
-  <div class="bg-surface rounded-xl border border-line">
-    <div class="flex items-center justify-between px-5 py-4 border-b border-line">
-      <h2 class="font-display font-semibold text-base text-ink flex items-center gap-2">
-        <Users class="w-4 h-4 text-sage" />
-        Kontakte ({data.contacts.length})
-      </h2>
-      <a href="/contacts?company={data.company.id}" class="text-xs text-terracotta hover:underline">+ Neuer Kontakt</a>
+  <!-- Tabs -->
+  <div class="flex gap-1 bg-surface border border-line rounded-lg p-1 mb-6 w-full overflow-x-auto">
+    {#each [
+      ['timeline', 'Timeline'],
+      ['kontakte', `Kontakte (${data.contacts.length})`]
+    ] as [tab, label]}
+      <button
+        onclick={() => activeTab = tab as typeof activeTab}
+        class="px-3 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap {activeTab === tab ? 'bg-terracotta text-white font-medium' : 'text-ink/60 hover:text-ink hover:bg-cream'}"
+      >
+        {label}
+      </button>
+    {/each}
+  </div>
+
+  {#if activeTab === 'timeline'}
+    <div class="flex flex-wrap gap-2 mb-4">
+      <button
+        onclick={() => showInteractionDialog = true}
+        class="flex items-center gap-1.5 px-3 py-1.5 bg-terracotta text-white rounded-lg text-sm font-medium hover:bg-terracotta/90 transition-colors"
+      >
+        <Plus class="w-3.5 h-3.5" /> Interaktion
+      </button>
+      <button
+        onclick={() => showEmailDialog = true}
+        class="flex items-center gap-1.5 px-3 py-1.5 border border-line text-ink/70 rounded-lg text-sm hover:bg-cream transition-colors"
+      >
+        <Plus class="w-3.5 h-3.5" /> E-Mail
+      </button>
     </div>
 
-    {#if data.contacts.length === 0}
-      <div class="py-12 text-center">
-        <User class="w-8 h-8 text-ink/15 mx-auto mb-2" />
-        <p class="text-sm text-ink/40">Noch keine Kontakte zugeordnet</p>
+    <div class="bg-surface rounded-xl border border-line">
+      {#if data.timeline.length === 0}
+        <div class="py-16 text-center">
+          <MessagesSquare class="w-8 h-8 text-ink/15 mx-auto mb-2" />
+          <p class="text-sm text-ink/40">Noch keine Einträge in der Timeline</p>
+          <p class="text-xs text-ink/30 mt-1">Service-Anrufe, Notizen, Mails — ohne Dummy-Kontakt</p>
+        </div>
+      {:else}
+        <div class="px-5 py-2 divide-y divide-line">
+          {#each data.timeline as entry}
+            <TimelineItem {entry} basePath="/companies/{data.company.id}" />
+          {/each}
+        </div>
+      {/if}
+    </div>
+
+  {:else}
+    <!-- Kontakte -->
+    <div class="bg-surface rounded-xl border border-line">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-line">
+        <h2 class="font-display font-semibold text-base text-ink flex items-center gap-2">
+          <Users class="w-4 h-4 text-sage" />
+          Kontakte ({data.contacts.length})
+        </h2>
+        <a href="/contacts?company={data.company.id}" class="text-xs text-terracotta hover:underline">+ Neuer Kontakt</a>
       </div>
-    {:else}
-      <div class="divide-y divide-line">
-        {#each data.contacts as contact}
-          <a href="/contacts/{contact.id}" class="flex items-center gap-3 px-5 py-3 hover:bg-cream transition-colors">
-            <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0">
-              {#if contact.photo}
-                <img src={contact.photo} alt="" class="w-full h-full object-cover" />
-              {:else}
-                <div class="w-full h-full bg-terracotta/10 flex items-center justify-center">
-                  <span class="text-sm font-semibold text-terracotta">{contact.name?.charAt(0)?.toUpperCase()}</span>
-                </div>
-              {/if}
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-ink truncate">{contact.name}</p>
-              {#if contact.rolle}
-                <p class="text-xs text-ink/50 truncate">{contact.rolle}</p>
-              {/if}
-            </div>
-            <div class="flex items-center gap-2 flex-shrink-0">
-              {#if contact.email}
-                <span class="text-ink/30" title={contact.email}><Mail class="w-3.5 h-3.5" /></span>
-              {/if}
-              {#if contact.telefon}
-                <span class="text-ink/30" title={contact.telefon}><Phone class="w-3.5 h-3.5" /></span>
-              {/if}
-            </div>
-          </a>
-        {/each}
-      </div>
-    {/if}
-  </div>
+
+      {#if data.contacts.length === 0}
+        <div class="py-12 text-center">
+          <User class="w-8 h-8 text-ink/15 mx-auto mb-2" />
+          <p class="text-sm text-ink/40">Noch keine Kontakte zugeordnet</p>
+        </div>
+      {:else}
+        <div class="divide-y divide-line">
+          {#each data.contacts as contact}
+            <a href="/contacts/{contact.id}" class="flex items-center gap-3 px-5 py-3 hover:bg-cream transition-colors">
+              <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0">
+                {#if contact.photo}
+                  <img src={contact.photo} alt="" class="w-full h-full object-cover" />
+                {:else}
+                  <div class="w-full h-full bg-terracotta/10 flex items-center justify-center">
+                    <span class="text-sm font-semibold text-terracotta">{contact.name?.charAt(0)?.toUpperCase()}</span>
+                  </div>
+                {/if}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-ink truncate">{contact.name}</p>
+                {#if contact.rolle}
+                  <p class="text-xs text-ink/50 truncate">{contact.rolle}</p>
+                {/if}
+              </div>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                {#if contact.email}
+                  <span class="text-ink/30" title={contact.email}><Mail class="w-3.5 h-3.5" /></span>
+                {/if}
+                {#if contact.telefon}
+                  <span class="text-ink/30" title={contact.telefon}><Phone class="w-3.5 h-3.5" /></span>
+                {/if}
+              </div>
+            </a>
+          {/each}
+        </div>
+      {/if}
+    </div>
+  {/if}
 </div>
+
+{#if showInteractionDialog}
+  <InteractionDialog
+    action="?/add_interaction"
+    onclose={() => showInteractionDialog = false}
+    onsuccess={() => { showInteractionDialog = false; invalidateAll(); }}
+  />
+{/if}
+
+{#if showEmailDialog}
+  <EmailDialog
+    action="?/add_email"
+    onclose={() => showEmailDialog = false}
+    onsuccess={() => { showEmailDialog = false; invalidateAll(); }}
+  />
+{/if}

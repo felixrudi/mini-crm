@@ -4,13 +4,13 @@
   import X from '@lucide/svelte/icons/x';
 
   let {
-    contactId,
+    contactId = '',
     contactEmail = '',
     action = '?/add_email',
     onclose,
     onsuccess
   }: {
-    contactId: string;
+    contactId?: string;
     contactEmail?: string;
     action?: string;
     onclose?: () => void;

@@ -95,7 +95,8 @@ export type Prospect = {
 }
 
 export type TimelineEntry = {
-  contact_id: string;
+  contact_id: string | null;
+  company_id?: string | null;
   art: 'interaction' | 'email';
   eintrag_id: string;
   subtyp: string;

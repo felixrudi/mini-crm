@@ -22,6 +22,7 @@
   }
 
   function handleTagKeydown(e: KeyboardEvent) {
+    if (e.isComposing) return;
     if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
       e.preventDefault();
       addTag();

@@ -64,7 +64,8 @@ export function mapTimelineEntry(r: TeableRecord) {
   const typ = f[INTERAKTIONEN_FIELDS.typ] as string;
   const isEmail = typ === 'email_rein' || typ === 'email_raus';
   return {
-    contact_id: linkId(f[INTERAKTIONEN_FIELDS.kontakt]) as string,
+    contact_id: linkId(f[INTERAKTIONEN_FIELDS.kontakt]) as string | null,
+    company_id: linkId(f[INTERAKTIONEN_FIELDS.firma]) as string | null,
     art: isEmail ? ('email' as const) : ('interaction' as const),
     eintrag_id: r.id,
     subtyp: isEmail ? (typ === 'email_rein' ? 'rein' : 'raus') : typ,

@@ -21,7 +21,16 @@
   import X from '@lucide/svelte/icons/x';
   import Maximize2 from '@lucide/svelte/icons/maximize-2';
 
-  let { entry, contactId }: { entry: TimelineEntry; contactId: string } = $props();
+  let {
+    entry,
+    contactId = '',
+    /** Base path for form actions, e.g. `/contacts/rec…` or `/companies/rec…` */
+    basePath = ''
+  }: {
+    entry: TimelineEntry;
+    contactId?: string;
+    basePath?: string;
+  } = $props();
 
   let expanded = $state(true);
   let showModal = $state(false);
@@ -31,6 +40,10 @@
   const renderedMarkdown = $derived(entry.inhalt ? marked(entry.inhalt) as string : '');
   let editTitel = $state('');
   let editInhalt = $state('');
+
+  const actionBase = $derived(
+    basePath || (contactId ? `/contacts/${contactId}` : '')
+  );
 
   function startEdit() {
     editTitel = entry.titel ?? '';
@@ -81,13 +94,13 @@
 
   const deleteAction = $derived(
     entry.art === 'email'
-      ? `/contacts/${contactId}?/delete_email`
-      : `/contacts/${contactId}?/delete_interaction`
+      ? `${actionBase}?/delete_email`
+      : `${actionBase}?/delete_interaction`
   );
   const updateAction = $derived(
     entry.art === 'email'
-      ? `/contacts/${contactId}?/update_email`
-      : `/contacts/${contactId}?/update_interaction`
+      ? `${actionBase}?/update_email`
+      : `${actionBase}?/update_interaction`
   );
 
   const vonAnLine = $derived(() => {

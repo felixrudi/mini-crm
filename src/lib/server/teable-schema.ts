@@ -64,6 +64,7 @@ export const KONTAKTE_FIELDS = {
 
 export const INTERAKTIONEN_FIELDS = {
   kontakt: 'Kontakt',
+  firma: 'Firma',
   typ: 'Typ',
   datum: 'Datum',
   titel: 'Titel',
