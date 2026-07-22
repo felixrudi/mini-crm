@@ -6,6 +6,7 @@
   import { pwaInfo } from 'virtual:pwa-info';
   import ToastContainer from '$lib/components/ToastContainer.svelte';
   import CommandPalette from '$lib/components/CommandPalette.svelte';
+  import SidebarSearch from '$lib/components/SidebarSearch.svelte';
   import UpdatePrompt from '$lib/components/UpdatePrompt.svelte';
   import InstallPrompt from '$lib/components/InstallPrompt.svelte';
   import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
@@ -123,7 +124,11 @@
       </button>
     </div>
 
-    <nav class="flex-1 py-3 px-3 space-y-0.5">
+    <div class="px-3 pt-3 pb-1">
+      <SidebarSearch />
+    </div>
+
+    <nav class="flex-1 py-2 px-3 space-y-0.5 overflow-y-auto">
       {#each navItems as item}
         {@const Icon = item.icon}
         <a
@@ -193,7 +198,10 @@
   <!-- Mobile Menu -->
   {#if mobileMenuOpen}
     <div class="md:hidden fixed inset-0 z-30 bg-ink/20" onclick={() => mobileMenuOpen = false}></div>
-    <div class="md:hidden fixed top-[calc(57px+env(safe-area-inset-top))] left-0 right-0 z-40 bg-surface border-b border-line py-2 px-3 shadow-lg">
+    <div class="md:hidden fixed top-[calc(57px+env(safe-area-inset-top))] left-0 right-0 z-40 bg-surface border-b border-line py-2 px-3 shadow-lg max-h-[calc(100dvh-57px-env(safe-area-inset-top))] overflow-y-auto">
+      <div class="px-0.5 pb-2">
+        <SidebarSearch onnavigate={() => (mobileMenuOpen = false)} />
+      </div>
       {#each navItems as item}
         {@const Icon = item.icon}
         <a
