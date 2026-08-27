@@ -8,6 +8,11 @@ import { loadCompanyDetail } from '$lib/server/detail-loaders';
 import { error } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
+function parseTags(d: FormData): string[] {
+  const raw = (d.get('tags') as string) || '';
+  return raw.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean);
+}
+
 export const load: PageServerLoad = async ({ params }) => {
   const data = await loadCompanyDetail(params.id);
   if (!data) throw error(404, 'Firma nicht gefunden');
@@ -25,7 +30,8 @@ export const actions: Actions = {
       [FIRMEN_FIELDS.plz]: d.get('plz') || null,
       [FIRMEN_FIELDS.ort]: d.get('ort') || null,
       [FIRMEN_FIELDS.land]: d.get('land') || null,
-      [FIRMEN_FIELDS.notizen]: d.get('notizen') || null
+      [FIRMEN_FIELDS.notizen]: d.get('notizen') || null,
+      [FIRMEN_FIELDS.tags]: parseTags(d)
     });
     return { success: true };
   },

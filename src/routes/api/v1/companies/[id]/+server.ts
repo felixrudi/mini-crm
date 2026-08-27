@@ -35,6 +35,9 @@ export const PATCH: RequestHandler = async ({ request, params }) => {
   const pick = (key: string, fieldKey: string): string | null =>
     body[key] !== undefined ? ((body[key] as string) || null) : ((existing.fields[fieldKey] as string) ?? null);
 
+  const pickTags = (): string[] =>
+    body.tags !== undefined ? (body.tags as string[]) : ((existing.fields[FIRMEN_FIELDS.tags] as string[]) ?? []);
+
   await updateRecord(TABLES.firmen, params.id, {
     [FIRMEN_FIELDS.name]: (body.name !== undefined ? (body.name as string)?.trim() : undefined) || existing.fields[FIRMEN_FIELDS.name],
     [FIRMEN_FIELDS.website]: pick('website', FIRMEN_FIELDS.website),
@@ -43,7 +46,8 @@ export const PATCH: RequestHandler = async ({ request, params }) => {
     [FIRMEN_FIELDS.plz]: pick('plz', FIRMEN_FIELDS.plz),
     [FIRMEN_FIELDS.ort]: pick('ort', FIRMEN_FIELDS.ort),
     [FIRMEN_FIELDS.land]: pick('land', FIRMEN_FIELDS.land),
-    [FIRMEN_FIELDS.notizen]: pick('notizen', FIRMEN_FIELDS.notizen)
+    [FIRMEN_FIELDS.notizen]: pick('notizen', FIRMEN_FIELDS.notizen),
+    [FIRMEN_FIELDS.tags]: pickTags()
   });
 
   const updated = await getRecord(TABLES.firmen, params.id);

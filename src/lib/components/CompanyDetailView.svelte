@@ -16,6 +16,8 @@
   import Mail from '@lucide/svelte/icons/mail';
   import Plus from '@lucide/svelte/icons/plus';
   import MessagesSquare from '@lucide/svelte/icons/messages-square';
+  import TagInput from '$lib/components/TagInput.svelte';
+  import { tagColor } from '$lib/tags';
 
   let {
     companyId,
@@ -43,6 +45,7 @@
   let editOrt = $state('');
   let editLand = $state('');
   let editNotizen = $state('');
+  let editTags = $state<string[]>([]);
 
   const basePath = $derived(`/companies/${companyId}`);
 
@@ -86,6 +89,7 @@
     editOrt = company.ort ?? '';
     editLand = company.land ?? '';
     editNotizen = company.notizen ?? '';
+    editTags = company.tags ?? [];
     editing = true;
   }
 </script>
@@ -120,6 +124,10 @@
         </div>
         <input name="land" bind:value={editLand} placeholder="Land" class="w-full px-2.5 py-1.5 bg-cream border border-line rounded-lg text-sm" />
         <textarea name="notizen" bind:value={editNotizen} rows="2" placeholder="Notizen" class="w-full px-2.5 py-1.5 bg-cream border border-line rounded-lg text-sm resize-none"></textarea>
+        <div class="mt-1">
+          <label class="block text-xs font-medium text-ink/60 mb-1">Tags</label>
+          <TagInput bind:tags={editTags} placeholder="steuerberater, wien … Enter" />
+        </div>
         <div class="flex gap-2">
           <button type="submit" class="flex items-center gap-1 px-2.5 py-1.5 bg-terracotta text-white rounded-lg text-xs font-medium"><Check class="w-3 h-3" /> Speichern</button>
           <button type="button" onclick={() => (editing = false)} class="flex items-center gap-1 px-2.5 py-1.5 border border-line rounded-lg text-xs"><X class="w-3 h-3" /> Abbrechen</button>
@@ -163,6 +171,13 @@
         {/if}
         {#if company.notizen}
           <p class="text-xs text-ink/55 whitespace-pre-wrap">{company.notizen}</p>
+        {/if}
+        {#if company.tags?.length}
+          <div class="flex flex-wrap gap-1 mt-1">
+            {#each company.tags as tag}
+              <span class="px-1.5 py-0.5 rounded-full text-[10px] font-medium border {tagColor(tag)}">{tag}</span>
+            {/each}
+          </div>
         {/if}
       </div>
     {/if}
