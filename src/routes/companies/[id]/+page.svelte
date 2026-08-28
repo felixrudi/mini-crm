@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { websiteLabel } from '$lib/utils';
+  import { websiteLabel, karteUrl } from '$lib/utils';
+  import MapPin from '@lucide/svelte/icons/map-pin';
   import { enhance } from '$app/forms';
   import { toast } from '$lib/toast';
   import { invalidateAll } from '$app/navigation';
@@ -176,6 +177,11 @@
           {#if data.company.strasse || data.company.ort}
             <p class="text-sm text-ink mt-0.5">{data.company.strasse ?? ''}</p>
             <p class="text-sm text-ink">{[data.company.plz, data.company.ort, data.company.land].filter(Boolean).join(' ')}</p>
+            {#if karteUrl(data.company)}
+              <a href={karteUrl(data.company)} target="_blank" rel="noopener" class="inline-flex items-center gap-1 mt-1 text-xs text-terracotta hover:underline">
+                <MapPin class="w-3 h-3" /> Auf Karte öffnen
+              </a>
+            {/if}
           {:else}
             <p class="text-sm text-ink/30 mt-0.5">—</p>
           {/if}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Contact, TimelineEntry, Company } from '$lib/types';
-  import { websiteLabel } from '$lib/utils';
+  import { websiteLabel, karteUrl, adresseText } from '$lib/utils';
+  import MapPin from '@lucide/svelte/icons/map-pin';
   import { enhance } from '$app/forms';
   import { toast } from '$lib/toast';
   import { openContact } from '$lib/detail-panel';
@@ -166,9 +167,14 @@
           </a>
         {/if}
         {#if company.strasse || company.ort}
-          <p class="text-xs text-ink/50">
-            {[company.strasse, [company.plz, company.ort, company.land].filter(Boolean).join(' ')].filter(Boolean).join(', ')}
-          </p>
+          {@const karte = karteUrl(company)}
+          {#if karte}
+            <a href={karte} target="_blank" rel="noopener" class="flex items-start gap-1.5 text-xs text-ink/50 hover:text-terracotta hover:underline">
+              <MapPin class="w-3 h-3 mt-0.5 flex-shrink-0" /> {adresseText(company)}
+            </a>
+          {:else}
+            <p class="text-xs text-ink/50">{adresseText(company)}</p>
+          {/if}
         {/if}
         {#if company.notizen}
           <p class="text-xs text-ink/55 whitespace-pre-wrap">{company.notizen}</p>

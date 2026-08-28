@@ -27,6 +27,7 @@
   import Check from '@lucide/svelte/icons/check';
   import X from '@lucide/svelte/icons/x';
   import MapPin from '@lucide/svelte/icons/map-pin';
+  import { karteUrl, adresseText } from '$lib/utils';
   import CalendarDays from '@lucide/svelte/icons/calendar-days';
 
   let { data }: { data: PageData } = $props();
@@ -237,10 +238,18 @@
         {/if}
 
         {#if data.contact.strasse || data.contact.ort}
-          <div class="flex items-center gap-1.5 text-sm text-ink/50">
-            <MapPin class="w-3.5 h-3.5 text-ink/30 flex-shrink-0" />
-            {[data.contact.strasse, [data.contact.plz, data.contact.ort].filter(Boolean).join(' ')].filter(Boolean).join(', ')}
-          </div>
+          {@const karte = karteUrl(data.contact)}
+          {#if karte}
+            <a href={karte} target="_blank" rel="noopener" class="flex items-center gap-1.5 text-sm text-ink/50 hover:text-terracotta hover:underline">
+              <MapPin class="w-3.5 h-3.5 text-ink/30 flex-shrink-0" />
+              {adresseText(data.contact)}
+            </a>
+          {:else}
+            <div class="flex items-center gap-1.5 text-sm text-ink/50">
+              <MapPin class="w-3.5 h-3.5 text-ink/30 flex-shrink-0" />
+              {adresseText(data.contact)}
+            </div>
+          {/if}
         {/if}
 
         {#if data.contact.geburtstag}

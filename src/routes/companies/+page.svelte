@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { websiteLabel } from '$lib/utils';
+  import { websiteLabel, karteUrl, adresseText, istMapsLink } from '$lib/utils';
   import { enhance } from '$app/forms';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
@@ -20,6 +20,7 @@
   import Trash2 from '@lucide/svelte/icons/trash-2';
   import Users from '@lucide/svelte/icons/users';
   import Phone from '@lucide/svelte/icons/phone';
+  import MapPin from '@lucide/svelte/icons/map-pin';
   import Target from '@lucide/svelte/icons/target';
   import Search from '@lucide/svelte/icons/search';
   import ChevronDown from '@lucide/svelte/icons/chevron-down';
@@ -277,6 +278,11 @@
             {/if}
             {#if company.telefon}
               <a href="tel:{company.telefon}" class="sm:hidden flex items-center gap-1 text-xs text-terracotta font-mono font-bold hover:underline"><Phone class="w-3 h-3" /> {company.telefon}</a>
+            {/if}
+            {#if !istMapsLink(company.website) && karteUrl(company)}
+              <a href={karteUrl(company)} target="_blank" rel="noopener" class="flex items-center gap-1 text-xs text-ink/45 hover:text-terracotta hover:underline">
+                <MapPin class="w-3 h-3 flex-shrink-0" /> <span class="truncate">{adresseText(company)}</span>
+              </a>
             {/if}
           </div>
         </div>
