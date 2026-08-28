@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Contact } from '$lib/types';
+  import { websiteLabel } from '$lib/utils';
   import { openContact, openCompany } from '$lib/detail-panel';
   import X from '@lucide/svelte/icons/x';
   import Search from '@lucide/svelte/icons/search';
@@ -154,7 +155,7 @@
                   <div class="min-w-0 flex-1">
                     <p class="text-sm font-medium text-ink truncate">{item.data.name}</p>
                     <p class="text-xs text-ink/50 truncate">
-                      {item.data.ort ?? item.data.website?.replace(/^https?:\/\//, '') ?? item.data.telefon ?? 'Firma'}
+                      {item.data.ort ?? (item.data.website ? websiteLabel(item.data.website) : null) ?? item.data.telefon ?? 'Firma'}
                     </p>
                   </div>
                   <span class="text-[10px] uppercase tracking-wide text-ink/30 flex-shrink-0">Firma</span>

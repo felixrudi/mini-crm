@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { formatDate } from '$lib/utils';
+  import { formatDate, websiteLabel } from '$lib/utils';
   import type { Contact } from '$lib/types';
   import { openContact, openCompany } from '$lib/detail-panel';
   import Users from '@lucide/svelte/icons/users';
@@ -215,7 +215,7 @@
                       </div>
                       <div class="min-w-0 flex-1">
                         <p class="text-sm font-medium text-ink truncate">{company.name}</p>
-                        <p class="text-xs text-ink/40 truncate">{company.ort ?? company.website?.replace(/^https?:\/\//, '') ?? company.notizen ?? '—'}</p>
+                        <p class="text-xs text-ink/40 truncate">{company.ort ?? (company.website ? websiteLabel(company.website) : null) ?? company.notizen ?? '—'}</p>
                       </div>
                       {#if company.telefon}
                         <span class="text-[11px] font-mono text-ink/35 flex-shrink-0 hidden sm:inline">{company.telefon}</span>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
+  import { websiteLabel } from '$lib/utils';
   import { enhance } from '$app/forms';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
@@ -271,7 +272,7 @@
             <a href="/companies/{company.id}" onclick={(e) => { e.preventDefault(); openCompany(company.id); }} class="text-sm font-medium text-ink hover:text-terracotta transition-colors block truncate">{company.name}</a>
             {#if company.website}
               <a href={company.website} target="_blank" rel="noopener" class="flex items-center gap-1 text-xs text-terracotta hover:underline font-mono">
-                <ExternalLink class="w-3 h-3" /> {company.website.replace(/^https?:\/\//, '')}
+                <ExternalLink class="w-3 h-3" /> {websiteLabel(company.website)}
               </a>
             {/if}
           </div>
@@ -331,7 +332,7 @@
           <span class="text-sm font-medium text-ink block truncate">{c.name}</span>
           {#if c.website}
             <a href={c.website} target="_blank" rel="noopener" class="flex items-center gap-1 text-xs text-terracotta hover:underline font-mono">
-              <ExternalLink class="w-3 h-3" /> {c.website.replace(/^https?:\/\//, '')}
+              <ExternalLink class="w-3 h-3" /> {websiteLabel(c.website)}
             </a>
           {/if}
         </div>

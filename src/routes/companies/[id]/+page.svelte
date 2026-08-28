@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
+  import { websiteLabel } from '$lib/utils';
   import { enhance } from '$app/forms';
   import { toast } from '$lib/toast';
   import { invalidateAll } from '$app/navigation';
@@ -152,7 +153,7 @@
             <a href={data.company.website} target="_blank" rel="noopener"
               class="flex items-center gap-1 text-sm text-terracotta hover:underline mt-0.5">
               <ExternalLink class="w-3.5 h-3.5" />
-              {data.company.website.replace(/^https?:\/\//, '')}
+              {websiteLabel(data.company.website)}
             </a>
           {:else}
             <p class="text-sm text-ink/30 mt-0.5">—</p>

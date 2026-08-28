@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Contact, TimelineEntry, Company } from '$lib/types';
+  import { websiteLabel } from '$lib/utils';
   import { enhance } from '$app/forms';
   import { toast } from '$lib/toast';
   import { openContact } from '$lib/detail-panel';
@@ -156,7 +157,7 @@
       <div class="grid grid-cols-1 gap-2 text-sm border-t border-line pt-3">
         {#if company.website}
           <a href={company.website} target="_blank" rel="noopener" class="flex items-center gap-1.5 text-terracotta hover:underline text-xs">
-            <ExternalLink class="w-3 h-3" /> {company.website.replace(/^https?:\/\//, '')}
+            <ExternalLink class="w-3 h-3" /> {websiteLabel(company.website)}
           </a>
         {/if}
         {#if company.telefon}
