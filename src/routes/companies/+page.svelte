@@ -275,6 +275,9 @@
                 <ExternalLink class="w-3 h-3" /> {websiteLabel(company.website)}
               </a>
             {/if}
+            {#if company.telefon}
+              <a href="tel:{company.telefon}" class="sm:hidden flex items-center gap-1 text-xs text-terracotta font-mono font-bold hover:underline"><Phone class="w-3 h-3" /> {company.telefon}</a>
+            {/if}
           </div>
         </div>
       {/if}
@@ -296,7 +299,7 @@
           <span class="text-ink/20 text-xs">—</span>
         {/if}
       </td>
-      <td class="px-3 py-2">
+      <td class="px-3 py-2 hidden sm:table-cell">
         {#if company.telefon}
           <a href="tel:{company.telefon}" class="flex items-center gap-1 text-sm text-terracotta font-mono font-bold hover:underline"><Phone class="w-3.5 h-3.5" /> {company.telefon}</a>
         {:else}
@@ -335,6 +338,10 @@
               <ExternalLink class="w-3 h-3" /> {websiteLabel(c.website)}
             </a>
           {/if}
+          {#if c.telefon}
+            <a href="tel:{c.telefon}" class="sm:hidden flex items-center gap-1 text-xs text-terracotta font-mono font-bold hover:underline"><Phone class="w-3 h-3" /> {c.telefon}</a>
+          {/if}
+          <span class="sm:hidden inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold border {STATUS_COLORS[c.status] ?? 'bg-ink/5 text-ink/40 border-line'}">{STATUS_LABELS[c.status] ?? c.status}</span>
         </div>
       </div>
     </td>
@@ -342,10 +349,10 @@
       <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-cream text-ink"><Users class="w-3 h-3" /> {c.prospects.length} Kontakt{c.prospects.length === 1 ? '' : 'e'}</span>
       <span class="block text-[11px] text-ink/40 mt-0.5 truncate">{c.prospects.map((p: any) => p.name).join(', ')}</span>
     </td>
-    <td class="px-3 py-2">
+    <td class="px-3 py-2 hidden sm:table-cell">
       <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold border {STATUS_COLORS[c.status] ?? 'bg-ink/5 text-ink/40 border-line'}">{STATUS_LABELS[c.status] ?? c.status}</span>
     </td>
-    <td class="px-3 py-2">
+    <td class="px-3 py-2 hidden sm:table-cell">
       {#if c.telefon}
         <a href="tel:{c.telefon}" class="flex items-center gap-1 text-sm text-terracotta font-mono font-bold hover:underline"><Phone class="w-3.5 h-3.5" /> {c.telefon}</a>
       {:else}
@@ -353,8 +360,8 @@
       {/if}
     </td>
     <td class="px-3 py-2 text-right">
-      <a href="/prospects?q={encodeURIComponent(c.name)}" class="inline-flex items-center gap-1 px-2.5 py-1 border border-line rounded text-xs text-ink/60 hover:bg-cream transition-colors">
-        <Target class="w-3.5 h-3.5" /> Prospects ansehen
+      <a href="/prospects?q={encodeURIComponent(c.name)}" aria-label="Prospects ansehen" class="inline-flex items-center gap-1 px-2.5 py-1 border border-line rounded text-xs text-ink/60 hover:bg-cream transition-colors">
+        <Target class="w-3.5 h-3.5" /> <span class="hidden lg:inline">Prospects ansehen</span>
       </a>
     </td>
   </tr>
@@ -517,7 +524,7 @@
               <span class="text-xs text-ink/40">{g.items.length}</span>
             </button>
             {#if !collapsedGroups.has(g.tag)}
-              <div class="overflow-x-auto"><table class="w-full"><tbody class="divide-y divide-line">{#each g.items as company}{@render companyRow(company)}{/each}</tbody></table></div>
+              <div class="overflow-x-auto"><table class="w-full table-fixed"><tbody class="divide-y divide-line">{#each g.items as company}{@render companyRow(company)}{/each}</tbody></table></div>
             {/if}
           </div>
         {/each}
@@ -525,14 +532,14 @@
     {:else}
       <div class="bg-surface rounded-xl border border-line overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full">
+          <table class="w-full table-fixed">
             <thead>
               <tr class="border-b border-line bg-cream/50">
                 <th class="text-left text-xs font-medium text-ink/50 px-3 py-2">Firma / Website</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden md:table-cell">Details</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden lg:table-cell">Verknüpfte Kontakte</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2">Telefon</th>
-                <th class="px-3 py-2 text-right text-xs font-medium text-ink/50">Aktion</th>
+                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden md:table-cell w-[30%]">Details</th>
+                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden lg:table-cell w-[20%]">Verknüpfte Kontakte</th>
+                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 w-[128px] hidden sm:table-cell">Telefon</th>
+                <th class="px-3 py-2 text-right text-xs font-medium text-ink/50 w-[76px]">Aktion</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-line">{#each data.companies as company}{@render companyRow(company)}{/each}</tbody>
@@ -591,7 +598,7 @@
             </button>
             {#if !collapsedGroups.has(g.tag)}
               <div class="overflow-x-auto">
-                <table class="w-full"><tbody class="divide-y divide-line">{#each g.items as c (c.key)}{@render outreachCompanyRow(c)}{/each}</tbody></table>
+                <table class="w-full table-fixed"><tbody class="divide-y divide-line">{#each g.items as c (c.key)}{@render outreachCompanyRow(c)}{/each}</tbody></table>
               </div>
             {/if}
           </div>
@@ -600,14 +607,14 @@
     {:else}
       <div class="bg-surface rounded-xl border border-line overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full">
+          <table class="w-full table-fixed">
             <thead>
               <tr class="border-b border-line bg-cream/50">
                 <th class="text-left text-xs font-medium text-ink/50 px-3 py-2">Firma / Website</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden lg:table-cell">Verknüpfte Kontakte</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2">Outreach-Status</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2">Telefon</th>
-                <th class="px-3 py-2 text-right text-xs font-medium text-ink/50">Aktion</th>
+                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden lg:table-cell w-[20%]">Verknüpfte Kontakte</th>
+                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 w-[104px] hidden sm:table-cell">Outreach-Status</th>
+                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 w-[128px] hidden sm:table-cell">Telefon</th>
+                <th class="px-3 py-2 text-right text-xs font-medium text-ink/50 w-[76px]">Aktion</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-line">
