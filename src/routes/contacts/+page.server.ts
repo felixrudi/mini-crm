@@ -1,6 +1,6 @@
 import { listRecords, createRecord, updateRecord, deleteRecord, linkId } from '$lib/server/teable';
-import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS, PROSPECT_FIELDS } from '$lib/server/teable-schema';
-import { mapContact, mapProspect } from '$lib/server/teable-map';
+import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS } from '$lib/server/teable-schema';
+import { mapContact } from '$lib/server/teable-map';
 import { matchesContactFilters, sortContacts } from '$lib/server/contact-filters';
 import type { TagMode, SortKey } from '$lib/server/contact-filters';
 import { listViews } from '$lib/server/views';
@@ -9,7 +9,6 @@ import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url }) => {
-  const db = url.searchParams.get('db') === 'outreach' ? 'outreach' : 'crm';
   const q = url.searchParams.get('q') || '';
   const kanal = url.searchParams.get('kanal') || '';
   const ort = url.searchParams.get('ort') || '';
@@ -40,21 +39,10 @@ export const load: PageServerLoad = async ({ url }) => {
       ? ['archiv']
       : tagsExcludeParam.split(',').map((t) => t.trim()).filter(Boolean);
 
-  const pq = (url.searchParams.get('pq') || '').toLowerCase();
-  const pstatus = url.searchParams.get('pstatus') || '';
-  const psort = ((): 'versandt' | 'name' | 'status' => {
-    const s = url.searchParams.get('psort');
-    return s === 'name' || s === 'status' ? s : 'versandt';
-  })();
-  // Prospects haben kein Tags-Feld in Teable — Gruppierung hier läuft daher
-  // über die Outreach-Phase (Status), nicht über Tags.
-  const pgroup = url.searchParams.get('pgroup') === 'status' ? 'status' : '';
-
-  const [kontakteRecs, firmenRecs, views, prospectRecs, interaktionenRecs] = await Promise.all([
+  const [kontakteRecs, firmenRecs, views, interaktionenRecs] = await Promise.all([
     listRecords(TABLES.kontakteReal),
     listRecords(TABLES.firmen),
-    listViews(db === 'outreach' ? 'kontakte-outreach' : 'kontakte'),
-    listRecords(TABLES.prospects),
+    listViews('kontakte'),
     listRecords(TABLES.interaktionenReal)
   ]);
   const firmaNameById = new Map(firmenRecs.map((f) => [f.id, f.fields[FIRMEN_FIELDS.name] as string]));
@@ -87,31 +75,7 @@ export const load: PageServerLoad = async ({ url }) => {
     kontakteRecs.map((r) => r.fields[KONTAKTE_FIELDS.ort] as string | undefined).filter((o): o is string => Boolean(o))
   )].sort();
 
-  // --- Outreach-Marketing (Prospects) ---
-  let prospects = prospectRecs.map((r) =>
-    mapProspect(r, firmaNameById.get(linkId(r.fields[PROSPECT_FIELDS.firma]) ?? '') ?? null)
-  );
-  if (pstatus) prospects = prospects.filter((p) => p.status === pstatus);
-  if (pq) {
-    prospects = prospects.filter((p) =>
-      `${p.name} ${p.email ?? ''} ${p.firma ?? ''} ${p.company_name ?? ''}`.toLowerCase().includes(pq)
-    );
-  }
-  if (psort === 'name') {
-    prospects.sort((a, b) => a.name.localeCompare(b.name));
-  } else if (psort === 'status') {
-    prospects.sort((a, b) => (a.status ?? '').localeCompare(b.status ?? '') || a.name.localeCompare(b.name));
-  } else {
-    prospects.sort((a, b) => {
-      const av = a.versandt_am ?? '';
-      const bv = b.versandt_am ?? '';
-      if (av !== bv) return av ? (bv ? bv.localeCompare(av) : -1) : 1;
-      return a.name.localeCompare(b.name);
-    });
-  }
-
   return {
-    db,
     contacts,
     companies,
     q,
@@ -124,12 +88,7 @@ export const load: PageServerLoad = async ({ url }) => {
     group,
     allTags,
     allOrte,
-    views,
-    prospects,
-    pq,
-    pstatus,
-    psort,
-    pgroup
+    views
   };
 };
 

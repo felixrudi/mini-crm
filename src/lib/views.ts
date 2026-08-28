@@ -12,12 +12,7 @@ function norm(f: ViewFilter): string {
     kanal: f.kanal ?? '',
     ort: f.ort ?? '',
     sort: f.sort ?? 'name',
-    group: f.group ?? '',
-    pstatus: f.pstatus ?? '',
-    psort: f.psort ?? 'versandt',
-    pgroup: f.pgroup ?? '',
-    osort: f.osort ?? 'name',
-    ogroup: f.ogroup ?? ''
+    group: f.group ?? ''
   });
 }
 
@@ -25,9 +20,8 @@ export function filtersEqual(a: ViewFilter, b: ViewFilter): boolean {
   return norm(a) === norm(b);
 }
 
-/** CRM-Listen: ohne Tag-Filter, aber archiv ausgeschlossen. Outreach: leer. */
-export function defaultListFilter(seite?: Seite): ViewFilter {
-  if (seite === 'kontakte-outreach' || seite === 'firmen-outreach') return {};
+/** CRM-Listen: ohne Tag-Filter, aber archiv ausgeschlossen. */
+export function defaultListFilter(_seite?: Seite): ViewFilter {
   return { tagsExclude: [...DEFAULT_TAGS_EXCLUDE] };
 }
 
@@ -44,7 +38,8 @@ export function isAllFilter(f: ViewFilter): boolean {
   return norm(f) === norm(allListFilter());
 }
 
-/** Outreach-Listen kennen keine Tags — dort ist die Standardansicht schon „Alle". */
-export function hatArchivUmschalter(seite?: Seite): boolean {
-  return seite !== 'kontakte-outreach' && seite !== 'firmen-outreach';
+/** Seit dem Wegfall der Outreach-Listen (28.08.2026) hat jede Liste den
+ *  Umschalter Aktuell/Alle — die Funktion bleibt als Angelpunkt bestehen. */
+export function hatArchivUmschalter(_seite?: Seite): boolean {
+  return true;
 }

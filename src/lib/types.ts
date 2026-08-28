@@ -107,7 +107,7 @@ export type TimelineEntry = {
   an: string | null;
 }
 
-export type Seite = 'kontakte' | 'kontakte-outreach' | 'firmen' | 'firmen-outreach';
+export type Seite = 'kontakte' | 'firmen';
 
 export type ViewFilter = {
   q?: string;
@@ -118,11 +118,6 @@ export type ViewFilter = {
   ort?: string;
   sort?: string;
   group?: string;
-  pstatus?: string;
-  psort?: string;
-  pgroup?: string;
-  osort?: string;
-  ogroup?: string;
 };
 
 export type SavedView = {

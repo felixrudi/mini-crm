@@ -21,86 +21,10 @@
   import Users from '@lucide/svelte/icons/users';
   import Phone from '@lucide/svelte/icons/phone';
   import MapPin from '@lucide/svelte/icons/map-pin';
-  import Target from '@lucide/svelte/icons/target';
   import Search from '@lucide/svelte/icons/search';
   import ChevronDown from '@lucide/svelte/icons/chevron-down';
 
   let { data }: { data: PageData } = $props();
-
-  let activeDb = $state(data.db);
-  function setDb(db: 'crm' | 'outreach') {
-    activeDb = db;
-    const url = new URL($page.url);
-    if (db === 'outreach') url.searchParams.set('db', 'outreach');
-    else url.searchParams.delete('db');
-    goto(url.toString(), { replaceState: true, keepFocus: true, noScroll: true });
-  }
-
-  const STATUS_LABELS: Record<string, string> = {
-    gesendet: 'Gesendet', geantwortet: 'Geantwortet', termin: 'Termin',
-    kein_interesse: 'Kein Interesse', bounce: 'Bounce', abgesagt: 'Abgesagt'
-  };
-  const STATUS_COLORS: Record<string, string> = {
-    gesendet: 'bg-blue-50 text-blue-600 border-blue-200',
-    geantwortet: 'bg-amber-50 text-amber-600 border-amber-200',
-    termin: 'bg-green-50 text-green-700 border-green-200',
-    kein_interesse: 'bg-ink/5 text-ink/40 border-line',
-    bounce: 'bg-red-50 text-red-500 border-red-200',
-    abgesagt: 'bg-ink/5 text-ink/40 border-line'
-  };
-
-  let outreachSearch = $state(data.oq ?? '');
-  let outreachDebounce: ReturnType<typeof setTimeout>;
-  function handleOutreachSearch() {
-    clearTimeout(outreachDebounce);
-    outreachDebounce = setTimeout(() => {
-      const url = new URL($page.url);
-      if (outreachSearch.trim()) url.searchParams.set('oq', outreachSearch.trim());
-      else url.searchParams.delete('oq');
-      goto(url.toString(), { replaceState: true, invalidateAll: true });
-    }, 300);
-  }
-
-  // Outreach-Firmen sind aus Prospects abgeleitet (keine Tags-/Ort-Felder
-  // dort) — Sortieren/Gruppieren spiegeln daher das Prospects-Muster (Name/
-  // Status/zuletzt versandt bzw. Gruppierung nach Status), nicht Tags.
-  let osort = $state<'name' | 'status' | 'versandt'>(
-    data.osort === 'status' || data.osort === 'versandt' ? data.osort : 'name'
-  );
-  let ogroup = $state<'' | 'status'>(data.ogroup === 'status' ? 'status' : '');
-  let outreachFilter = $derived<ViewFilter>({ q: outreachSearch, osort, ogroup });
-
-  function updateOutreachExtraUrl() {
-    const url = new URL($page.url);
-    if (osort !== 'name') url.searchParams.set('osort', osort);
-    else url.searchParams.delete('osort');
-    if (ogroup === 'status') url.searchParams.set('ogroup', 'status');
-    else url.searchParams.delete('ogroup');
-    goto(url.toString(), { replaceState: true, keepFocus: true, noScroll: true, invalidateAll: true });
-  }
-  function setOSort(s: 'name' | 'status' | 'versandt') { osort = s; updateOutreachExtraUrl(); }
-  function setOGroup(g: '' | 'status') { ogroup = g; updateOutreachExtraUrl(); }
-  function clearOutreachExtraFilter() { osort = 'name'; ogroup = ''; updateOutreachExtraUrl(); }
-
-  function applyOutreachView(filter: ViewFilter) {
-    outreachSearch = filter.q ?? '';
-    osort = filter.osort === 'status' || filter.osort === 'versandt' ? filter.osort : 'name';
-    ogroup = filter.ogroup === 'status' ? 'status' : '';
-    clearTimeout(outreachDebounce);
-    const url = new URL($page.url);
-    if (outreachSearch.trim()) url.searchParams.set('oq', outreachSearch.trim());
-    else url.searchParams.delete('oq');
-    if (osort !== 'name') url.searchParams.set('osort', osort);
-    else url.searchParams.delete('osort');
-    if (ogroup === 'status') url.searchParams.set('ogroup', 'status');
-    else url.searchParams.delete('ogroup');
-    goto(url.toString(), { replaceState: true, keepFocus: true, noScroll: true, invalidateAll: true });
-  }
-
-  const OSTATUS_GROUP_LABEL = (status: string) => STATUS_LABELS[status] ?? status ?? 'Unbekannt';
-  let outreachCompanyGroups = $derived(
-    ogroup === 'status' ? groupByTags(data.outreachCompanies, (c: { status: string }) => [OSTATUS_GROUP_LABEL(c.status)]) : null
-  );
 
   let showCreateForm = $state(false);
   let editId = $state<string | null>(null);
@@ -330,75 +254,20 @@
   </tr>
 {/snippet}
 
-{#snippet outreachCompanyRow(c: { key: string; name: string; website: string | null; prospects: { id: string; name: string }[]; telefon: string | null; status: string })}
-  <tr class="hover:bg-cream/50 transition-colors">
-    <td class="px-3 py-2">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-lg bg-terracotta/10 flex items-center justify-center flex-shrink-0">
-          <Building2 class="w-4 h-4 text-terracotta" />
-        </div>
-        <div class="min-w-0">
-          <span class="text-sm font-medium text-ink block truncate">{c.name}</span>
-          {#if c.website}
-            <a href={c.website} target="_blank" rel="noopener" class="flex items-center gap-1 text-xs text-terracotta hover:underline font-mono">
-              <ExternalLink class="w-3 h-3" /> {websiteLabel(c.website)}
-            </a>
-          {/if}
-          {#if c.telefon}
-            <a href="tel:{c.telefon}" class="sm:hidden flex items-center gap-1 text-xs text-terracotta font-mono font-bold hover:underline"><Phone class="w-3 h-3" /> {c.telefon}</a>
-          {/if}
-          <span class="sm:hidden inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold border {STATUS_COLORS[c.status] ?? 'bg-ink/5 text-ink/40 border-line'}">{STATUS_LABELS[c.status] ?? c.status}</span>
-        </div>
-      </div>
-    </td>
-    <td class="px-3 py-2 hidden lg:table-cell">
-      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-cream text-ink"><Users class="w-3 h-3" /> {c.prospects.length} Kontakt{c.prospects.length === 1 ? '' : 'e'}</span>
-      <span class="block text-[11px] text-ink/40 mt-0.5 truncate">{c.prospects.map((p: any) => p.name).join(', ')}</span>
-    </td>
-    <td class="px-3 py-2 hidden sm:table-cell">
-      <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold border {STATUS_COLORS[c.status] ?? 'bg-ink/5 text-ink/40 border-line'}">{STATUS_LABELS[c.status] ?? c.status}</span>
-    </td>
-    <td class="px-3 py-2 hidden sm:table-cell">
-      {#if c.telefon}
-        <a href="tel:{c.telefon}" class="flex items-center gap-1 text-sm text-terracotta font-mono font-bold hover:underline"><Phone class="w-3.5 h-3.5" /> {c.telefon}</a>
-      {:else}
-        <span class="text-ink/20 text-xs">—</span>
-      {/if}
-    </td>
-    <td class="px-3 py-2 text-right">
-      <a href="/prospects?q={encodeURIComponent(c.name)}" aria-label="Prospects ansehen" class="inline-flex items-center gap-1 px-2.5 py-1 border border-line rounded text-xs text-ink/60 hover:bg-cream transition-colors">
-        <Target class="w-3.5 h-3.5" /> <span class="hidden lg:inline">Prospects ansehen</span>
-      </a>
-    </td>
-  </tr>
-{/snippet}
-
 <div class="p-6 max-w-[1400px] mx-auto overflow-x-hidden">
   <div class="flex items-start justify-between mb-4 flex-wrap gap-3">
     <div>
-      <h1 class="font-display font-bold text-2xl text-ink">
-        Firmen ({activeDb === 'crm' ? 'Mein Netzwerk' : 'Outreach-Firmen'})
-      </h1>
-      <div class="flex gap-1.5 mt-2.5 bg-cream p-1 rounded-lg w-fit">
-        <button onclick={() => setDb('crm')}
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors {activeDb === 'crm' ? 'bg-surface text-ink shadow-sm' : 'text-ink/50 hover:text-ink'}">
-          <Users class="w-3.5 h-3.5" /> Mein Netzwerk (CRM)
-        </button>
-        <button onclick={() => setDb('outreach')}
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors {activeDb === 'outreach' ? 'bg-surface text-ink shadow-sm' : 'text-ink/50 hover:text-ink'}">
-          <Target class="w-3.5 h-3.5" /> Outreach-Firmen (DB)
-        </button>
-      </div>
+      <h1 class="font-display font-bold text-2xl text-ink">Firmen</h1>
     </div>
-    {#if activeDb === 'crm'}
+    
       <button onclick={() => (showCreateForm = !showCreateForm)}
         class="flex items-center gap-2 px-4 py-2 bg-terracotta text-white rounded-lg text-sm font-medium hover:bg-terracotta/90 transition-colors">
         <Plus class="w-4 h-4" /> Neue Firma
       </button>
-    {/if}
+    
   </div>
 
-  {#if activeDb === 'crm'}
+  
     <ViewTabs seite="firmen" views={data.views} currentFilter={currentFilter} onselect={applyView} />
 
     <!-- Filterleiste -->
@@ -553,82 +422,5 @@
         </div>
       </div>
     {/if}
-  {:else}
-    <!-- Outreach-Firmen -->
-    <ViewTabs seite="firmen-outreach" views={data.views} currentFilter={outreachFilter} onselect={applyOutreachView} />
-
-    <div class="bg-surface rounded-xl border border-line p-3 mb-3">
-      <div class="relative max-w-sm">
-        <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink/30" />
-        <input type="text" bind:value={outreachSearch} oninput={handleOutreachSearch} placeholder="Firma suchen…"
-          class="w-full pl-8 pr-3 py-1 bg-cream border border-line rounded-lg text-xs text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
-      </div>
-      <div class="mt-2 pt-2 border-t border-line flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-        <label class="flex items-center gap-1 text-ink/50">
-          Sortieren
-          <select value={osort} onchange={(e) => setOSort((e.currentTarget as HTMLSelectElement).value as 'name' | 'status' | 'versandt')}
-            class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
-            <option value="name">Name (A-Z)</option>
-            <option value="status">Phase</option>
-            <option value="versandt">Zuletzt versandt</option>
-          </select>
-        </label>
-        <label class="flex items-center gap-1 text-ink/50">
-          Gruppieren
-          <select value={ogroup} onchange={(e) => setOGroup((e.currentTarget as HTMLSelectElement).value as '' | 'status')}
-            class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
-            <option value="">Keine</option>
-            <option value="status">Nach Phase</option>
-          </select>
-        </label>
-        {#if osort !== 'name' || ogroup}
-          <button onclick={clearOutreachExtraFilter} class="text-ink/40 hover:text-terracotta transition-colors ml-auto">Filter löschen</button>
-        {/if}
-      </div>
-    </div>
-
-    {#if data.outreachCompanies.length === 0}
-      <div class="bg-surface rounded-xl border border-line py-16 text-center">
-        <Target class="w-10 h-10 text-ink/15 mx-auto mb-3" />
-        <p class="text-sm font-medium text-ink/50">Keine Outreach-Firmen gefunden</p>
-      </div>
-    {:else if outreachCompanyGroups}
-      <div class="space-y-4">
-        {#each outreachCompanyGroups as g (g.tag)}
-          <div class="bg-surface rounded-xl border border-line overflow-hidden">
-            <button type="button" onclick={() => toggleGroup(g.tag)}
-              class="w-full px-4 py-2.5 bg-cream/70 {collapsedGroups.has(g.tag) ? '' : 'border-b border-line'} flex items-center gap-2 text-left hover:bg-cream transition-colors">
-              <ChevronDown class="w-3.5 h-3.5 text-ink/40 transition-transform duration-150 {collapsedGroups.has(g.tag) ? '-rotate-90' : ''}" />
-              <span class="px-2 py-0.5 rounded-full text-xs font-medium border bg-cream text-ink/70 border-line">{g.tag}</span>
-              <span class="text-xs text-ink/40">{g.items.length}</span>
-            </button>
-            {#if !collapsedGroups.has(g.tag)}
-              <div class="overflow-x-auto">
-                <table class="w-full table-fixed"><tbody class="divide-y divide-line">{#each g.items as c (c.key)}{@render outreachCompanyRow(c)}{/each}</tbody></table>
-              </div>
-            {/if}
-          </div>
-        {/each}
-      </div>
-    {:else}
-      <div class="bg-surface rounded-xl border border-line overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full table-fixed">
-            <thead>
-              <tr class="border-b border-line bg-cream/50">
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2">Firma / Website</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden lg:table-cell w-[20%]">Verknüpfte Kontakte</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 w-[104px] hidden sm:table-cell">Outreach-Status</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 w-[128px] hidden sm:table-cell">Telefon</th>
-                <th class="px-3 py-2 text-right text-xs font-medium text-ink/50 w-[76px]">Aktion</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-line">
-              {#each data.outreachCompanies as c (c.key)}{@render outreachCompanyRow(c)}{/each}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    {/if}
-  {/if}
+  
 </div>
