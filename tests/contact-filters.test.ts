@@ -42,3 +42,24 @@ test('sortContacts: Tags-Sortierung ordnet nach absteigender Tag-Anzahl', () => 
   const sorted = sortContacts(contacts, 'tags');
   assert.deepEqual(sorted.map((c) => c.name), ['B', 'A', 'C']);
 });
+
+test('sortContacts: Aktivitäts-Sortierung zeigt zuletzt Gehörtes zuerst', () => {
+  const contacts = [
+    { name: 'Alt', company_name: null, last_activity: '2026-07-29' },
+    { name: 'Neu', company_name: null, last_activity: '2026-08-21' },
+    { name: 'Nie', company_name: null, last_activity: null }
+  ];
+  const sorted = sortContacts(contacts, 'activity');
+  assert.deepEqual(sorted.map((c) => c.name), ['Neu', 'Alt', 'Nie']);
+});
+
+test('sortContacts: gleiche Aktivität fällt auf Name zurück', () => {
+  const contacts = [
+    { name: 'Zoe', company_name: null, last_activity: '2026-08-21' },
+    { name: 'Anna', company_name: null, last_activity: '2026-08-21' },
+    { name: 'Bert', company_name: null, last_activity: null },
+    { name: 'Aaron', company_name: null, last_activity: null }
+  ];
+  const sorted = sortContacts(contacts, 'activity');
+  assert.deepEqual(sorted.map((c) => c.name), ['Anna', 'Zoe', 'Aaron', 'Bert']);
+});

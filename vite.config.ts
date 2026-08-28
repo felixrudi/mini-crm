@@ -18,9 +18,11 @@ export default defineConfig({
       manifest: {
         name: 'Hirschfeld CRM', // decided 19.07.2026, see plan "Open Questions"
         short_name: 'CRM', // decided 19.07.2026, see plan "Open Questions"
-        description: 'Persönliches CRM für Kontakte, Firmen und Outreach.',
+        description: 'Persönliches CRM für Kontakte und Firmen.',
         lang: 'de',
-        start_url: '/',
+        // Direkt in die Kontaktliste — seit 28.08.2026 gibt es kein Dashboard
+        // mehr, '/' würde beim App-Start nur einen Redirect kosten.
+        start_url: '/contacts',
         scope: '/',
         display: 'standalone',
         background_color: '#f9f6f2', // light-hybrid theme background, src/app.css — Felix's decision 19.07.2026

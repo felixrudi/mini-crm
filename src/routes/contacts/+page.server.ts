@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ url }) => {
   const group = url.searchParams.get('group') === 'tags' ? 'tags' : '';
   const sort = ((): SortKey => {
     const s = url.searchParams.get('sort');
-    return s === 'company' || s === 'tags' ? s : 'name';
+    return s === 'company' || s === 'tags' || s === 'activity' ? s : 'name';
   })();
   const tagMode: TagMode = url.searchParams.get('mode') === 'and' ? 'and' : 'or';
 

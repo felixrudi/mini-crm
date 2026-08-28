@@ -68,7 +68,7 @@
   let excludedTags = $state<string[]>(data.tagsExclude ?? []);
   let tagMode = $state<'or' | 'and'>(data.tagMode === 'and' ? 'and' : 'or');
   let ort = $state(data.ort ?? '');
-  let sortBy = $state<'name' | 'company' | 'tags'>(data.sort ?? 'name');
+  let sortBy = $state<'name' | 'company' | 'tags' | 'activity'>(data.sort ?? 'name');
   let group = $state<'' | 'tags'>(data.group === 'tags' ? 'tags' : '');
   // „Filter aktiv“ nur wenn mehr als der Standard-Archiv-Ausschluss gesetzt ist
   let hasTagFilter = $derived(
@@ -147,7 +147,7 @@
     updateUrl();
   }
   function setTagMode(mode: 'or' | 'and') { tagMode = mode; updateUrl(); }
-  function setSort(s: 'name' | 'company' | 'tags') { sortBy = s; updateUrl(); }
+  function setSort(s: 'name' | 'company' | 'tags' | 'activity') { sortBy = s; updateUrl(); }
   function setOrt(o: string) { ort = o; updateUrl(); }
   function setGroup(g: '' | 'tags') { group = g; updateUrl(); }
   function clearTagFilter() {
@@ -162,7 +162,10 @@
     // Gespeicherte Ansicht ohne tagsExclude → Default (ohne Archiv)
     excludedTags = filter.tagsExclude !== undefined ? (filter.tagsExclude ?? []) : [...DEFAULT_TAGS_EXCLUDE];
     tagMode = filter.tagMode === 'and' ? 'and' : 'or';
-    sortBy = filter.sort === 'company' || filter.sort === 'tags' ? filter.sort : 'name';
+    sortBy =
+      filter.sort === 'company' || filter.sort === 'tags' || filter.sort === 'activity'
+        ? filter.sort
+        : 'name';
     ort = filter.ort ?? '';
     group = filter.group === 'tags' ? 'tags' : '';
     updateUrl();
@@ -509,9 +512,10 @@
       <div class="mt-2 pt-2 border-t border-line flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
         <label class="flex items-center gap-1 text-ink/50">
           Sortieren
-          <select value={sortBy} onchange={(e) => setSort((e.currentTarget as HTMLSelectElement).value as 'name' | 'company' | 'tags')}
+          <select value={sortBy} onchange={(e) => setSort((e.currentTarget as HTMLSelectElement).value as 'name' | 'company' | 'tags' | 'activity')}
             class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
             <option value="name">Name (A-Z)</option>
+            <option value="activity">Zuletzt aktiv</option>
             <option value="company">Firma (A-Z)</option>
             <option value="tags">Anzahl Tags</option>
           </select>

@@ -11,7 +11,6 @@
   import UpdatePrompt from '$lib/components/UpdatePrompt.svelte';
   import InstallPrompt from '$lib/components/InstallPrompt.svelte';
   import { parseDetailParam } from '$lib/detail-panel';
-  import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
   import Users from '@lucide/svelte/icons/users';
   import Building2 from '@lucide/svelte/icons/building-2';
   import ScanLine from '@lucide/svelte/icons/scan-line';
@@ -19,8 +18,6 @@
   import X from '@lucide/svelte/icons/x';
   import Search from '@lucide/svelte/icons/search';
   import ChevronLeft from '@lucide/svelte/icons/chevron-left';
-  import Columns from '@lucide/svelte/icons/columns';
-  import CheckCircle2 from '@lucide/svelte/icons/check-circle-2';
 
   let { children } = $props();
 
@@ -64,12 +61,12 @@
     }
   });
 
+  // Kein Dashboard mehr (28.08.2026): Startseite ist die Kontaktliste, und die
+  // Outreach-Ansichten sind raus — ihre Daten leben in der Marketing-Base und
+  // im Abgleich, nicht hier.
   const navItems = [
-    { href: '/', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/contacts', label: 'Kontakte', icon: Users },
     { href: '/companies', label: 'Firmen', icon: Building2 },
-    { href: '/outreach', label: 'Outreach-Überblick', icon: Columns },
-    { href: '/versand-uebersicht', label: 'Versand-Übersicht', icon: CheckCircle2 },
     { href: '/scan', label: 'Scan & Import', icon: ScanLine },
   ];
 

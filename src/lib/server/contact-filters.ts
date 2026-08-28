@@ -2,7 +2,7 @@
 import { KONTAKTE_FIELDS } from './teable-schema.ts';
 
 export type TagMode = 'and' | 'or';
-export type SortKey = 'name' | 'company' | 'tags';
+export type SortKey = 'name' | 'company' | 'tags' | 'activity';
 
 export type ContactFilterParams = {
   q: string;
@@ -38,16 +38,26 @@ export function matchesContactFilters(
   return true;
 }
 
-export function sortContacts<T extends { name: string; company_name: string | null; tags?: string[] }>(
-  contacts: T[],
-  sort: SortKey
-): T[] {
+export function sortContacts<
+  T extends { name: string; company_name: string | null; tags?: string[]; last_activity?: string | null }
+>(contacts: T[], sort: SortKey): T[] {
   const byName = (a: T, b: T) => a.name.localeCompare(b.name);
   if (sort === 'company') {
     return contacts.sort((a, b) => (a.company_name ?? '').localeCompare(b.company_name ?? '') || byName(a, b));
   }
   if (sort === 'tags') {
     return contacts.sort((a, b) => (b.tags?.length ?? 0) - (a.tags?.length ?? 0) || byName(a, b));
+  }
+  if (sort === 'activity') {
+    // Zuletzt Gehörtes zuerst; wer nie eine Interaktion hatte, steht am Ende
+    // (und dort alphabetisch) statt vorne — sonst füllt sich der Kopf der
+    // Liste mit den 52 Kontakten ohne jede Interaktion.
+    return contacts.sort((a, b) => {
+      const av = a.last_activity ?? '';
+      const bv = b.last_activity ?? '';
+      if (av !== bv) return av ? (bv ? bv.localeCompare(av) : -1) : 1;
+      return byName(a, b);
+    });
   }
   return contacts.sort(byName);
 }
