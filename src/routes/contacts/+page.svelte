@@ -34,6 +34,43 @@
 
   let debounceTimer: ReturnType<typeof setTimeout>;
 
+  async function handleAvatarChange(e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file || !avatarUploadId) return;
+    const targetId = avatarUploadId;
+    avatarUploadId = null;
+
+    const resized = await resizeImage(file, 400);
+    const fd = new FormData();
+    fd.append('image', resized, 'photo.jpg');
+    const res = await fetch(`/api/contacts/${targetId}/photo`, { method: 'POST', body: fd });
+    if (res.ok) {
+      const d = await res.json();
+      photoCache[targetId] = d.photo;
+      toast.success('Foto gespeichert');
+    } else {
+      toast.error('Upload fehlgeschlagen');
+    }
+    (e.target as HTMLInputElement).value = '';
+  }
+
+  function resizeImage(file: File, maxSize: number): Promise<Blob> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const ratio = Math.min(maxSize / img.width, maxSize / img.height, 1);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        canvas.toBlob((blob) => resolve(blob!), 'image/jpeg', 0.85);
+      };
+      img.src = url;
+    });
+  }
+
   // --- CRM-Filter, Sortierung, Gruppierung (bestehende Funktion, in "Mehr Filter") ---
   let selectedTags = $state<string[]>(data.tags ?? []);
   let excludedTags = $state<string[]>(data.tagsExclude ?? []);
