@@ -2,7 +2,7 @@
   import { invalidateAll } from '$app/navigation';
   import { toast } from '$lib/toast';
   import type { SavedView, ViewFilter, Seite } from '$lib/types';
-  import { filtersEqual, isDefaultFilter, defaultListFilter } from '$lib/views';
+  import { filtersEqual, isDefaultFilter, defaultListFilter, allListFilter, isAllFilter, hatArchivUmschalter } from '$lib/views';
   import Plus from '@lucide/svelte/icons/plus';
   import Pencil from '@lucide/svelte/icons/pencil';
   import Trash2 from '@lucide/svelte/icons/trash-2';
@@ -85,8 +85,21 @@
       ? 'bg-terracotta text-white border-terracotta'
       : 'bg-surface text-ink/60 border-line hover:border-ink/30'}"
   >
-    {seite === 'kontakte-outreach' || seite === 'firmen-outreach' ? 'Alle' : 'Aktuell'}
+    {hatArchivUmschalter(seite) ? 'Aktuell' : 'Alle'}
   </button>
+
+  {#if hatArchivUmschalter(seite)}
+    <button
+      type="button"
+      onclick={() => onselect(allListFilter())}
+      title="Auch archivierte Einträge zeigen"
+      class="px-2.5 py-1 rounded-full text-xs font-medium border transition-colors {isAllFilter(currentFilter)
+        ? 'bg-terracotta text-white border-terracotta'
+        : 'bg-surface text-ink/60 border-line hover:border-ink/30'}"
+    >
+      Alle
+    </button>
+  {/if}
 
   {#each views as view (view.id)}
     {#if renaming === view.id}

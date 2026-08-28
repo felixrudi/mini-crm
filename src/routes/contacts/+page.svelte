@@ -589,7 +589,7 @@
             </button>
             {#if !collapsedGroups.has(g.tag)}
               <div class="overflow-x-auto">
-                <table class="w-full"><tbody class="divide-y divide-line">{#each g.items as contact}{@render contactRow(contact)}{/each}</tbody></table>
+                <table class="w-full table-fixed"><tbody class="divide-y divide-line">{#each g.items as contact}{@render contactRow(contact)}{/each}</tbody></table>
               </div>
             {/if}
           </div>
@@ -598,14 +598,14 @@
     {:else}
       <div class="bg-surface rounded-xl border border-line overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full">
+          <table class="w-full table-fixed">
             <thead>
               <tr class="border-b border-line bg-cream/50">
                 <th class="text-left text-xs font-medium text-ink/50 px-3 py-2">Name / Details</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden md:table-cell">Rolle</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden lg:table-cell">Tags</th>
+                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden md:table-cell w-[22%]">Rolle</th>
+                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden lg:table-cell w-[18%]">Tags</th>
                 <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden lg:table-cell">Letzte Info / Kontakt</th>
-                <th class="px-3 py-2 text-right text-xs font-medium text-ink/50">Aktion</th>
+                <th class="px-3 py-2 text-right text-xs font-medium text-ink/50 w-[76px]">Aktion</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-line">
@@ -633,7 +633,7 @@
             </button>
             {#if !collapsedGroups.has(g.tag)}
               <div class="overflow-x-auto">
-                <table class="w-full"><tbody class="divide-y divide-line">{#each g.items as p}{@render prospectRow(p)}{/each}</tbody></table>
+                <table class="w-full table-fixed"><tbody class="divide-y divide-line">{#each g.items as p}{@render prospectRow(p)}{/each}</tbody></table>
               </div>
             {/if}
           </div>
@@ -642,15 +642,15 @@
     {:else}
       <div class="bg-surface rounded-xl border border-line overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full">
+          <table class="w-full table-fixed">
             <thead>
               <tr class="border-b border-line bg-cream/50">
                 <th class="text-left text-xs font-medium text-ink/50 px-3 py-2">Name / Details</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden md:table-cell">Rolle</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden lg:table-cell">Tags</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2">Outreach-Phase &amp; Letzte Interaktion</th>
+                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden md:table-cell w-[22%]">Rolle</th>
+                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden lg:table-cell w-[18%]">Tags</th>
+                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 w-[132px] hidden sm:table-cell">Outreach-Phase &amp; Letzte Interaktion</th>
                 <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden lg:table-cell">Letzte Info / Kontakt</th>
-                <th class="px-3 py-2 text-right text-xs font-medium text-ink/50">Aktion</th>
+                <th class="px-3 py-2 text-right text-xs font-medium text-ink/50 w-[76px]">Aktion</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-line">

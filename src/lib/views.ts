@@ -34,3 +34,17 @@ export function defaultListFilter(seite?: Seite): ViewFilter {
 export function isDefaultFilter(f: ViewFilter, seite?: Seite): boolean {
   return norm(f) === norm(defaultListFilter(seite));
 }
+
+/** CRM-Listen: nichts ausgeschlossen, also auch Archiviertes. */
+export function allListFilter(): ViewFilter {
+  return { tagsExclude: [] };
+}
+
+export function isAllFilter(f: ViewFilter): boolean {
+  return norm(f) === norm(allListFilter());
+}
+
+/** Outreach-Listen kennen keine Tags — dort ist die Standardansicht schon „Alle". */
+export function hatArchivUmschalter(seite?: Seite): boolean {
+  return seite !== 'kontakte-outreach' && seite !== 'firmen-outreach';
+}
