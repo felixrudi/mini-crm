@@ -1,0 +1,244 @@
+/* ============================================================
+   Kopfleiste (Dach) — Standard Design (Bernstein hell)
+   ------------------------------------------------------------
+   Henry Design System (kanonisch seit 05.09.2026).
+   Hintergrund #f2e5bc / #fbf1c7, Akzentrot #904446, Text #2a201c.
+   Schrift: Inter (Text) + Roboto Mono (Zeichen, Labels) — seit 17.09.2026.
+   ============================================================ */
+
+/* Schriften der Kopfleiste — selbst mitgebracht, damit Apps ohne fonts.css
+   (Todoist, CRM) nicht auf die Systemschrift fallen. Pfade relativ zu dieser
+   Datei: design/fonts/. Henry-Standard seit 17.09.2026: Inter + Roboto Mono.
+   Doppelte @font-face mit fonts.css schaden nicht. */
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 300 800; font-display: block;
+  src: url(./fonts/inter-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 300 800; font-display: block;
+  src: url(./fonts/inter-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Roboto Mono'; font-style: normal; font-weight: 100 700; font-display: block;
+  src: url(./fonts/roboto-mono-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Roboto Mono'; font-style: normal; font-weight: 100 700; font-display: block;
+  src: url(./fonts/roboto-mono-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+2C60-2C7F, U+A720-A7FF; }
+
+:root {
+  --dach-bg:          #f2e5bc;
+  --dach-linie:       #e0d3a8;
+  --dach-linie-stark: #cdbc8c;
+  --dach-text:        #2a201c;
+  --dach-text-still:  #6b5a4e;
+  --dach-text-leise:  #6a5a4c;
+  --dach-akzent:      #904446;
+  --dach-akzent-tief: #73282a;
+  --dach-akzent-weich: rgba(144, 68, 70, 0.10);
+  --dach-gut:         #1a6549;
+  --dach-gut-weich:    rgba(31, 122, 90, 0.15);
+  --dach-grau:        #a89984;
+}
+
+.dach {
+  position: relative;
+  z-index: 100;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: var(--dach-bg);
+  border-bottom: 1px solid var(--dach-linie);
+  color: var(--dach-text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+/* Marke links */
+.dach-marke {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  color: var(--dach-text);
+  margin-right: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: opacity 0.15s;
+}
+.dach-marke:hover {
+  opacity: 0.85;
+}
+
+.dach-zeichen {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: var(--dach-akzent);
+  color: #fff;
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+}
+
+.dach-name {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--dach-text);
+}
+.dach-name .tld {
+  font-weight: 500;
+  color: var(--dach-text-still);
+}
+
+/* Reiterreihe */
+.dach-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 100%;
+}
+
+.dach-reiter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 0 12px;
+  text-decoration: none;
+  color: var(--dach-text-still);
+  font-weight: 500;
+  font-size: 13px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+  cursor: pointer;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.dach-reiter:hover {
+  color: var(--dach-text);
+  background: rgba(144, 68, 70, 0.04);
+}
+
+.dach-reiter[aria-current='page'],
+.dach-reiter.aktiv {
+  color: var(--dach-akzent-tief);
+  font-weight: 600;
+  border-bottom-color: var(--dach-akzent);
+}
+
+/* Tastenkürzel Badge im Reiter */
+.dach-taste {
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  font-size: 10px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--dach-text-still);
+  line-height: 1.2;
+}
+.dach-reiter[aria-current='page'] .dach-taste,
+.dach-reiter.aktiv .dach-taste {
+  background: var(--dach-akzent-weich);
+  color: var(--dach-akzent);
+}
+
+/* Status-Punkt je Reiter */
+.dach-punkt {
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  background: var(--dach-grau);
+  opacity: 0.4;
+  transition: background 0.2s, opacity 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+}
+.dach-reiter[data-online="ja"] .dach-punkt {
+  background: var(--dach-gut);
+  opacity: 1;
+  box-shadow: 0 0 0 2px var(--dach-gut-weich);
+}
+.dach-reiter[data-online="nein"] .dach-punkt {
+  background: var(--dach-grau);
+  opacity: 0.4;
+}
+
+/* Offline-Dämpfung */
+.dach-reiter[data-offline] {
+  opacity: 0.55;
+}
+.dach-reiter[data-offline]:hover {
+  color: var(--dach-text-still);
+  background: none;
+}
+
+/* Rechte Werkzeugleiste */
+.dach-rechts {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dach-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--dach-linie);
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--dach-text-still);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.dach-pill:hover {
+  background: rgba(0, 0, 0, 0.07);
+  color: var(--dach-text);
+}
+
+.dach-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 5px;
+  background: transparent;
+  border: 1px solid var(--dach-linie);
+  color: var(--dach-text-still);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.dach-btn:hover {
+  background: #fbf1c7;
+  color: var(--dach-text);
+  border-color: var(--dach-linie-stark);
+}
+.dach-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* Modul-Titel (z.B. Mail-Subheader) */
+.modul-titel {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: inherit;
+}
