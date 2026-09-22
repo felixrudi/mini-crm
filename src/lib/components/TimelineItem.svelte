@@ -3,7 +3,7 @@
   import { formatDate } from '$lib/utils';
   import { enhance } from '$app/forms';
   import { toast } from '$lib/toast';
-  import { marked } from 'marked';
+  import { renderMarkdown } from '$lib/markdown';
   import Phone from '@lucide/svelte/icons/phone';
   import MapPin from '@lucide/svelte/icons/map-pin';
   import StickyNote from '@lucide/svelte/icons/sticky-note';
@@ -37,7 +37,7 @@
   let editing = $state(false);
 
   const isLongNote = $derived(entry.art === 'interaction' && (entry.inhalt?.length ?? 0) > 120);
-  const renderedMarkdown = $derived(entry.inhalt ? marked(entry.inhalt) as string : '');
+  const renderedMarkdown = $derived(entry.inhalt ? renderMarkdown(entry.inhalt) : '');
   let editTitel = $state('');
   let editInhalt = $state('');
 
