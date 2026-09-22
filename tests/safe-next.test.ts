@@ -20,3 +20,8 @@ test('leer oder fehlend wird zu /', () => {
   assert.equal(safeNext(null), '/');
   assert.equal(safeNext(undefined), '/');
 });
+
+test('Steuerzeichen (Tab etc.) im Ziel werden zu /', () => {
+  assert.equal(safeNext('/\t/evil.com'), '/');
+  assert.equal(safeNext('/\x00evil.com'), '/');
+});
