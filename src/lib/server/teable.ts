@@ -3,18 +3,16 @@
 // Teable scripts (see plan Global Constraints) + Task 0 spike results.
 
 const TEABLE_BASE = (process.env.TEABLE_BASE_URL ?? 'https://teable.hirschfeld.at').replace(/\/$/, '');
-const TEABLE_API_KEY = process.env.TEABLE_API_KEY as string;
 
-if (!TEABLE_API_KEY) {
-  throw new Error('TEABLE_API_KEY not set');
+function baseHeaders(): Record<string, string> {
+  const key = process.env.TEABLE_API_KEY;
+  if (!key) throw new Error('TEABLE_API_KEY not set');
+  return {
+    Authorization: `Bearer ${key}`,
+    // WAF on teable.hirschfeld.at blocks default Node/undici user-agents. Do not remove.
+    'User-Agent': 'curl/8'
+  };
 }
-
-const BASE_HEADERS = {
-  Authorization: `Bearer ${TEABLE_API_KEY}`,
-  // WAF on teable.hirschfeld.at blocks default Node/undici user-agents — confirmed
-  // across every working script in the Henry repo. Do not remove.
-  'User-Agent': 'curl/8'
-};
 
 export type TeableRecord<F = Record<string, unknown>> = {
   id: string;
@@ -30,7 +28,7 @@ async function teableFetch(
 ): Promise<Response> {
   const res = await fetch(`${TEABLE_BASE}/api${path}`, {
     ...init,
-    headers: { ...BASE_HEADERS, ...(init.headers ?? {}) }
+    headers: { ...baseHeaders(), ...(init.headers ?? {}) }
   });
   if (!res.ok && res.status >= 500 && attempt < 3) {
     await new Promise((r) => setTimeout(r, 300 * attempt));
