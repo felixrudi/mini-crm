@@ -1,5 +1,5 @@
 import { dev } from '$app/environment';
-import type { Handle } from '@sveltejs/kit';
+import { redirect, type Handle } from '@sveltejs/kit';
 import { decideAuth } from '$lib/server/auth-policy';
 import { verifySessionToken } from '$lib/server/session';
 
@@ -44,14 +44,17 @@ export const handle: Handle = async ({ event, resolve }) => {
     );
   }
   if (decision === 'login') {
-    // Als Response statt throw redirect() gebaut, damit die Security-Header
-    // auch hier noch gesetzt werden können.
-    return applySecurityHeaders(
-      new Response(null, {
-        status: 303,
-        headers: { location: `/login?next=${encodeURIComponent(buildNext(pathname, search))}` }
-      })
-    );
+    // throw redirect() statt einer manuell gebauten Response: SvelteKits
+    // Request-Maschinerie fängt den geworfenen Redirect ab und kodiert ihn für
+    // __data.json-SPA-Requests und use:enhance-Formulare als JSON-Envelope um
+    // (siehe node_modules/@sveltejs/kit/src/runtime/server/respond.js und
+    // .../client/client.js). Eine roh zurückgegebene Response umgeht das —
+    // eine In-App-Navigation oder ein enhanced Formular-Submit folgt dem
+    // rohen 303 per fetch(), landet auf der Login-HTML statt JSON und bricht,
+    // bis neu geladen wird. Trade-off: dieser Pfad bekommt dadurch keine der
+    // drei Security-Header — vertretbar, weil ein Redirect ohne Body nichts
+    // hat, das sie schützen müssten. deny() und resolve() behalten sie.
+    throw redirect(303, `/login?next=${encodeURIComponent(buildNext(pathname, search))}`);
   }
 
   const response = await resolve(event);

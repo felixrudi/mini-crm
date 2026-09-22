@@ -67,9 +67,17 @@ test('unauthentifizierte Anfrage auf eine geschützte Seite wird zu /login umgel
   await withEnv({ SESSION_SECRET: undefined, TRUST_PROXY_USER: undefined }, async () => {
     const event = makeEvent('/contacts');
     const { resolve, wasCalled } = makeResolve();
-    const response = await handle({ event, resolve } as any);
-    assert.equal(response.status, 303);
-    assert.match(response.headers.get('location') ?? '', /^\/login\?next=/);
+    // handle() nutzt hier throw redirect(...) statt einer zurückgegebenen
+    // Response — SvelteKits eigener Redirect-Helfer wirft ein Objekt mit
+    // status/location statt eines echten Response, deshalb try/catch.
+    await assert.rejects(
+      () => handle({ event, resolve } as any),
+      (err: any) => {
+        assert.equal(err.status, 303);
+        assert.match(err.location ?? '', /^\/login\?next=/);
+        return true;
+      }
+    );
     assert.equal(wasCalled(), false);
   });
 });
@@ -104,8 +112,13 @@ test('TRUST_PROXY_USER nicht gesetzt: remote-user-Header allein reicht nicht, es
   await withEnv({ SESSION_SECRET: undefined, TRUST_PROXY_USER: undefined }, async () => {
     const event = makeEvent('/contacts', { headers: { 'remote-user': 'felix' } });
     const { resolve, wasCalled } = makeResolve();
-    const response = await handle({ event, resolve } as any);
-    assert.equal(response.status, 303);
+    await assert.rejects(
+      () => handle({ event, resolve } as any),
+      (err: any) => {
+        assert.equal(err.status, 303);
+        return true;
+      }
+    );
     assert.equal(wasCalled(), false);
   });
 });
@@ -124,8 +137,13 @@ test('TRUST_PROXY_USER=1 aber ohne remote-user-Header: bleibt ungültig, es geht
   await withEnv({ SESSION_SECRET: undefined, TRUST_PROXY_USER: '1' }, async () => {
     const event = makeEvent('/contacts');
     const { resolve, wasCalled } = makeResolve();
-    const response = await handle({ event, resolve } as any);
-    assert.equal(response.status, 303);
+    await assert.rejects(
+      () => handle({ event, resolve } as any),
+      (err: any) => {
+        assert.equal(err.status, 303);
+        return true;
+      }
+    );
     assert.equal(wasCalled(), false);
   });
 });
@@ -134,9 +152,14 @@ test('next-Redirect entfernt __data.json-Suffix und x-sveltekit-invalidated', as
   await withEnv({ SESSION_SECRET: undefined, TRUST_PROXY_USER: undefined }, async () => {
     const event = makeEvent('/contacts/__data.json?x-sveltekit-invalidated=001');
     const { resolve } = makeResolve();
-    const response = await handle({ event, resolve } as any);
-    const location = response.headers.get('location') ?? '';
-    const next = decodeURIComponent(location.replace('/login?next=', ''));
-    assert.equal(next, '/contacts');
+    await assert.rejects(
+      () => handle({ event, resolve } as any),
+      (err: any) => {
+        const location = err.location ?? '';
+        const next = decodeURIComponent(location.replace('/login?next=', ''));
+        assert.equal(next, '/contacts');
+        return true;
+      }
+    );
   });
 });
