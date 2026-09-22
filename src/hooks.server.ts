@@ -10,6 +10,20 @@ function applySecurityHeaders(response: Response): Response {
   return response;
 }
 
+/**
+ * Baut das Redirect-Ziel für "next" nach dem Login. Bei einer abgelaufenen
+ * Sitzung mitten in der Navigation fragt SvelteKit intern oft
+ * "/pfad/__data.json" (statt "/pfad") ab — ungefiltert würde "next" nach dem
+ * Login auf diese rohe JSON-Antwort zeigen statt auf die echte Seite.
+ */
+function buildNext(pathname: string, search: string): string {
+  const cleanPathname = pathname.replace(/\/__data\.json$/, '');
+  const params = new URLSearchParams(search);
+  params.delete('x-sveltekit-invalidated');
+  const cleanSearch = params.toString();
+  return cleanSearch ? `${cleanPathname}?${cleanSearch}` : cleanPathname;
+}
+
 export const handle: Handle = async ({ event, resolve }) => {
   const { pathname, search } = event.url;
 
@@ -35,7 +49,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     return applySecurityHeaders(
       new Response(null, {
         status: 303,
-        headers: { location: `/login?next=${encodeURIComponent(pathname + search)}` }
+        headers: { location: `/login?next=${encodeURIComponent(buildNext(pathname, search))}` }
       })
     );
   }
