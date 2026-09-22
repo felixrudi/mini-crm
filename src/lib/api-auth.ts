@@ -1,4 +1,4 @@
-
+import { safeEqual } from '$lib/server/safe-equal';
 
 export function checkApiAuth(request: Request): Response | null {
   const auth = request.headers.get('authorization');
@@ -9,7 +9,7 @@ export function checkApiAuth(request: Request): Response | null {
     });
   }
   const token = auth.slice(7);
-  if (token !== process.env.CRM_API_KEY) {
+  if (!safeEqual(token, process.env.CRM_API_KEY)) {
     return new Response(JSON.stringify({ error: 'Forbidden' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
