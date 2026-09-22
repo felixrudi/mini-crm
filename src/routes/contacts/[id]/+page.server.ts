@@ -5,7 +5,8 @@ import {
 } from '$lib/server/teable';
 import { TABLES, KONTAKTE_FIELDS, INTERAKTIONEN_FIELDS } from '$lib/server/teable-schema';
 import { loadContactDetail } from '$lib/server/detail-loaders';
-import { error } from '@sveltejs/kit';
+import { isRecordId } from '$lib/server/validation';
+import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -41,12 +42,16 @@ export const actions: Actions = {
   },
   delete_interaction: async ({ request }) => {
     const d = await request.formData();
-    await deleteRecord(TABLES.interaktionenReal, d.get('id') as string);
+    const id = d.get('id');
+    if (!isRecordId(id)) return fail(400, { error: 'Ungültige ID' });
+    await deleteRecord(TABLES.interaktionenReal, id);
     return { success: true };
   },
   update_interaction: async ({ request }) => {
     const d = await request.formData();
-    await updateRecord(TABLES.interaktionenReal, d.get('id') as string, {
+    const id = d.get('id');
+    if (!isRecordId(id)) return fail(400, { error: 'Ungültige ID' });
+    await updateRecord(TABLES.interaktionenReal, id, {
       [INTERAKTIONEN_FIELDS.titel]: d.get('zusammenfassung') || null,
       [INTERAKTIONEN_FIELDS.text]: d.get('text') || null
     });
@@ -54,12 +59,16 @@ export const actions: Actions = {
   },
   delete_email: async ({ request }) => {
     const d = await request.formData();
-    await deleteRecord(TABLES.interaktionenReal, d.get('id') as string);
+    const id = d.get('id');
+    if (!isRecordId(id)) return fail(400, { error: 'Ungültige ID' });
+    await deleteRecord(TABLES.interaktionenReal, id);
     return { success: true };
   },
   update_email: async ({ request }) => {
     const d = await request.formData();
-    await updateRecord(TABLES.interaktionenReal, d.get('id') as string, {
+    const id = d.get('id');
+    if (!isRecordId(id)) return fail(400, { error: 'Ungültige ID' });
+    await updateRecord(TABLES.interaktionenReal, id, {
       [INTERAKTIONEN_FIELDS.titel]: d.get('betreff') || null,
       [INTERAKTIONEN_FIELDS.text]: d.get('body_text') || null
     });
