@@ -4,6 +4,7 @@ import { matchesCompanyFilters, sortCompanies } from '$lib/server/company-filter
 import type { TagMode, CompanySortKey } from '$lib/server/company-filters';
 import { listViews } from '$lib/server/views';
 import { renameTagBulk } from '$lib/server/tag-rename';
+import { isRecordId } from '$lib/server/validation';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -129,6 +130,7 @@ export const actions: Actions = {
   update: async ({ request }) => {
     const d = await request.formData();
     const id = d.get('id') as string;
+    if (!isRecordId(id)) return fail(400, { error: 'Ungültige ID' });
     await updateRecord(TABLES.firmen, id, {
       [FIRMEN_FIELDS.name]: d.get('name'),
       [FIRMEN_FIELDS.website]: d.get('website') || null,
@@ -144,7 +146,9 @@ export const actions: Actions = {
   },
   delete: async ({ request }) => {
     const d = await request.formData();
-    await deleteRecord(TABLES.firmen, d.get('id') as string);
+    const id = d.get('id');
+    if (!isRecordId(id)) return fail(400, { error: 'Ungültige ID' });
+    await deleteRecord(TABLES.firmen, id);
     return { success: true };
   },
   rename_tag: async ({ request }) => {

@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import { uploadAttachment, updateRecord, getRecord, attachmentUrl } from '$lib/server/teable';
 import type { TeableAttachment } from '$lib/server/teable';
 import { TABLES, KONTAKTE_FIELDS } from '$lib/server/teable-schema';
+import { checkUpload, IMAGE_TYPES } from '$lib/server/validation';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, params }) => {
@@ -9,6 +10,9 @@ export const POST: RequestHandler = async ({ request, params }) => {
   const formData = await request.formData();
   const file = formData.get('image') as File | null;
   if (!file) throw error(400, 'Kein Bild');
+
+  const problem = checkUpload(file, { maxBytes: 8 * 1024 * 1024, types: IMAGE_TYPES });
+  if (problem) throw error(400, problem);
 
   // uploadAttachment appends to the field rather than replacing it (confirmed
   // live 2026-07-14: repeated uploads accumulate entries) — Foto is meant to

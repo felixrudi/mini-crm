@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { checkUpload, IMAGE_TYPES } from '$lib/server/validation';
 
 import type { RequestHandler } from './$types';
 
@@ -39,6 +40,9 @@ export const POST: RequestHandler = async ({ request }) => {
   const formData = await request.formData();
   const file = formData.get('image') as File | null;
   if (!file) throw error(400, 'Kein Bild');
+
+  const problem = checkUpload(file, { maxBytes: 8 * 1024 * 1024, types: IMAGE_TYPES });
+  if (problem) throw error(400, problem);
 
   const buffer = await file.arrayBuffer();
   const base64 = Buffer.from(buffer).toString('base64');

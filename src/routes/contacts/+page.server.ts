@@ -6,6 +6,7 @@ import { matchesContactFilters, sortContacts } from '$lib/server/contact-filters
 import type { TagMode, SortKey } from '$lib/server/contact-filters';
 import { listViews } from '$lib/server/views';
 import { renameTagBulk } from '$lib/server/tag-rename';
+import { isRecordId } from '$lib/server/validation';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -146,12 +147,15 @@ export const actions: Actions = {
   update: async ({ request }) => {
     const d = await request.formData();
     const id = d.get('id') as string;
+    if (!isRecordId(id)) return fail(400, { error: 'Ungültige ID' });
     await updateRecord(TABLES.kontakteReal, id, extractContactFields(d, (d.get('company_id') as string) || null));
     return { success: true };
   },
   delete: async ({ request }) => {
     const d = await request.formData();
-    await deleteRecord(TABLES.kontakteReal, d.get('id') as string);
+    const id = d.get('id');
+    if (!isRecordId(id)) return fail(400, { error: 'Ungültige ID' });
+    await deleteRecord(TABLES.kontakteReal, id);
     return { success: true };
   },
   rename_tag: async ({ request }) => {

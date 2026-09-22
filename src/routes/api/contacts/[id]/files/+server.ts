@@ -3,6 +3,7 @@ import { getRecord, uploadAttachment } from '$lib/server/teable';
 import type { TeableAttachment } from '$lib/server/teable';
 import { TABLES, KONTAKTE_FIELDS } from '$lib/server/teable-schema';
 import { mapFile } from '$lib/server/teable-map';
+import { checkUpload } from '$lib/server/validation';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ params }) => {
@@ -15,6 +16,9 @@ export const POST: RequestHandler = async ({ request, params }) => {
   const formData = await request.formData();
   const file = formData.get('file') as File | null;
   if (!file) throw error(400, 'Keine Datei');
+
+  const problem = checkUpload(file, { maxBytes: 15 * 1024 * 1024 });
+  if (problem) throw error(400, problem);
 
   // Dateien is multi-file by design (unlike Foto) — uploadAttachment's
   // append-only behavior is exactly what's wanted here, no clear-first needed.
