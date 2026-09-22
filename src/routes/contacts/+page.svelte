@@ -86,6 +86,9 @@
       DEFAULT_TAGS_EXCLUDE.some((t) => !excludedTags.includes(t))
   );
 
+  // Prüfe ob irgendein URL-Filter aktiv ist (außer 'detail')
+  let hatFilter = $derived([...$page.url.searchParams.keys()].some((k) => k !== 'detail'));
+
   // Eingeklappte Gruppen (nur clientseitig, kein Teable-Persist nötig).
   let collapsedGroups = $state<Set<string>>(new Set());
   function toggleGroup(tag: string) {
@@ -379,7 +382,12 @@
     {#if data.contacts.length === 0}
       <div class="bg-surface rounded-xl border border-line py-16 text-center">
         <Users class="w-10 h-10 text-ink/15 mx-auto mb-3" />
-        <p class="text-sm font-medium text-ink-soft">{data.q ? `Keine Ergebnisse für „${data.q}"` : 'Noch keine Kontakte'}</p>
+        <p class="text-sm font-medium text-ink-soft">
+          {data.q ? `Keine Ergebnisse für „${data.q}"` : hatFilter ? 'Kein Kontakt passt zu diesen Filtern' : 'Noch keine Kontakte'}
+        </p>
+        {#if hatFilter}
+          <a href="/contacts" class="inline-block mt-3 text-sm text-terracotta hover:underline">Filter zurücksetzen</a>
+        {/if}
       </div>
     {:else if contactGroups}
       <div class="space-y-4">
