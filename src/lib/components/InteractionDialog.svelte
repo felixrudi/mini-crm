@@ -2,6 +2,8 @@
   import { enhance } from '$app/forms';
   import { toast } from '$lib/toast';
   import X from '@lucide/svelte/icons/x';
+  import { modal } from '$lib/actions/modal';
+  import { localIsoDate } from '$lib/local-date';
 
   let {
     contactId = '',
@@ -20,14 +22,14 @@
     'whatsapp', 'wechat', 'linkedin', 'signal', 'sonstiges'
   ];
 
-  let today = $derived(new Date().toISOString().split('T')[0]);
+  const today = localIsoDate();
 </script>
 
 <div class="fixed inset-0 bg-ink/20 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick={(e) => { if (e.target === e.currentTarget) onclose?.(); }}>
-  <div class="bg-surface rounded-xl border border-line shadow-xl w-full max-w-md">
+  <div use:modal={{ onclose }} class="bg-surface rounded-xl border border-line shadow-xl w-full max-w-md" aria-label="Interaktion erfassen">
     <div class="flex items-center justify-between p-5 border-b border-line">
       <h2 class="font-display font-bold text-lg text-ink">Interaktion erfassen</h2>
-      <button onclick={() => onclose?.()} class="text-ink-soft hover:text-ink transition-colors">
+      <button onclick={() => onclose?.()} aria-label="Schließen" class="text-ink-soft hover:text-ink transition-colors">
         <X class="w-5 h-5" />
       </button>
     </div>
@@ -57,6 +59,7 @@
           id="typ"
           name="typ"
           required
+          data-autofocus
           class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta capitalize"
         >
           {#each typen as typ}
