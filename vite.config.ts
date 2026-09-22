@@ -40,7 +40,8 @@ export default defineConfig({
         // only immutable JS/CSS bundles, icons, and the manifest itself match.
         globPatterns: ['**/*.{js,css,ico,png,svg,webmanifest,woff,woff2}'],
         // Never serve a cached document for a navigation — every route must hit
-        // the Node server so +layout.server.ts's crm_session cookie check runs.
+        // the Node server so hooks.server.ts's crm_session cookie check runs
+        // (moved there from +layout.server.ts).
         navigateFallback: null,
         runtimeCaching: [
           {
