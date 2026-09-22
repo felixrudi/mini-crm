@@ -33,9 +33,13 @@ echo "→ restart..."
 ssh "$HETZNER" "cd /data/coolify/applications/$APP_ID && docker compose up -d --force-recreate 2>&1 | tail -3"
 
 # 5. Health-Check
+# Seit dem zentralen Auth-Hook (hooks.server.ts) liefert "/" ohne gültige
+# Sitzung korrekt einen Redirect zum Login statt 200 — 302/303 sind hier also
+# genauso "gesund" wie 200. Nur 5xx, Timeouts oder Connection-Refused (leerer
+# $STATUS) bedeuten einen kaputten Deploy.
 sleep 4
 STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://crm.hirschfeld.at/)
-if [ "$STATUS" = "200" ]; then
+if [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ] || [ "$STATUS" = "303" ]; then
   echo "✓ Live @ crm.hirschfeld.at (HTTP $STATUS)"
 else
   echo "⚠ HTTP $STATUS — Logs prüfen:"
