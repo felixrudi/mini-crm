@@ -1,8 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { listViews, createView, renameView, deleteView } from '../src/lib/server/views.ts';
 
-test('views.ts: create -> list -> rename -> delete Round-Trip gegen echtes Teable', async () => {
+const skip = process.env.RUN_LIVE === '1' ? false : 'nur mit RUN_LIVE=1 (schreibt ins echte Teable)';
+
+test('views.ts: create -> list -> rename -> delete Round-Trip gegen echtes Teable', { skip }, async () => {
+  // Dynamischer Import nur wenn Test nicht übersprungen wird
+  const { listViews, createView, renameView, deleteView } = await import('../src/lib/server/views.ts');
+
   const created = await createView('kontakte', 'TEST_TMP_ansicht', { tags: ['test'], tagMode: 'or' });
   try {
     const afterCreate = await listViews('kontakte');
