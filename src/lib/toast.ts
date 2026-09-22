@@ -8,7 +8,7 @@ const { subscribe, update } = writable<Toast[]>([]);
 function add(message: string, type: Toast['type'] = 'info') {
   const id = nextId++;
   update(toasts => [...toasts, { id, message, type }]);
-  setTimeout(() => remove(id), 3500);
+  setTimeout(() => remove(id), type === 'error' ? 8000 : 6000);
 }
 
 function remove(id: number) {
