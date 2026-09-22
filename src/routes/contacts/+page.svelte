@@ -218,23 +218,23 @@
         </button>
         <div class="min-w-0">
           <a href="/contacts/{contact.id}" onclick={(e) => { e.preventDefault(); openContact(contact.id); }} class="text-sm font-medium text-ink hover:text-terracotta transition-colors block truncate">{contact.name}</a>
-          <span class="text-xs text-ink/40 truncate block">{contact.company_name ?? '—'}</span>
+          <span class="text-xs text-ink-soft truncate block">{contact.company_name ?? '—'}</span>
         </div>
       </div>
     </td>
     <td class="px-3 py-2 hidden md:table-cell">
-      <span class="text-sm text-ink/60 font-mono">{contact.rolle ?? '—'}</span>
+      <span class="text-sm text-ink-soft font-mono">{contact.rolle ?? '—'}</span>
     </td>
     <td class="px-3 py-2 hidden lg:table-cell">
       <div class="flex flex-wrap gap-1">
         {#each contact.tags ?? [] as t}
           <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-cream text-ink/70">{t}</span>
         {/each}
-        {#if !contact.tags?.length}<span class="text-ink/20 text-xs">—</span>{/if}
+        {#if !contact.tags?.length}<span class="text-ink-soft text-xs">—</span>{/if}
       </div>
     </td>
     <td class="px-3 py-2 hidden lg:table-cell">
-      <span class="text-xs text-ink/50">{formatDate(contact.last_activity)}</span>
+      <span class="text-xs text-ink-soft">{formatDate(contact.last_activity)}</span>
     </td>
     <td class="px-3 py-2">
       <div class="flex items-center justify-end gap-1.5">
@@ -243,7 +243,7 @@
             📞 {contact.telefon}
           </a>
         {/if}
-        <button onclick={() => { editContact = contact; showForm = true; }} class="p-1.5 text-ink/30 hover:text-terracotta transition-colors rounded" title="Bearbeiten">
+        <button onclick={() => { editContact = contact; showForm = true; }} class="p-1.5 text-ink-soft hover:text-terracotta transition-colors rounded" title="Bearbeiten">
           <Pencil class="w-3.5 h-3.5" />
         </button>
         {#if deleteConfirm === contact.id}
@@ -256,7 +256,7 @@
             <button type="button" onclick={() => (deleteConfirm = null)} class="px-2 py-1 border border-line rounded text-xs">Nein</button>
           </form>
         {:else}
-          <button onclick={() => (deleteConfirm = contact.id)} class="p-1.5 text-ink/30 hover:text-red-500 transition-colors rounded" title="Löschen">
+          <button onclick={() => (deleteConfirm = contact.id)} class="p-1.5 text-ink-soft hover:text-red-500 transition-colors rounded" title="Löschen">
             <Trash2 class="w-3.5 h-3.5" />
           </button>
         {/if}
@@ -287,10 +287,10 @@
   <div class="bg-surface rounded-xl border border-line p-3 mb-3">
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div>
-        <p class="text-[11px] font-bold text-ink/40 uppercase tracking-wide mb-1">🔍 Live-Suche</p>
+        <p class="text-[11px] font-bold text-ink-soft uppercase tracking-wide mb-1">🔍 Live-Suche</p>
         
           <div class="relative">
-            <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink/30" />
+            <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-soft" />
             <input type="text" bind:value={searchValue} oninput={handleSearch} placeholder="Name, Firma oder Rolle…"
               class="w-full pl-8 pr-3 py-1 bg-cream border border-line rounded-lg text-xs text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
           </div>
@@ -298,14 +298,14 @@
       </div>
       
         <div>
-          <p class="text-[11px] font-bold text-ink/40 uppercase tracking-wide mb-1">🏷 Tags (Mehrfachauswahl)</p>
+          <p class="text-[11px] font-bold text-ink-soft uppercase tracking-wide mb-1">🏷 Tags (Mehrfachauswahl)</p>
           <div class="flex flex-wrap gap-1">
             {#each data.allTags as tag}
               <EditableTagChip
                 tag={tag}
                 active={selectedTags.includes(tag)}
                 activeClass={tagColor(tag) + ' ring-2 ring-offset-1 ring-terracotta/40'}
-                inactiveClass="bg-cream text-ink/50 border-line hover:border-ink/30"
+                inactiveClass="bg-cream text-ink-soft border-line hover:border-ink/30"
                 onToggle={() => toggleTag(tag)}
                 onRename={(newTag) => renameTag(tag, newTag)}
               />
@@ -319,7 +319,7 @@
                   tag={tag}
                   active={excludedTags.includes(tag)}
                   activeClass="bg-red-50 text-red-600 border-red-300 ring-2 ring-offset-1 ring-red-300/50"
-                  inactiveClass="bg-cream text-ink/50 border-line hover:border-red-300/50"
+                  inactiveClass="bg-cream text-ink-soft border-line hover:border-red-300/50"
                   onToggle={() => toggleExcludeTag(tag)}
                   onRename={(newTag) => renameTag(tag, newTag)}
                 />
@@ -333,7 +333,7 @@
     <!-- Sortierung/Gruppierung/Ort — dünne, immer sichtbare Zeile -->
     
       <div class="mt-2 pt-2 border-t border-line flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-        <label class="flex items-center gap-1 text-ink/50">
+        <label class="flex items-center gap-1 text-ink-soft">
           Sortieren
           <select value={sortBy} onchange={(e) => setSort((e.currentTarget as HTMLSelectElement).value as 'name' | 'company' | 'tags' | 'activity')}
             class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
@@ -343,7 +343,7 @@
             <option value="tags">Anzahl Tags</option>
           </select>
         </label>
-        <label class="flex items-center gap-1 text-ink/50">
+        <label class="flex items-center gap-1 text-ink-soft">
           Gruppieren
           <select value={group} onchange={(e) => setGroup((e.currentTarget as HTMLSelectElement).value as '' | 'tags')}
             class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
@@ -352,7 +352,7 @@
           </select>
         </label>
         {#if data.allOrte.length > 0}
-          <label class="flex items-center gap-1 text-ink/50">
+          <label class="flex items-center gap-1 text-ink-soft">
             Ort
             <select value={ort} onchange={(e) => setOrt((e.currentTarget as HTMLSelectElement).value)}
               class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
@@ -363,12 +363,12 @@
         {/if}
         {#if selectedTags.length > 1}
           <div class="flex items-center gap-1">
-            <button type="button" onclick={() => setTagMode('or')} class="px-1.5 py-0.5 rounded-full border transition-colors {tagMode === 'or' ? 'bg-terracotta text-white border-terracotta' : 'border-line text-ink/50 hover:border-ink/30'}">ODER</button>
-            <button type="button" onclick={() => setTagMode('and')} class="px-1.5 py-0.5 rounded-full border transition-colors {tagMode === 'and' ? 'bg-terracotta text-white border-terracotta' : 'border-line text-ink/50 hover:border-ink/30'}">UND</button>
+            <button type="button" onclick={() => setTagMode('or')} class="px-1.5 py-0.5 rounded-full border transition-colors {tagMode === 'or' ? 'bg-terracotta text-white border-terracotta' : 'border-line text-ink-soft hover:border-ink/30'}">ODER</button>
+            <button type="button" onclick={() => setTagMode('and')} class="px-1.5 py-0.5 rounded-full border transition-colors {tagMode === 'and' ? 'bg-terracotta text-white border-terracotta' : 'border-line text-ink-soft hover:border-ink/30'}">UND</button>
           </div>
         {/if}
         {#if hasTagFilter}
-          <button onclick={clearTagFilter} class="text-ink/40 hover:text-terracotta transition-colors ml-auto">Filter löschen</button>
+          <button onclick={clearTagFilter} class="text-ink-soft hover:text-terracotta transition-colors ml-auto">Filter löschen</button>
         {/if}
       </div>
     
@@ -379,7 +379,7 @@
     {#if data.contacts.length === 0}
       <div class="bg-surface rounded-xl border border-line py-16 text-center">
         <Users class="w-10 h-10 text-ink/15 mx-auto mb-3" />
-        <p class="text-sm font-medium text-ink/50">{data.q ? `Keine Ergebnisse für „${data.q}"` : 'Noch keine Kontakte'}</p>
+        <p class="text-sm font-medium text-ink-soft">{data.q ? `Keine Ergebnisse für „${data.q}"` : 'Noch keine Kontakte'}</p>
       </div>
     {:else if contactGroups}
       <div class="space-y-4">
@@ -387,9 +387,9 @@
           <div class="bg-surface rounded-xl border border-line overflow-hidden">
             <button type="button" onclick={() => toggleGroup(g.tag)}
               class="w-full px-4 py-2.5 bg-cream/70 {collapsedGroups.has(g.tag) ? '' : 'border-b border-line'} flex items-center gap-2 text-left hover:bg-cream transition-colors">
-              <ChevronDown class="w-3.5 h-3.5 text-ink/40 transition-transform duration-150 {collapsedGroups.has(g.tag) ? '-rotate-90' : ''}" />
-              <span class="px-2 py-0.5 rounded-full text-xs font-medium border {g.tag === 'Ohne Tags' ? 'bg-cream text-ink/40 border-line' : tagColor(g.tag)}">{g.tag}</span>
-              <span class="text-xs text-ink/40">{g.items.length}</span>
+              <ChevronDown class="w-3.5 h-3.5 text-ink-soft transition-transform duration-150 {collapsedGroups.has(g.tag) ? '-rotate-90' : ''}" />
+              <span class="px-2 py-0.5 rounded-full text-xs font-medium border {g.tag === 'Ohne Tags' ? 'bg-cream text-ink-soft border-line' : tagColor(g.tag)}">{g.tag}</span>
+              <span class="text-xs text-ink-soft">{g.items.length}</span>
             </button>
             {#if !collapsedGroups.has(g.tag)}
               <div class="overflow-x-auto">
@@ -405,11 +405,11 @@
           <table class="w-full table-fixed">
             <thead>
               <tr class="border-b border-line bg-cream/50">
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2">Name / Details</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden md:table-cell w-[22%]">Rolle</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden lg:table-cell w-[18%]">Tags</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden lg:table-cell">Letzte Info / Kontakt</th>
-                <th class="px-3 py-2 text-right text-xs font-medium text-ink/50 w-[76px]">Aktion</th>
+                <th class="text-left text-xs font-medium text-ink-soft px-3 py-2">Name / Details</th>
+                <th class="text-left text-xs font-medium text-ink-soft px-3 py-2 hidden md:table-cell w-[22%]">Rolle</th>
+                <th class="text-left text-xs font-medium text-ink-soft px-3 py-2 hidden lg:table-cell w-[18%]">Tags</th>
+                <th class="text-left text-xs font-medium text-ink-soft px-3 py-2 hidden lg:table-cell">Letzte Info / Kontakt</th>
+                <th class="px-3 py-2 text-right text-xs font-medium text-ink-soft w-[76px]">Aktion</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-line">

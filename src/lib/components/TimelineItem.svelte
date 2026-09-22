@@ -83,7 +83,7 @@
   };
 
   let Icon = $derived(iconMap[entry.subtyp?.toLowerCase()] ?? Circle);
-  let iconColor = $derived(colorMap[entry.subtyp?.toLowerCase()] ?? 'text-ink/40');
+  let iconColor = $derived(colorMap[entry.subtyp?.toLowerCase()] ?? 'text-ink-soft');
 
   let label = $derived(() => {
     if (entry.art === 'email') {
@@ -148,7 +148,7 @@
           <button type="submit" class="flex items-center gap-1 px-2.5 py-1 bg-terracotta text-white rounded-lg text-xs font-medium hover:bg-terracotta/90 transition-colors">
             <Check class="w-3 h-3" /> Speichern
           </button>
-          <button type="button" onclick={() => editing = false} class="flex items-center gap-1 px-2.5 py-1 border border-line text-ink/60 rounded-lg text-xs hover:bg-cream transition-colors">
+          <button type="button" onclick={() => editing = false} class="flex items-center gap-1 px-2.5 py-1 border border-line text-ink-soft rounded-lg text-xs hover:bg-cream transition-colors">
             <X class="w-3 h-3" /> Abbrechen
           </button>
         </div>
@@ -156,20 +156,20 @@
     {:else}
       <div class="flex items-start justify-between gap-2">
         <div>
-          <span class="text-xs font-medium text-ink/60 uppercase tracking-wide">{label()}</span>
+          <span class="text-xs font-medium text-ink-soft uppercase tracking-wide">{label()}</span>
           {#if entry.titel}
             <p class="text-sm font-medium text-ink mt-0.5">{entry.titel}</p>
           {/if}
           {#if vonAnLine()}
-            <p class="text-xs text-ink/40 mt-0.5">{vonAnLine()}</p>
+            <p class="text-xs text-ink-soft mt-0.5">{vonAnLine()}</p>
           {/if}
         </div>
         <div class="flex items-center gap-1 flex-shrink-0">
-          <span class="text-xs text-ink/40">{formatDate(entry.datum)}</span>
+          <span class="text-xs text-ink-soft">{formatDate(entry.datum)}</span>
           <button
             type="button"
             onclick={startEdit}
-            class="p-1 text-ink/20 hover:text-terracotta transition-colors opacity-0 group-hover:opacity-100"
+            class="p-1 text-ink-soft hover:text-terracotta transition-colors opacity-0 group-hover:opacity-100"
             title="Bearbeiten"
           >
             <Pencil class="w-3.5 h-3.5" />
@@ -185,7 +185,7 @@
             onsubmit={(e) => { if (!confirm('Eintrag löschen?')) e.preventDefault(); }}
           >
             <input type="hidden" name="id" value={entry.eintrag_id} />
-            <button type="submit" class="p-1 text-ink/20 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100" title="Löschen">
+            <button type="submit" class="p-1 text-ink-soft hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100" title="Löschen">
               <Trash2 class="w-3.5 h-3.5" />
             </button>
           </form>
@@ -209,15 +209,15 @@
     <div class="bg-[#faf8f5] rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col">
       <div class="flex items-center justify-between px-6 py-4 border-b border-line flex-shrink-0">
         <div>
-          <span class="text-xs font-medium text-ink/50 uppercase tracking-wide">Notiz</span>
+          <span class="text-xs font-medium text-ink-soft uppercase tracking-wide">Notiz</span>
           {#if entry.titel}
             <h2 class="text-base font-semibold text-ink mt-0.5">{entry.titel}</h2>
           {/if}
-          <p class="text-xs text-ink/40 mt-0.5">{formatDate(entry.datum)}</p>
+          <p class="text-xs text-ink-soft mt-0.5">{formatDate(entry.datum)}</p>
         </div>
         <button
           onclick={() => showModal = false}
-          class="p-2 rounded-lg text-ink/40 hover:text-ink hover:bg-line/50 transition-colors"
+          class="p-2 rounded-lg text-ink-soft hover:text-ink hover:bg-line/50 transition-colors"
         >
           <X class="w-5 h-5" />
         </button>

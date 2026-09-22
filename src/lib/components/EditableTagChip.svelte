@@ -93,7 +93,7 @@
       }}
       disabled={saving}
       title="Abbrechen"
-      class="text-xs text-ink/40 px-0.5 disabled:opacity-40"
+      class="text-xs text-ink-soft px-0.5 disabled:opacity-40"
     >
       ✕
     </button>
@@ -111,7 +111,7 @@
       type="button"
       onclick={startEdit}
       title="Tag umbenennen"
-      class="absolute -right-1.5 -top-1.5 w-4 h-4 rounded-full bg-surface border border-line flex items-center justify-center opacity-0 pointer-events-none group-hover/chip:opacity-100 group-hover/chip:pointer-events-auto transition-opacity hover:border-terracotta hover:text-terracotta text-ink/40"
+      class="absolute -right-1.5 -top-1.5 w-4 h-4 rounded-full bg-surface border border-line flex items-center justify-center opacity-0 pointer-events-none group-hover/chip:opacity-100 group-hover/chip:pointer-events-auto transition-opacity hover:border-terracotta hover:text-terracotta text-ink-soft"
     >
       <Pencil class="w-2.5 h-2.5" />
     </button>

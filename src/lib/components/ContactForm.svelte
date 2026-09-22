@@ -117,7 +117,7 @@
           <span>Visitenkarte</span>
         {/if}
       </button>
-      <button onclick={() => onclose?.()} class="text-ink/40 hover:text-ink transition-colors p-1">
+      <button onclick={() => onclose?.()} class="text-ink-soft hover:text-ink transition-colors p-1">
         <X class="w-5 h-5" />
       </button>
     </div>
@@ -147,12 +147,12 @@
 
       <!-- Persönlich -->
       <section>
-        <h3 class="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-3">Persönlich</h3>
+        <h3 class="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-3">Persönlich</h3>
         <div class="space-y-3">
 
           <!-- Anrede -->
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1.5">Anrede</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1.5">Anrede</label>
             <div class="flex gap-2">
               {#each ['Herr', 'Frau'] as option}
                 <label class="flex items-center gap-2 cursor-pointer">
@@ -164,14 +164,14 @@
               <label class="flex items-center gap-2 cursor-pointer">
                 <input type="radio" name="anrede" value="" checked={!anrede}
                   onchange={() => anrede = ''} class="accent-terracotta" />
-                <span class="text-sm text-ink/50">—</span>
+                <span class="text-sm text-ink-soft">—</span>
               </label>
             </div>
           </div>
 
           <!-- Titel -->
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1" for="titel">Titel</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1" for="titel">Titel</label>
             <input id="titel" name="titel" type="text" bind:value={titel}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="Dr., Mag., DI …" />
@@ -180,13 +180,13 @@
           <!-- Vorname + Nachname -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-ink/60 mb-1" for="vorname">Vorname</label>
+              <label class="block text-xs font-medium text-ink-soft mb-1" for="vorname">Vorname</label>
               <input id="vorname" name="vorname" type="text" bind:value={vorname} oninput={syncName}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="Felix" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-ink/60 mb-1" for="nachname">Nachname</label>
+              <label class="block text-xs font-medium text-ink-soft mb-1" for="nachname">Nachname</label>
               <input id="nachname" name="nachname" type="text" bind:value={nachname} oninput={syncName}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="Hirschfeld" />
@@ -195,8 +195,8 @@
 
           <!-- Anzeigename -->
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1" for="name_field">
-              Anzeigename <span class="font-normal text-ink/30">(wird automatisch gesetzt)</span>
+            <label class="block text-xs font-medium text-ink-soft mb-1" for="name_field">
+              Anzeigename <span class="font-normal text-ink-soft">(wird automatisch gesetzt)</span>
             </label>
             <input
               id="name_field" name="name" type="text"
@@ -207,7 +207,7 @@
 
           <!-- Geburtstag -->
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1" for="geburtstag">Geburtstag</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1" for="geburtstag">Geburtstag</label>
             <input
               id="geburtstag" name="geburtstag" type="date"
               value={contact?.geburtstag ? contact.geburtstag.slice(0, 10) : ''}
@@ -219,10 +219,10 @@
 
       <!-- Beruflich -->
       <section>
-        <h3 class="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-3">Beruflich</h3>
+        <h3 class="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-3">Beruflich</h3>
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1" for="company_id">Firma</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1" for="company_id">Firma</label>
             <select
               id="company_id" name="company_id"
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
@@ -234,7 +234,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1" for="rolle">Rolle</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1" for="rolle">Rolle</label>
             <input id="rolle" name="rolle" type="text" bind:value={rolle}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="z.B. Geschäftsführer" />
@@ -244,23 +244,23 @@
 
       <!-- Kontakt -->
       <section>
-        <h3 class="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-3">Kontakt</h3>
+        <h3 class="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-3">Kontakt</h3>
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1" for="email">E-Mail</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1" for="email">E-Mail</label>
             <input id="email" name="email" type="email" bind:value={email}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="name@firma.at" />
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-ink/60 mb-1" for="telefon">Telefon</label>
+              <label class="block text-xs font-medium text-ink-soft mb-1" for="telefon">Telefon</label>
               <input id="telefon" name="telefon" type="tel" bind:value={telefon}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="+43 …" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-ink/60 mb-1" for="whatsapp">WhatsApp</label>
+              <label class="block text-xs font-medium text-ink-soft mb-1" for="whatsapp">WhatsApp</label>
               <input id="whatsapp" name="whatsapp" type="text" value={contact?.whatsapp ?? ''}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="+43 …" />
@@ -268,13 +268,13 @@
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-ink/60 mb-1" for="wechat_id">WeChat ID</label>
+              <label class="block text-xs font-medium text-ink-soft mb-1" for="wechat_id">WeChat ID</label>
               <input id="wechat_id" name="wechat_id" type="text" value={contact?.wechat_id ?? ''}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="WeChat ID" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-ink/60 mb-1" for="linkedin_url">LinkedIn</label>
+              <label class="block text-xs font-medium text-ink-soft mb-1" for="linkedin_url">LinkedIn</label>
               <input id="linkedin_url" name="linkedin_url" type="url" value={contact?.linkedin_url ?? ''}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="linkedin.com/in/…" />
@@ -285,23 +285,23 @@
 
       <!-- Adresse -->
       <section>
-        <h3 class="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-3">Adresse</h3>
+        <h3 class="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-3">Adresse</h3>
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1" for="strasse">Straße</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1" for="strasse">Straße</label>
             <input id="strasse" name="strasse" type="text" bind:value={strasse}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="Musterstraße 1/2" />
           </div>
           <div class="grid grid-cols-3 gap-3">
             <div>
-              <label class="block text-xs font-medium text-ink/60 mb-1" for="plz">PLZ</label>
+              <label class="block text-xs font-medium text-ink-soft mb-1" for="plz">PLZ</label>
               <input id="plz" name="plz" type="text" bind:value={plz}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="1010" />
             </div>
             <div class="col-span-2">
-              <label class="block text-xs font-medium text-ink/60 mb-1" for="ort">Ort</label>
+              <label class="block text-xs font-medium text-ink-soft mb-1" for="ort">Ort</label>
               <input id="ort" name="ort" type="text" bind:value={ort}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="Wien" />
@@ -312,17 +312,17 @@
 
       <!-- Weiteres -->
       <section>
-        <h3 class="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-3">Weiteres</h3>
+        <h3 class="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-3">Weiteres</h3>
         <div class="space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-ink/60 mb-1" for="telefon2">2. Telefon</label>
+              <label class="block text-xs font-medium text-ink-soft mb-1" for="telefon2">2. Telefon</label>
               <input id="telefon2" name="telefon2" type="tel" value={contact?.telefon2 ?? ''}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="+43 …" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-ink/60 mb-1" for="iban">IBAN / Konto</label>
+              <label class="block text-xs font-medium text-ink-soft mb-1" for="iban">IBAN / Konto</label>
               <input id="iban" name="iban" type="text" value={contact?.iban ?? ''}
                 class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
                 placeholder="AT61 1904 3002 …" />
@@ -330,7 +330,7 @@
           </div>
           <!-- Tags -->
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1">Tags</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1">Tags</label>
             <TagInput bind:tags placeholder="privat, schüler … Enter" />
           </div>
         </div>
@@ -338,7 +338,7 @@
 
       <!-- Notizen -->
       <section>
-        <h3 class="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-3">Notizen</h3>
+        <h3 class="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-3">Notizen</h3>
         <textarea
           name="notizen" rows="3"
           class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta resize-none"

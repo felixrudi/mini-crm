@@ -127,7 +127,7 @@
 
 <div class="relative" bind:this={rootEl}>
   <div class="relative">
-    <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink/35 pointer-events-none" />
+    <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-soft pointer-events-none" />
     <input
       bind:this={inputEl}
       bind:value={query}
@@ -143,7 +143,7 @@
       <button
         type="button"
         onclick={clear}
-        class="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-ink/35 hover:text-ink"
+        class="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-ink-soft hover:text-ink"
         aria-label="Suche leeren"
       >
         <X class="w-3.5 h-3.5" />
@@ -160,7 +160,7 @@
           <div class="w-4 h-4 border-2 border-terracotta border-t-transparent rounded-full animate-spin mx-auto"></div>
         </div>
       {:else if results.length === 0}
-        <p class="px-3 py-3 text-xs text-ink/40">Keine Treffer für „{query.trim()}"</p>
+        <p class="px-3 py-3 text-xs text-ink-soft">Keine Treffer für „{query.trim()}"</p>
       {:else}
         <ul class="py-1">
           {#each results as item, i}
@@ -177,7 +177,7 @@
                   </div>
                   <div class="min-w-0 flex-1">
                     <p class="text-xs font-medium text-ink truncate">{item.data.name}</p>
-                    <p class="text-[10px] text-ink/40 truncate">
+                    <p class="text-[10px] text-ink-soft truncate">
                       {item.data.company_name ?? item.data.rolle ?? item.data.email ?? 'Kontakt'}
                     </p>
                   </div>
@@ -187,7 +187,7 @@
                   </div>
                   <div class="min-w-0 flex-1">
                     <p class="text-xs font-medium text-ink truncate">{item.data.name}</p>
-                    <p class="text-[10px] text-ink/40 truncate">
+                    <p class="text-[10px] text-ink-soft truncate">
                       {item.data.ort ?? (item.data.website ? websiteLabel(item.data.website) : null) ?? item.data.telefon ?? 'Firma'}
                     </p>
                   </div>

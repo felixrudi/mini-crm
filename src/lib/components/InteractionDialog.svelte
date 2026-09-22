@@ -27,7 +27,7 @@
   <div class="bg-surface rounded-xl border border-line shadow-xl w-full max-w-md">
     <div class="flex items-center justify-between p-5 border-b border-line">
       <h2 class="font-display font-bold text-lg text-ink">Interaktion erfassen</h2>
-      <button onclick={() => onclose?.()} class="text-ink/40 hover:text-ink transition-colors">
+      <button onclick={() => onclose?.()} class="text-ink-soft hover:text-ink transition-colors">
         <X class="w-5 h-5" />
       </button>
     </div>
@@ -52,7 +52,7 @@
       <input type="hidden" name="contact_id" value={contactId} />
 
       <div>
-        <label class="block text-xs font-medium text-ink/60 mb-1" for="typ">Typ *</label>
+        <label class="block text-xs font-medium text-ink-soft mb-1" for="typ">Typ *</label>
         <select
           id="typ"
           name="typ"
@@ -66,7 +66,7 @@
       </div>
 
       <div>
-        <label class="block text-xs font-medium text-ink/60 mb-1" for="datum">Datum *</label>
+        <label class="block text-xs font-medium text-ink-soft mb-1" for="datum">Datum *</label>
         <input
           id="datum"
           name="datum"
@@ -78,7 +78,7 @@
       </div>
 
       <div>
-        <label class="block text-xs font-medium text-ink/60 mb-1" for="zusammenfassung">Zusammenfassung</label>
+        <label class="block text-xs font-medium text-ink-soft mb-1" for="zusammenfassung">Zusammenfassung</label>
         <input
           id="zusammenfassung"
           name="zusammenfassung"
@@ -89,7 +89,7 @@
       </div>
 
       <div>
-        <label class="block text-xs font-medium text-ink/60 mb-1" for="text">Details</label>
+        <label class="block text-xs font-medium text-ink-soft mb-1" for="text">Details</label>
         <textarea
           id="text"
           name="text"

@@ -110,7 +110,7 @@
   >
     <div class="bg-surface rounded-xl border border-line shadow-2xl w-full max-w-lg overflow-hidden">
       <div class="flex items-center gap-3 px-4 py-3 border-b border-line">
-        <Search class="w-4 h-4 text-ink/40 flex-shrink-0" />
+        <Search class="w-4 h-4 text-ink-soft flex-shrink-0" />
         <input
           bind:this={inputEl}
           bind:value={query}
@@ -123,7 +123,7 @@
         {#if loading}
           <div class="w-4 h-4 border-2 border-terracotta border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
         {:else}
-          <button onclick={() => open = false} class="text-ink/40 hover:text-ink transition-colors flex-shrink-0">
+          <button onclick={() => open = false} class="text-ink-soft hover:text-ink transition-colors flex-shrink-0">
             <X class="w-4 h-4" />
           </button>
         {/if}
@@ -143,22 +143,22 @@
                   </div>
                   <div class="min-w-0 flex-1">
                     <p class="text-sm font-medium text-ink truncate">{item.data.name}</p>
-                    <p class="text-xs text-ink/50 truncate">
+                    <p class="text-xs text-ink-soft truncate">
                       {item.data.company_name ?? item.data.rolle ?? item.data.email ?? 'Kontakt'}
                     </p>
                   </div>
-                  <span class="text-[10px] uppercase tracking-wide text-ink/30 flex-shrink-0">Kontakt</span>
+                  <span class="text-[10px] uppercase tracking-wide text-ink-soft flex-shrink-0">Kontakt</span>
                 {:else}
                   <div class="w-8 h-8 rounded-lg bg-sage-100 flex items-center justify-center flex-shrink-0">
                     <Building2 class="w-4 h-4 text-sage" />
                   </div>
                   <div class="min-w-0 flex-1">
                     <p class="text-sm font-medium text-ink truncate">{item.data.name}</p>
-                    <p class="text-xs text-ink/50 truncate">
+                    <p class="text-xs text-ink-soft truncate">
                       {item.data.ort ?? (item.data.website ? websiteLabel(item.data.website) : null) ?? item.data.telefon ?? 'Firma'}
                     </p>
                   </div>
-                  <span class="text-[10px] uppercase tracking-wide text-ink/30 flex-shrink-0">Firma</span>
+                  <span class="text-[10px] uppercase tracking-wide text-ink-soft flex-shrink-0">Firma</span>
                 {/if}
               </button>
             </li>
@@ -166,11 +166,11 @@
         </ul>
       {:else if query.trim() && !loading}
         <div class="py-8 text-center">
-          <p class="text-sm text-ink/40">Keine Treffer für „{query}"</p>
+          <p class="text-sm text-ink-soft">Keine Treffer für „{query}"</p>
         </div>
       {:else if !query.trim()}
         <div class="py-6 text-center">
-          <p class="text-xs text-ink/30 px-4">Tippe um zu suchen<span class="hidden sm:inline"> · ↑↓ navigieren · Enter öffnen · Esc schließen</span></p>
+          <p class="text-xs text-ink-soft px-4">Tippe um zu suchen<span class="hidden sm:inline"> · ↑↓ navigieren · Enter öffnen · Esc schließen</span></p>
         </div>
       {/if}
     </div>

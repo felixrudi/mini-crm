@@ -77,7 +77,7 @@
   <!-- Header -->
   <div>
     <h1 class="font-display font-bold text-2xl text-ink">Scan &amp; Import</h1>
-    <p class="text-sm text-ink/50 mt-1">Kontakterfassung in Sekunden: per Visitenkarten-Scan oder Kompakt-Eingabe</p>
+    <p class="text-sm text-ink-soft mt-1">Kontakterfassung in Sekunden: per Visitenkarten-Scan oder Kompakt-Eingabe</p>
   </div>
 
   <!-- Scankontakt -->
@@ -85,7 +85,7 @@
     <h2 class="font-display font-semibold text-base text-ink mb-4 flex items-center gap-2">
       <Camera class="w-4 h-4 text-terracotta" /> Smarter Visitenkarten-Upload
     </h2>
-    <p class="text-sm text-ink/50 mb-4">Foto einer Visitenkarte oder Screenshot (WeChat/WhatsApp) hochladen — die KI liest die Daten aus.</p>
+    <p class="text-sm text-ink-soft mb-4">Foto einer Visitenkarte oder Screenshot (WeChat/WhatsApp) hochladen — die KI liest die Daten aus.</p>
     <form
       method="POST"
       action="/contacts?/create"
@@ -110,7 +110,7 @@
           type="button"
           onclick={() => scanFileInput.click()}
           disabled={scanScanning}
-          class="w-full flex items-center justify-center gap-2 px-3 py-2.5 border border-dashed border-line rounded-lg text-sm text-ink/50 hover:border-terracotta/40 hover:text-terracotta transition-colors disabled:opacity-50 {scanDirty ? 'border-green-300 text-green-700 hover:border-green-400' : ''}"
+          class="w-full flex items-center justify-center gap-2 px-3 py-2.5 border border-dashed border-line rounded-lg text-sm text-ink-soft hover:border-terracotta/40 hover:text-terracotta transition-colors disabled:opacity-50 {scanDirty ? 'border-green-300 text-green-700 hover:border-green-400' : ''}"
         >
           {#if scanScanning}
             <Loader class="w-4 h-4 animate-spin" /> Erkenne…
@@ -159,7 +159,7 @@
     <h2 class="font-display font-semibold text-base text-ink mb-4 flex items-center gap-2">
       <Plus class="w-4 h-4 text-terracotta" /> Kompakter Schnellkontakt
     </h2>
-    <p class="text-sm text-ink/50 mb-4">Auf zwei Felder reduziert — ein Klick auf "Anlegen" speichert sofort.</p>
+    <p class="text-sm text-ink-soft mb-4">Auf zwei Felder reduziert — ein Klick auf "Anlegen" speichert sofort.</p>
     <form
       method="POST"
       action="/contacts?/create"

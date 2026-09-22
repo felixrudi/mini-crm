@@ -50,13 +50,13 @@
       <button onclick={installAndroid} class="flex-1 py-2 bg-terracotta text-white rounded-lg text-sm font-medium">
         Installieren
       </button>
-      <button onclick={dismiss} class="px-3 py-2 text-sm text-ink/60">Später</button>
+      <button onclick={dismiss} class="px-3 py-2 text-sm text-ink-soft">Später</button>
     </div>
   </div>
 {:else if showIosHint}
   <div class="fixed bottom-4 left-4 z-50 bg-surface border border-line rounded-xl shadow-lg p-4 max-w-xs">
     <p class="text-sm text-ink mb-1">Zum Home-Bildschirm hinzufügen:</p>
-    <p class="text-xs text-ink/60 mb-3">Teilen-Symbol → "Zum Home-Bildschirm"</p>
-    <button onclick={dismiss} class="w-full py-2 text-sm text-ink/60">Verstanden</button>
+    <p class="text-xs text-ink-soft mb-3">Teilen-Symbol → "Zum Home-Bildschirm"</p>
+    <button onclick={dismiss} class="w-full py-2 text-sm text-ink-soft">Verstanden</button>
   </div>
 {/if}

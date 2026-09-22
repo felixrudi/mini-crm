@@ -185,7 +185,7 @@
           <div class="mb-2"><TagInput bind:tags={editTags} placeholder="steuerberater, wien … Enter" /></div>
           <div class="flex gap-1.5">
             <button type="submit" class="flex items-center gap-1 px-2.5 py-1 bg-terracotta text-white rounded text-xs font-medium"><Check class="w-3 h-3" /> Speichern</button>
-            <button type="button" onclick={cancelEdit} class="flex items-center gap-1 px-2.5 py-1 border border-line rounded text-xs text-ink/60"><X class="w-3 h-3" /> Abbrechen</button>
+            <button type="button" onclick={cancelEdit} class="flex items-center gap-1 px-2.5 py-1 border border-line rounded text-xs text-ink-soft"><X class="w-3 h-3" /> Abbrechen</button>
           </div>
         </form>
       {:else}
@@ -204,7 +204,7 @@
               <a href="tel:{company.telefon}" class="sm:hidden flex items-center gap-1 text-xs text-terracotta font-mono font-bold hover:underline"><Phone class="w-3 h-3" /> {company.telefon}</a>
             {/if}
             {#if !istMapsLink(company.website) && karteUrl(company)}
-              <a href={karteUrl(company)} target="_blank" rel="noopener" class="flex items-center gap-1 text-xs text-ink/45 hover:text-terracotta hover:underline">
+              <a href={karteUrl(company)} target="_blank" rel="noopener" class="flex items-center gap-1 text-xs text-ink-soft hover:text-terracotta hover:underline">
                 <MapPin class="w-3 h-3 flex-shrink-0" /> <span class="truncate">{adresseText(company)}</span>
               </a>
             {/if}
@@ -214,7 +214,7 @@
     </td>
     {#if editId !== company.id}
       <td class="px-3 py-2 hidden md:table-cell">
-        <span class="text-sm text-ink/60">{company.notizen ?? '—'}</span>
+        <span class="text-sm text-ink-soft">{company.notizen ?? '—'}</span>
         {#if company.tags?.length}
           <div class="flex flex-wrap gap-1 mt-1">
             {#each company.tags as t}<span class="px-1.5 py-0.5 rounded-full text-[10px] font-medium border {tagColor(t)}">{t}</span>{/each}
@@ -224,21 +224,21 @@
       <td class="px-3 py-2 hidden lg:table-cell">
         {#if company.contact_count > 0}
           <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-cream text-ink"><Users class="w-3 h-3" /> {company.contact_count} Kontakt{company.contact_count === 1 ? '' : 'e'}</span>
-          <span class="block text-[11px] text-ink/40 mt-0.5 truncate">{(company.contact_names ?? []).join(', ')}</span>
+          <span class="block text-[11px] text-ink-soft mt-0.5 truncate">{(company.contact_names ?? []).join(', ')}</span>
         {:else}
-          <span class="text-ink/20 text-xs">—</span>
+          <span class="text-ink-soft text-xs">—</span>
         {/if}
       </td>
       <td class="px-3 py-2 hidden sm:table-cell">
         {#if company.telefon}
           <a href="tel:{company.telefon}" class="flex items-center gap-1 text-sm text-terracotta font-mono font-bold hover:underline"><Phone class="w-3.5 h-3.5" /> {company.telefon}</a>
         {:else}
-          <span class="text-ink/20 text-xs">—</span>
+          <span class="text-ink-soft text-xs">—</span>
         {/if}
       </td>
       <td class="px-3 py-2">
         <div class="flex items-center justify-end gap-1">
-          <button onclick={() => startEdit(company)} class="p-1.5 text-ink/30 hover:text-terracotta transition-colors rounded"><Pencil class="w-3.5 h-3.5" /></button>
+          <button onclick={() => startEdit(company)} class="p-1.5 text-ink-soft hover:text-terracotta transition-colors rounded"><Pencil class="w-3.5 h-3.5" /></button>
           {#if deleteConfirm === company.id}
             <form method="POST" action="?/delete" use:enhance={() => async ({ result, update }) => { if (result.type === 'success') toast.success('Gelöscht'); deleteConfirm = null; await update(); }} class="flex items-center gap-1">
               <input type="hidden" name="id" value={company.id} />
@@ -246,7 +246,7 @@
               <button type="button" onclick={() => (deleteConfirm = null)} class="px-2 py-1 border border-line rounded text-xs">Nein</button>
             </form>
           {:else}
-            <button onclick={() => (deleteConfirm = company.id)} class="p-1.5 text-ink/30 hover:text-red-500 transition-colors rounded"><Trash2 class="w-3.5 h-3.5" /></button>
+            <button onclick={() => (deleteConfirm = company.id)} class="p-1.5 text-ink-soft hover:text-red-500 transition-colors rounded"><Trash2 class="w-3.5 h-3.5" /></button>
           {/if}
         </div>
       </td>
@@ -273,23 +273,23 @@
     <!-- Filterleiste -->
     <div class="bg-surface rounded-xl border border-line p-3 mb-3">
       <div class="mb-2">
-        <p class="text-[11px] font-bold text-ink/40 uppercase tracking-wide mb-1">🔍 Live-Suche</p>
+        <p class="text-[11px] font-bold text-ink-soft uppercase tracking-wide mb-1">🔍 Live-Suche</p>
         <div class="relative max-w-sm">
-          <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink/30" />
+          <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-soft" />
           <input type="text" bind:value={searchValue} oninput={handleCrmSearch}
             placeholder="Name, Website, Telefon, Notiz, Kontakt…"
             class="w-full pl-8 pr-3 py-1 bg-cream border border-line rounded-lg text-xs text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
         </div>
       </div>
       {#if data.allTags.length > 0}
-        <p class="text-[11px] font-bold text-ink/40 uppercase tracking-wide mb-1">🏷 Tags</p>
+        <p class="text-[11px] font-bold text-ink-soft uppercase tracking-wide mb-1">🏷 Tags</p>
         <div class="flex flex-wrap gap-1">
           {#each data.allTags as tag}
             <EditableTagChip
               tag={tag}
               active={selectedTags.includes(tag)}
               activeClass={tagColor(tag) + ' ring-2 ring-offset-1 ring-terracotta/40'}
-              inactiveClass="bg-cream text-ink/50 border-line hover:border-ink/30"
+              inactiveClass="bg-cream text-ink-soft border-line hover:border-ink/30"
               onToggle={() => toggleTag(tag)}
               onRename={(newTag) => renameTag(tag, newTag)}
             />
@@ -302,7 +302,7 @@
               tag={tag}
               active={excludedTags.includes(tag)}
               activeClass="bg-red-50 text-red-600 border-red-300 ring-2 ring-offset-1 ring-red-300/50"
-              inactiveClass="bg-cream text-ink/50 border-line hover:border-red-300/50"
+              inactiveClass="bg-cream text-ink-soft border-line hover:border-red-300/50"
               onToggle={() => toggleExcludeTag(tag)}
               onRename={(newTag) => renameTag(tag, newTag)}
             />
@@ -312,7 +312,7 @@
 
       <!-- Sortierung/Gruppierung/Ort — dünne, immer sichtbare Zeile -->
       <div class="mt-2 pt-2 border-t border-line flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-        <label class="flex items-center gap-1 text-ink/50">
+        <label class="flex items-center gap-1 text-ink-soft">
           Sortieren
           <select value={sortBy} onchange={(e) => setSort((e.currentTarget as HTMLSelectElement).value as 'name' | 'contacts' | 'tags')}
             class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
@@ -321,7 +321,7 @@
             <option value="tags">Anzahl Tags</option>
           </select>
         </label>
-        <label class="flex items-center gap-1 text-ink/50">
+        <label class="flex items-center gap-1 text-ink-soft">
           Gruppieren
           <select value={group} onchange={(e) => setGroup((e.currentTarget as HTMLSelectElement).value as '' | 'tags')}
             class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
@@ -330,7 +330,7 @@
           </select>
         </label>
         {#if data.allOrte.length > 0}
-          <label class="flex items-center gap-1 text-ink/50">
+          <label class="flex items-center gap-1 text-ink-soft">
             Ort
             <select value={ort} onchange={(e) => setOrt((e.currentTarget as HTMLSelectElement).value)}
               class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
@@ -340,7 +340,7 @@
           </label>
         {/if}
         {#if hasFilter}
-          <button onclick={clearFilter} class="text-ink/40 hover:text-terracotta transition-colors ml-auto">Filter löschen</button>
+          <button onclick={clearFilter} class="text-ink-soft hover:text-terracotta transition-colors ml-auto">Filter löschen</button>
         {/if}
       </div>
     </div>
@@ -356,23 +356,23 @@
         <h3 class="font-display font-semibold text-base text-ink mb-4">Neue Firma</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           <div class="sm:col-span-2">
-            <label class="block text-xs font-medium text-ink/60 mb-1">Name *</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1">Name *</label>
             <input name="name" type="text" required placeholder="Firmenname"
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
           </div>
-          <div><label class="block text-xs font-medium text-ink/60 mb-1">Website</label>
+          <div><label class="block text-xs font-medium text-ink-soft mb-1">Website</label>
             <input name="website" type="url" placeholder="https://..." class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" /></div>
-          <div><label class="block text-xs font-medium text-ink/60 mb-1">Telefon</label>
+          <div><label class="block text-xs font-medium text-ink-soft mb-1">Telefon</label>
             <input name="telefon" type="tel" placeholder="+43 1 234567" class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" /></div>
-          <div><label class="block text-xs font-medium text-ink/60 mb-1">Ort</label>
+          <div><label class="block text-xs font-medium text-ink-soft mb-1">Ort</label>
             <input name="ort" type="text" placeholder="Wien" class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" /></div>
-          <div><label class="block text-xs font-medium text-ink/60 mb-1">Notizen</label>
+          <div><label class="block text-xs font-medium text-ink-soft mb-1">Notizen</label>
             <input name="notizen" type="text" placeholder="Optional..." class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-sm text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" /></div>
-          <div class="sm:col-span-2"><label class="block text-xs font-medium text-ink/60 mb-1">Tags</label>
+          <div class="sm:col-span-2"><label class="block text-xs font-medium text-ink-soft mb-1">Tags</label>
             <TagInput bind:tags={createTags} placeholder="steuerberater, wien … Enter" /></div>
         </div>
         <div class="flex gap-2">
-          <button type="button" onclick={() => (showCreateForm = false)} class="px-3 py-1.5 border border-line rounded-lg text-sm text-ink/60 hover:bg-cream transition-colors">Abbrechen</button>
+          <button type="button" onclick={() => (showCreateForm = false)} class="px-3 py-1.5 border border-line rounded-lg text-sm text-ink-soft hover:bg-cream transition-colors">Abbrechen</button>
           <button type="submit" class="px-3 py-1.5 bg-terracotta text-white rounded-lg text-sm font-medium hover:bg-terracotta/90 transition-colors">Erstellen</button>
         </div>
       </form>
@@ -382,7 +382,7 @@
     {#if data.companies.length === 0}
       <div class="bg-surface rounded-xl border border-line py-16 text-center">
         <Building2 class="w-10 h-10 text-ink/15 mx-auto mb-3" />
-        <p class="text-sm font-medium text-ink/50">
+        <p class="text-sm font-medium text-ink-soft">
           {#if data.q}Keine Ergebnisse für „{data.q}"
           {:else if hasFilter}Keine Firmen für diesen Filter
           {:else}Noch keine Firmen{/if}
@@ -394,9 +394,9 @@
           <div class="bg-surface rounded-xl border border-line overflow-hidden">
             <button type="button" onclick={() => toggleGroup(g.tag)}
               class="w-full px-4 py-2.5 bg-cream/70 {collapsedGroups.has(g.tag) ? '' : 'border-b border-line'} flex items-center gap-2 text-left hover:bg-cream transition-colors">
-              <ChevronDown class="w-3.5 h-3.5 text-ink/40 transition-transform duration-150 {collapsedGroups.has(g.tag) ? '-rotate-90' : ''}" />
-              <span class="px-2 py-0.5 rounded-full text-xs font-medium border {g.tag === 'Ohne Tags' ? 'bg-cream text-ink/40 border-line' : tagColor(g.tag)}">{g.tag}</span>
-              <span class="text-xs text-ink/40">{g.items.length}</span>
+              <ChevronDown class="w-3.5 h-3.5 text-ink-soft transition-transform duration-150 {collapsedGroups.has(g.tag) ? '-rotate-90' : ''}" />
+              <span class="px-2 py-0.5 rounded-full text-xs font-medium border {g.tag === 'Ohne Tags' ? 'bg-cream text-ink-soft border-line' : tagColor(g.tag)}">{g.tag}</span>
+              <span class="text-xs text-ink-soft">{g.items.length}</span>
             </button>
             {#if !collapsedGroups.has(g.tag)}
               <div class="overflow-x-auto"><table class="w-full table-fixed"><tbody class="divide-y divide-line">{#each g.items as company}{@render companyRow(company)}{/each}</tbody></table></div>
@@ -410,11 +410,11 @@
           <table class="w-full table-fixed">
             <thead>
               <tr class="border-b border-line bg-cream/50">
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2">Firma / Website</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden md:table-cell w-[30%]">Details</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 hidden lg:table-cell w-[20%]">Verknüpfte Kontakte</th>
-                <th class="text-left text-xs font-medium text-ink/50 px-3 py-2 w-[128px] hidden sm:table-cell">Telefon</th>
-                <th class="px-3 py-2 text-right text-xs font-medium text-ink/50 w-[76px]">Aktion</th>
+                <th class="text-left text-xs font-medium text-ink-soft px-3 py-2">Firma / Website</th>
+                <th class="text-left text-xs font-medium text-ink-soft px-3 py-2 hidden md:table-cell w-[30%]">Details</th>
+                <th class="text-left text-xs font-medium text-ink-soft px-3 py-2 hidden lg:table-cell w-[20%]">Verknüpfte Kontakte</th>
+                <th class="text-left text-xs font-medium text-ink-soft px-3 py-2 w-[128px] hidden sm:table-cell">Telefon</th>
+                <th class="px-3 py-2 text-right text-xs font-medium text-ink-soft w-[76px]">Aktion</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-line">{#each data.companies as company}{@render companyRow(company)}{/each}</tbody>

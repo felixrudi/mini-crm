@@ -47,12 +47,12 @@
   >
     <header class="flex items-center justify-between gap-2 px-4 py-3 border-b border-line flex-shrink-0 bg-surface">
       <div class="min-w-0">
-        <p class="text-[10px] font-semibold text-ink/40 uppercase tracking-wider">{title}</p>
+        <p class="text-[10px] font-semibold text-ink-soft uppercase tracking-wider">{title}</p>
       </div>
       <div class="flex items-center gap-1">
         <a
           href={fullHref}
-          class="p-1.5 text-ink/40 hover:text-ink rounded-lg hover:bg-cream transition-colors"
+          class="p-1.5 text-ink-soft hover:text-ink rounded-lg hover:bg-cream transition-colors"
           title="Als eigene Seite öffnen"
         >
           <ExternalLink class="w-4 h-4" />
@@ -60,7 +60,7 @@
         <button
           type="button"
           onclick={closeDetail}
-          class="p-1.5 text-ink/40 hover:text-ink rounded-lg hover:bg-cream transition-colors"
+          class="p-1.5 text-ink-soft hover:text-ink rounded-lg hover:bg-cream transition-colors"
           title="Schließen (Esc)"
         >
           <X class="w-4 h-4" />

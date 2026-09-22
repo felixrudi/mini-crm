@@ -17,7 +17,7 @@
       </div>
       <div>
         <div class="font-display font-bold text-lg text-ink leading-tight">Hirschfeld</div>
-        <div class="text-xs text-ink/40 leading-tight tracking-wide uppercase">CRM</div>
+        <div class="text-xs text-ink-soft leading-tight tracking-wide uppercase">CRM</div>
       </div>
     </div>
 
@@ -35,9 +35,9 @@
         }}
       >
         <div class="mb-4">
-          <label class="block text-xs font-medium text-ink/60 mb-1.5" for="password">Passwort</label>
+          <label class="block text-xs font-medium text-ink-soft mb-1.5" for="password">Passwort</label>
           <div class="relative">
-            <Lock class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink/30" />
+            <Lock class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
             <input
               id="password"
               name="password"

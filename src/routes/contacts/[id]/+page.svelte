@@ -122,7 +122,7 @@
 
 <div class="px-4 py-4 md:px-6 md:py-6 max-w-[1400px] mx-auto overflow-x-hidden">
   <!-- Back -->
-  <a href="/contacts" class="inline-flex items-center gap-1.5 text-sm text-ink/50 hover:text-ink transition-colors mb-6">
+  <a href="/contacts" class="inline-flex items-center gap-1.5 text-sm text-ink-soft hover:text-ink transition-colors mb-6">
     <ArrowLeft class="w-4 h-4" />
     Alle Kontakte
   </a>
@@ -157,11 +157,11 @@
           <h1 class="font-display font-bold text-xl text-ink truncate">{data.contact.name}</h1>
           <div class="flex flex-wrap items-center gap-2 mt-1">
             {#if data.contact.rolle}
-              <span class="text-sm text-ink/60">{data.contact.rolle}</span>
+              <span class="text-sm text-ink-soft">{data.contact.rolle}</span>
             {/if}
             {#if data.contact.company_name}
-              <span class="text-ink/30">·</span>
-              <span class="flex items-center gap-1 text-sm text-ink/60">
+              <span class="text-ink-soft">·</span>
+              <span class="flex items-center gap-1 text-sm text-ink-soft">
                 <Building2 class="w-3.5 h-3.5" />
                 {data.contact.company_name}
               </span>
@@ -172,15 +172,15 @@
       <div class="flex items-center gap-2 flex-shrink-0">
         <button
           onclick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Link kopiert'); }}
-          class="p-2 text-ink/40 hover:text-terracotta transition-colors border border-line rounded-lg"
+          class="p-2 text-ink-soft hover:text-terracotta transition-colors border border-line rounded-lg"
           title="Link kopieren"
         >
           <Link class="w-4 h-4" />
         </button>
-        <a href="/contacts/{data.contact.id}/vcard" class="p-2 text-ink/40 hover:text-terracotta transition-colors border border-line rounded-lg" title="vCard exportieren">
+        <a href="/contacts/{data.contact.id}/vcard" class="p-2 text-ink-soft hover:text-terracotta transition-colors border border-line rounded-lg" title="vCard exportieren">
           <Download class="w-4 h-4" />
         </a>
-        <button onclick={() => showEditContact = true} class="p-2 text-ink/40 hover:text-terracotta transition-colors border border-line rounded-lg" title="Bearbeiten">
+        <button onclick={() => showEditContact = true} class="p-2 text-ink-soft hover:text-terracotta transition-colors border border-line rounded-lg" title="Bearbeiten">
           <Pencil class="w-4 h-4" />
         </button>
       </div>
@@ -194,7 +194,7 @@
         </a>
       {/if}
       {#if data.contact.telefon}
-        <a href="tel:{data.contact.telefon}" class="flex items-center gap-1.5 text-sm text-ink/60 hover:text-terracotta transition-colors">
+        <a href="tel:{data.contact.telefon}" class="flex items-center gap-1.5 text-sm text-ink-soft hover:text-terracotta transition-colors">
           <Phone class="w-3.5 h-3.5" /> {data.contact.telefon}
         </a>
       {/if}
@@ -214,7 +214,7 @@
         </a>
       {/if}
       {#if data.contact.telefon2}
-        <a href="tel:{data.contact.telefon2}" class="flex items-center gap-1.5 text-sm text-ink/60 hover:text-terracotta transition-colors">
+        <a href="tel:{data.contact.telefon2}" class="flex items-center gap-1.5 text-sm text-ink-soft hover:text-terracotta transition-colors">
           <Phone class="w-3.5 h-3.5" /> {data.contact.telefon2}
         </a>
       {/if}
@@ -227,12 +227,12 @@
         {#if data.contact.company_name || data.contact.rolle}
           <div class="flex flex-wrap gap-x-4 gap-y-1">
             {#if data.contact.company_name}
-              <span class="flex items-center gap-1.5 text-sm text-ink/60">
-                <Building2 class="w-3.5 h-3.5 text-ink/30" /> {data.contact.company_name}
+              <span class="flex items-center gap-1.5 text-sm text-ink-soft">
+                <Building2 class="w-3.5 h-3.5 text-ink-soft" /> {data.contact.company_name}
               </span>
             {/if}
             {#if data.contact.rolle}
-              <span class="text-sm text-ink/50">{data.contact.rolle}</span>
+              <span class="text-sm text-ink-soft">{data.contact.rolle}</span>
             {/if}
           </div>
         {/if}
@@ -240,21 +240,21 @@
         {#if data.contact.strasse || data.contact.ort}
           {@const karte = karteUrl(data.contact)}
           {#if karte}
-            <a href={karte} target="_blank" rel="noopener" class="flex items-center gap-1.5 text-sm text-ink/50 hover:text-terracotta hover:underline">
-              <MapPin class="w-3.5 h-3.5 text-ink/30 flex-shrink-0" />
+            <a href={karte} target="_blank" rel="noopener" class="flex items-center gap-1.5 text-sm text-ink-soft hover:text-terracotta hover:underline">
+              <MapPin class="w-3.5 h-3.5 text-ink-soft flex-shrink-0" />
               {adresseText(data.contact)}
             </a>
           {:else}
-            <div class="flex items-center gap-1.5 text-sm text-ink/50">
-              <MapPin class="w-3.5 h-3.5 text-ink/30 flex-shrink-0" />
+            <div class="flex items-center gap-1.5 text-sm text-ink-soft">
+              <MapPin class="w-3.5 h-3.5 text-ink-soft flex-shrink-0" />
               {adresseText(data.contact)}
             </div>
           {/if}
         {/if}
 
         {#if data.contact.geburtstag}
-          <div class="flex items-center gap-1.5 text-sm text-ink/50">
-            <CalendarDays class="w-3.5 h-3.5 text-ink/30" /> {formatDate(data.contact.geburtstag)}
+          <div class="flex items-center gap-1.5 text-sm text-ink-soft">
+            <CalendarDays class="w-3.5 h-3.5 text-ink-soft" /> {formatDate(data.contact.geburtstag)}
           </div>
         {/if}
 
@@ -267,7 +267,7 @@
         {/if}
 
         {#if data.contact.notizen}
-          <p class="text-sm text-ink/60 whitespace-pre-wrap leading-relaxed">{data.contact.notizen}</p>
+          <p class="text-sm text-ink-soft whitespace-pre-wrap leading-relaxed">{data.contact.notizen}</p>
         {/if}
 
       </div>
@@ -279,7 +279,7 @@
     {#each [['timeline', 'Timeline'], ['details', 'Details'], ['dateien', 'Dateien']] as [tab, label]}
       <button
         onclick={() => activeTab = tab as typeof activeTab}
-        class="px-3 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap {activeTab === tab ? 'bg-terracotta text-white font-medium' : 'text-ink/60 hover:text-ink hover:bg-cream'}"
+        class="px-3 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap {activeTab === tab ? 'bg-terracotta text-white font-medium' : 'text-ink-soft hover:text-ink hover:bg-cream'}"
       >
         {label}
       </button>
@@ -309,8 +309,8 @@
     <div class="bg-surface rounded-xl border border-line">
       {#if data.timeline.length === 0}
         <div class="py-16 text-center">
-          <p class="text-sm text-ink/40">Noch keine Einträge in der Timeline</p>
-          <p class="text-xs text-ink/30 mt-1">Erfasse die erste Interaktion oder E-Mail</p>
+          <p class="text-sm text-ink-soft">Noch keine Einträge in der Timeline</p>
+          <p class="text-xs text-ink-soft mt-1">Erfasse die erste Interaktion oder E-Mail</p>
         </div>
       {:else}
         <div class="px-5 py-2 divide-y divide-line">
@@ -327,7 +327,7 @@
       <!-- Tags -->
       {#if data.contact.tags?.length > 0}
         <div class="bg-surface rounded-xl border border-line px-5 py-4">
-          <p class="text-xs font-medium text-ink/40 uppercase tracking-wide mb-2">Tags</p>
+          <p class="text-xs font-medium text-ink-soft uppercase tracking-wide mb-2">Tags</p>
           <div class="flex flex-wrap gap-1.5">
             {#each data.contact.tags as tag}
               <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-terracotta/10 text-terracotta border border-terracotta/20">{tag}</span>
@@ -338,7 +338,7 @@
 
       <!-- Persönliche Daten -->
       <div class="bg-surface rounded-xl border border-line p-5">
-        <p class="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-3">Persönlich</p>
+        <p class="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-3">Persönlich</p>
         <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {#each [
             ['Anrede', data.contact.anrede],
@@ -349,7 +349,7 @@
           ] as [label, value]}
             {#if value}
               <div>
-                <dt class="text-xs font-medium text-ink/40 uppercase tracking-wide">{label}</dt>
+                <dt class="text-xs font-medium text-ink-soft uppercase tracking-wide">{label}</dt>
                 <dd class="text-sm text-ink mt-0.5">{value}</dd>
               </div>
             {/if}
@@ -359,7 +359,7 @@
 
       <!-- Beruflich -->
       <div class="bg-surface rounded-xl border border-line p-5">
-        <p class="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-3">Beruflich</p>
+        <p class="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-3">Beruflich</p>
         <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {#each [
             ['Firma', data.contact.company_name],
@@ -367,7 +367,7 @@
           ] as [label, value]}
             {#if value}
               <div>
-                <dt class="text-xs font-medium text-ink/40 uppercase tracking-wide">{label}</dt>
+                <dt class="text-xs font-medium text-ink-soft uppercase tracking-wide">{label}</dt>
                 <dd class="text-sm text-ink mt-0.5">{value}</dd>
               </div>
             {/if}
@@ -377,7 +377,7 @@
 
       <!-- Kontakt -->
       <div class="bg-surface rounded-xl border border-line p-5">
-        <p class="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-3">Kontakt</p>
+        <p class="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-3">Kontakt</p>
         <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {#each [
             ['E-Mail', data.contact.email],
@@ -389,7 +389,7 @@
           ] as [label, value]}
             {#if value}
               <div>
-                <dt class="text-xs font-medium text-ink/40 uppercase tracking-wide">{label}</dt>
+                <dt class="text-xs font-medium text-ink-soft uppercase tracking-wide">{label}</dt>
                 <dd class="text-sm text-ink mt-0.5 break-all">{value}</dd>
               </div>
             {/if}
@@ -400,7 +400,7 @@
       <!-- Adresse -->
       {#if data.contact.strasse || data.contact.ort}
         <div class="bg-surface rounded-xl border border-line p-5">
-          <p class="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-3">Adresse</p>
+          <p class="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-3">Adresse</p>
           <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {#each [
               ['Straße', data.contact.strasse],
@@ -408,7 +408,7 @@
             ] as [label, value]}
               {#if value}
                 <div>
-                  <dt class="text-xs font-medium text-ink/40 uppercase tracking-wide">{label}</dt>
+                  <dt class="text-xs font-medium text-ink-soft uppercase tracking-wide">{label}</dt>
                   <dd class="text-sm text-ink mt-0.5">{value}</dd>
                 </div>
               {/if}
@@ -420,10 +420,10 @@
       <!-- Finanzen -->
       {#if data.contact.iban}
         <div class="bg-surface rounded-xl border border-line p-5">
-          <p class="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-3">Finanzen</p>
+          <p class="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-3">Finanzen</p>
           <dl>
             <div>
-              <dt class="text-xs font-medium text-ink/40 uppercase tracking-wide">IBAN / Konto</dt>
+              <dt class="text-xs font-medium text-ink-soft uppercase tracking-wide">IBAN / Konto</dt>
               <dd class="text-sm text-ink mt-0.5 font-mono">{data.contact.iban}</dd>
             </div>
           </dl>
@@ -433,24 +433,24 @@
       <!-- Notizen -->
       {#if data.contact.notizen}
         <div class="bg-surface rounded-xl border border-line p-5">
-          <p class="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-2">Notizen</p>
+          <p class="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-2">Notizen</p>
           <p class="text-sm text-ink/70 whitespace-pre-wrap">{data.contact.notizen}</p>
         </div>
       {/if}
 
       <!-- Meta -->
       <div class="bg-surface rounded-xl border border-line p-5">
-        <p class="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-3">Meta</p>
+        <p class="text-xs font-semibold text-ink-soft uppercase tracking-wider mb-3">Meta</p>
         <dl>
           <div>
-            <dt class="text-xs font-medium text-ink/40 uppercase tracking-wide">Erstellt</dt>
+            <dt class="text-xs font-medium text-ink-soft uppercase tracking-wide">Erstellt</dt>
             <dd class="text-sm text-ink mt-0.5">{formatDate(data.contact.created_at)}</dd>
           </div>
         </dl>
         <div class="mt-4">
           <button
             onclick={() => showEditContact = true}
-            class="flex items-center gap-2 px-3 py-1.5 border border-line rounded-lg text-sm text-ink/60 hover:bg-cream hover:text-ink transition-colors"
+            class="flex items-center gap-2 px-3 py-1.5 border border-line rounded-lg text-sm text-ink-soft hover:bg-cream hover:text-ink transition-colors"
           >
             <Pencil class="w-3.5 h-3.5" /> Kontakt bearbeiten
           </button>
@@ -463,7 +463,7 @@
     <input bind:this={fileInputEl} type="file" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt" class="hidden" onchange={uploadFile} />
 
     <div class="flex items-center justify-between mb-4">
-      <p class="text-sm text-ink/50">{files.length} {files.length === 1 ? 'Datei' : 'Dateien'}</p>
+      <p class="text-sm text-ink-soft">{files.length} {files.length === 1 ? 'Datei' : 'Dateien'}</p>
       <button
         type="button"
         onclick={() => fileInputEl.click()}
@@ -481,7 +481,7 @@
     {#if files.length === 0}
       <div class="bg-surface rounded-xl border border-line py-16 text-center">
         <Paperclip class="w-8 h-8 text-ink/15 mx-auto mb-2" />
-        <p class="text-sm text-ink/40">Noch keine Dateien</p>
+        <p class="text-sm text-ink-soft">Noch keine Dateien</p>
         <button onclick={() => fileInputEl.click()} class="mt-3 text-xs text-terracotta hover:underline">
           Erste Datei hochladen
         </button>
@@ -513,17 +513,17 @@
         <div class="bg-surface rounded-xl border border-line divide-y divide-line">
           {#each files.filter(f => !f.mimetype.startsWith('image/')) as f}
             <div class="flex items-center gap-3 px-4 py-3">
-              <FileText class="w-5 h-5 text-ink/30 flex-shrink-0" />
+              <FileText class="w-5 h-5 text-ink-soft flex-shrink-0" />
               <div class="flex-1 min-w-0">
                 <p class="text-sm text-ink truncate">{f.filename}</p>
-                <p class="text-xs text-ink/40">{f.mimetype}</p>
+                <p class="text-xs text-ink-soft">{f.mimetype}</p>
               </div>
               <div class="flex items-center gap-1">
                 <a href="/api/contacts/{data.contact.id}/files/{f.id}" download={f.filename}
-                  class="p-1.5 text-ink/30 hover:text-terracotta transition-colors" title="Herunterladen">
+                  class="p-1.5 text-ink-soft hover:text-terracotta transition-colors" title="Herunterladen">
                   <Download class="w-3.5 h-3.5" />
                 </a>
-                <button onclick={() => deleteFile(f.id)} class="p-1.5 text-ink/30 hover:text-red-500 transition-colors" title="Löschen">
+                <button onclick={() => deleteFile(f.id)} class="p-1.5 text-ink-soft hover:text-red-500 transition-colors" title="Löschen">
                   <X class="w-3.5 h-3.5" />
                 </button>
               </div>

@@ -114,12 +114,12 @@
         </div>
         <div>
           <div class="font-display font-bold text-sm text-ink leading-tight tracking-tight">Hirschfeld</div>
-          <div class="text-[10px] text-ink/40 leading-tight tracking-wide uppercase">CRM</div>
+          <div class="text-[10px] text-ink-soft leading-tight tracking-wide uppercase">CRM</div>
         </div>
       </div>
       <button
         onclick={() => sidebarCollapsed = true}
-        class="p-1 rounded-lg text-ink/40 hover:bg-cream hover:text-ink transition-colors ml-auto"
+        class="p-1 rounded-lg text-ink-soft hover:bg-cream hover:text-ink transition-colors ml-auto"
         title="Sidebar einklappen"
       >
         <ChevronLeft class="w-4 h-4" />
@@ -146,7 +146,7 @@
     <div class="px-3 py-3 border-t border-line space-y-3">
       <!-- Theme Switcher -->
       <div class="flex items-center justify-between px-1">
-        <span class="text-[10px] text-ink/40 uppercase font-semibold tracking-wider">Theme</span>
+        <span class="text-[10px] text-ink-soft uppercase font-semibold tracking-wider">Theme</span>
         <div class="flex gap-1.5">
           {#each [
             { id: 'light-hybrid', color: 'bg-[#f9f6f2] border-[#e6c5a8]', title: 'Hirschfeld Cream' },
@@ -166,7 +166,7 @@
 
       <button
         onclick={() => paletteOpen = true}
-        class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-ink/40 hover:bg-cream hover:text-ink transition-colors border border-line"
+        class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-ink-soft hover:bg-cream hover:text-ink transition-colors border border-line"
       >
         <Search class="w-4 h-4" />
         <span class="flex-1 text-left">Suchen...</span>
@@ -184,10 +184,10 @@
       <span class="font-display font-bold text-sm text-ink">Hirschfeld CRM</span>
     </div>
     <div class="flex items-center gap-2">
-      <button onclick={() => paletteOpen = true} class="p-2 text-ink/60 hover:text-ink">
+      <button onclick={() => paletteOpen = true} class="p-2 text-ink-soft hover:text-ink">
         <Search class="w-5 h-5" />
       </button>
-      <button onclick={() => mobileMenuOpen = !mobileMenuOpen} class="p-2 text-ink/60 hover:text-ink">
+      <button onclick={() => mobileMenuOpen = !mobileMenuOpen} class="p-2 text-ink-soft hover:text-ink">
         {#if mobileMenuOpen}
           <X class="w-5 h-5" />
         {:else}
@@ -223,7 +223,7 @@
     {#if sidebarCollapsed}
       <button
         onclick={() => sidebarCollapsed = false}
-        class="hidden md:flex absolute top-4 left-4 z-30 p-2 bg-surface rounded-lg border border-line text-ink/60 hover:text-ink shadow-sm hover:bg-cream transition-colors"
+        class="hidden md:flex absolute top-4 left-4 z-30 p-2 bg-surface rounded-lg border border-line text-ink-soft hover:text-ink shadow-sm hover:bg-cream transition-colors"
         title="Sidebar ausklappen"
       >
         <Menu class="w-4 h-4" />

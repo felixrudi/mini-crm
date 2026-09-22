@@ -25,7 +25,7 @@
   <div class="bg-surface rounded-xl border border-line shadow-xl w-full max-w-md">
     <div class="flex items-center justify-between p-5 border-b border-line">
       <h2 class="font-display font-bold text-lg text-ink">E-Mail erfassen</h2>
-      <button onclick={() => onclose?.()} class="text-ink/40 hover:text-ink transition-colors">
+      <button onclick={() => onclose?.()} class="text-ink-soft hover:text-ink transition-colors">
         <X class="w-5 h-5" />
       </button>
     </div>
@@ -50,7 +50,7 @@
       <input type="hidden" name="contact_id" value={contactId} />
 
       <div>
-        <label class="block text-xs font-medium text-ink/60 mb-1">Richtung *</label>
+        <label class="block text-xs font-medium text-ink-soft mb-1">Richtung *</label>
         <div class="flex gap-2">
           <button
             type="button"
@@ -72,7 +72,7 @@
 
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-medium text-ink/60 mb-1" for="von">Von</label>
+          <label class="block text-xs font-medium text-ink-soft mb-1" for="von">Von</label>
           <input
             id="von"
             name="von"
@@ -83,7 +83,7 @@
           />
         </div>
         <div>
-          <label class="block text-xs font-medium text-ink/60 mb-1" for="an">An</label>
+          <label class="block text-xs font-medium text-ink-soft mb-1" for="an">An</label>
           <input
             id="an"
             name="an"
@@ -96,7 +96,7 @@
       </div>
 
       <div>
-        <label class="block text-xs font-medium text-ink/60 mb-1" for="betreff">Betreff</label>
+        <label class="block text-xs font-medium text-ink-soft mb-1" for="betreff">Betreff</label>
         <input
           id="betreff"
           name="betreff"
@@ -107,7 +107,7 @@
       </div>
 
       <div>
-        <label class="block text-xs font-medium text-ink/60 mb-1" for="datum">Datum *</label>
+        <label class="block text-xs font-medium text-ink-soft mb-1" for="datum">Datum *</label>
         <input
           id="datum"
           name="datum"
@@ -119,7 +119,7 @@
       </div>
 
       <div>
-        <label class="block text-xs font-medium text-ink/60 mb-1" for="body_text">Inhalt</label>
+        <label class="block text-xs font-medium text-ink-soft mb-1" for="body_text">Inhalt</label>
         <textarea
           id="body_text"
           name="body_text"

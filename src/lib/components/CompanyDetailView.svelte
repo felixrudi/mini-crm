@@ -102,7 +102,7 @@
   </div>
 {:else if errorMsg || !company}
   <div class="px-5 py-16 text-center">
-    <p class="text-sm text-ink/50">{errorMsg || 'Nicht gefunden'}</p>
+    <p class="text-sm text-ink-soft">{errorMsg || 'Nicht gefunden'}</p>
   </div>
 {:else}
   <div class="px-4 py-4 space-y-4">
@@ -127,7 +127,7 @@
         <input name="land" bind:value={editLand} placeholder="Land" class="w-full px-2.5 py-1.5 bg-cream border border-line rounded-lg text-sm" />
         <textarea name="notizen" bind:value={editNotizen} rows="2" placeholder="Notizen" class="w-full px-2.5 py-1.5 bg-cream border border-line rounded-lg text-sm resize-none"></textarea>
         <div class="mt-1">
-          <label class="block text-xs font-medium text-ink/60 mb-1">Tags</label>
+          <label class="block text-xs font-medium text-ink-soft mb-1">Tags</label>
           <TagInput bind:tags={editTags} placeholder="steuerberater, wien … Enter" />
         </div>
         <div class="flex gap-2">
@@ -142,15 +142,15 @@
         </div>
         <div class="min-w-0 flex-1">
           <h2 class="font-display font-bold text-lg text-ink">{company.name}</h2>
-          <p class="text-xs text-ink/45 mt-0.5 flex items-center gap-1">
+          <p class="text-xs text-ink-soft mt-0.5 flex items-center gap-1">
             <Users class="w-3 h-3" /> {contacts.length} Kontakt{contacts.length !== 1 ? 'e' : ''}
             {#if timeline.length}
-              <span class="text-ink/25">·</span>
+              <span class="text-ink-soft">·</span>
               <MessagesSquare class="w-3 h-3" /> {timeline.length}
             {/if}
           </p>
         </div>
-        <button type="button" onclick={startEdit} class="p-1.5 text-ink/40 hover:text-terracotta border border-line rounded-lg" title="Bearbeiten">
+        <button type="button" onclick={startEdit} class="p-1.5 text-ink-soft hover:text-terracotta border border-line rounded-lg" title="Bearbeiten">
           <Pencil class="w-3.5 h-3.5" />
         </button>
       </div>
@@ -169,15 +169,15 @@
         {#if company.strasse || company.ort}
           {@const karte = karteUrl(company)}
           {#if karte}
-            <a href={karte} target="_blank" rel="noopener" class="flex items-start gap-1.5 text-xs text-ink/50 hover:text-terracotta hover:underline">
+            <a href={karte} target="_blank" rel="noopener" class="flex items-start gap-1.5 text-xs text-ink-soft hover:text-terracotta hover:underline">
               <MapPin class="w-3 h-3 mt-0.5 flex-shrink-0" /> {adresseText(company)}
             </a>
           {:else}
-            <p class="text-xs text-ink/50">{adresseText(company)}</p>
+            <p class="text-xs text-ink-soft">{adresseText(company)}</p>
           {/if}
         {/if}
         {#if company.notizen}
-          <p class="text-xs text-ink/55 whitespace-pre-wrap">{company.notizen}</p>
+          <p class="text-xs text-ink-soft whitespace-pre-wrap">{company.notizen}</p>
         {/if}
         {#if company.tags?.length}
           <div class="flex flex-wrap gap-1 mt-1">
@@ -190,8 +190,8 @@
     {/if}
 
     <div class="flex gap-1 bg-cream border border-line rounded-lg p-1">
-      <button type="button" onclick={() => (activeTab = 'timeline')} class="flex-1 px-2 py-1.5 text-xs rounded-md {activeTab === 'timeline' ? 'bg-terracotta text-white font-medium' : 'text-ink/60'}">Timeline</button>
-      <button type="button" onclick={() => (activeTab = 'kontakte')} class="flex-1 px-2 py-1.5 text-xs rounded-md {activeTab === 'kontakte' ? 'bg-terracotta text-white font-medium' : 'text-ink/60'}">Kontakte ({contacts.length})</button>
+      <button type="button" onclick={() => (activeTab = 'timeline')} class="flex-1 px-2 py-1.5 text-xs rounded-md {activeTab === 'timeline' ? 'bg-terracotta text-white font-medium' : 'text-ink-soft'}">Timeline</button>
+      <button type="button" onclick={() => (activeTab = 'kontakte')} class="flex-1 px-2 py-1.5 text-xs rounded-md {activeTab === 'kontakte' ? 'bg-terracotta text-white font-medium' : 'text-ink-soft'}">Kontakte ({contacts.length})</button>
     </div>
 
     {#if activeTab === 'timeline'}
@@ -206,8 +206,8 @@
       <div class="bg-cream/40 rounded-xl border border-line">
         {#if timeline.length === 0}
           <div class="py-10 text-center">
-            <p class="text-xs text-ink/40">Noch keine Einträge</p>
-            <p class="text-[10px] text-ink/30 mt-1">Service-Anrufe ohne Dummy-Kontakt</p>
+            <p class="text-xs text-ink-soft">Noch keine Einträge</p>
+            <p class="text-[10px] text-ink-soft mt-1">Service-Anrufe ohne Dummy-Kontakt</p>
           </div>
         {:else}
           <div class="px-3 py-1 divide-y divide-line">
@@ -220,7 +220,7 @@
     {:else}
       <div class="border border-line rounded-xl divide-y divide-line overflow-hidden">
         {#if contacts.length === 0}
-          <div class="py-10 text-center text-xs text-ink/40">Keine Kontakte</div>
+          <div class="py-10 text-center text-xs text-ink-soft">Keine Kontakte</div>
         {:else}
           {#each contacts as c}
             <button type="button" onclick={() => openContact(c.id)} class="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-cream text-left transition-colors">
@@ -229,9 +229,9 @@
               </div>
               <div class="min-w-0 flex-1">
                 <p class="text-sm font-medium text-ink truncate">{c.name}</p>
-                {#if c.rolle}<p class="text-[11px] text-ink/45 truncate">{c.rolle}</p>{/if}
+                {#if c.rolle}<p class="text-[11px] text-ink-soft truncate">{c.rolle}</p>{/if}
               </div>
-              <div class="flex gap-1 text-ink/30">
+              <div class="flex gap-1 text-ink-soft">
                 {#if c.email}<Mail class="w-3 h-3" />{/if}
                 {#if c.telefon}<Phone class="w-3 h-3" />{/if}
               </div>

@@ -52,7 +52,7 @@
 </script>
 
 <div class="px-4 py-4 md:px-6 md:py-6 max-w-[1400px] mx-auto overflow-x-hidden">
-  <a href="/companies" class="inline-flex items-center gap-1.5 text-sm text-ink/50 hover:text-ink transition-colors mb-6">
+  <a href="/companies" class="inline-flex items-center gap-1.5 text-sm text-ink-soft hover:text-ink transition-colors mb-6">
     <ArrowLeft class="w-4 h-4" />
     Alle Firmen
   </a>
@@ -71,48 +71,48 @@
       >
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           <div class="sm:col-span-2">
-            <label class="block text-xs font-medium text-ink/60 mb-1">Name *</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1">Name *</label>
             <input name="name" type="text" bind:value={editName} required
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1">Website</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1">Website</label>
             <input name="website" type="text" bind:value={editWebsite}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="https://…" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1">Telefon</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1">Telefon</label>
             <input name="telefon" type="tel" bind:value={editTelefon}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="+43 1 234567" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1">Straße</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1">Straße</label>
             <input name="strasse" type="text" bind:value={editStrasse}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="Musterstraße 1" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1">PLZ</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1">PLZ</label>
             <input name="plz" type="text" bind:value={editPlz}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="1010" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1">Ort</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1">Ort</label>
             <input name="ort" type="text" bind:value={editOrt}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="Wien" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-ink/60 mb-1">Land</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1">Land</label>
             <input name="land" type="text" bind:value={editLand}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="Österreich" />
           </div>
           <div class="sm:col-span-2">
-            <label class="block text-xs font-medium text-ink/60 mb-1">Notizen</label>
+            <label class="block text-xs font-medium text-ink-soft mb-1">Notizen</label>
             <textarea name="notizen" rows="2" bind:value={editNotizen}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta resize-none"
               placeholder="Interne Notizen…"></textarea>
@@ -122,7 +122,7 @@
           <button type="submit" class="flex items-center gap-1.5 px-3 py-1.5 bg-terracotta text-white rounded-lg text-sm font-medium hover:bg-terracotta/90 transition-colors">
             <Check class="w-3.5 h-3.5" /> Speichern
           </button>
-          <button type="button" onclick={() => editing = false} class="flex items-center gap-1.5 px-3 py-1.5 border border-line rounded-lg text-sm text-ink/60 hover:bg-cream transition-colors">
+          <button type="button" onclick={() => editing = false} class="flex items-center gap-1.5 px-3 py-1.5 border border-line rounded-lg text-sm text-ink-soft hover:bg-cream transition-colors">
             <X class="w-3.5 h-3.5" /> Abbrechen
           </button>
         </div>
@@ -134,11 +134,11 @@
         </div>
         <div class="min-w-0">
           <h1 class="font-display font-bold text-xl text-ink">{data.company.name}</h1>
-          <span class="flex items-center gap-1 text-sm text-ink/50 mt-1">
+          <span class="flex items-center gap-1 text-sm text-ink-soft mt-1">
             <Users class="w-3.5 h-3.5" />
             {data.contacts.length} Kontakt{data.contacts.length !== 1 ? 'e' : ''}
             {#if data.timeline.length > 0}
-              <span class="text-ink/25">·</span>
+              <span class="text-ink-soft">·</span>
               <MessagesSquare class="w-3.5 h-3.5" />
               {data.timeline.length} Eintrag{data.timeline.length !== 1 ? 'e' : ''}
             {/if}
@@ -149,7 +149,7 @@
       <!-- Firmendetails — immer sichtbar -->
       <div class="mt-5 pt-5 border-t border-line grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <p class="text-xs font-medium text-ink/40 uppercase tracking-wide">Website</p>
+          <p class="text-xs font-medium text-ink-soft uppercase tracking-wide">Website</p>
           {#if data.company.website}
             <a href={data.company.website} target="_blank" rel="noopener"
               class="flex items-center gap-1 text-sm text-terracotta hover:underline mt-0.5">
@@ -157,11 +157,11 @@
               {websiteLabel(data.company.website)}
             </a>
           {:else}
-            <p class="text-sm text-ink/30 mt-0.5">—</p>
+            <p class="text-sm text-ink-soft mt-0.5">—</p>
           {/if}
         </div>
         <div>
-          <p class="text-xs font-medium text-ink/40 uppercase tracking-wide">Telefon</p>
+          <p class="text-xs font-medium text-ink-soft uppercase tracking-wide">Telefon</p>
           {#if data.company.telefon}
             <a href="tel:{data.company.telefon}"
               class="flex items-center gap-1 text-sm text-terracotta hover:underline mt-0.5">
@@ -169,11 +169,11 @@
               {data.company.telefon}
             </a>
           {:else}
-            <p class="text-sm text-ink/30 mt-0.5">—</p>
+            <p class="text-sm text-ink-soft mt-0.5">—</p>
           {/if}
         </div>
         <div>
-          <p class="text-xs font-medium text-ink/40 uppercase tracking-wide">Adresse</p>
+          <p class="text-xs font-medium text-ink-soft uppercase tracking-wide">Adresse</p>
           {#if data.company.strasse || data.company.ort}
             <p class="text-sm text-ink mt-0.5">{data.company.strasse ?? ''}</p>
             <p class="text-sm text-ink">{[data.company.plz, data.company.ort, data.company.land].filter(Boolean).join(' ')}</p>
@@ -183,11 +183,11 @@
               </a>
             {/if}
           {:else}
-            <p class="text-sm text-ink/30 mt-0.5">—</p>
+            <p class="text-sm text-ink-soft mt-0.5">—</p>
           {/if}
         </div>
         <div class="sm:col-span-2">
-          <p class="text-xs font-medium text-ink/40 uppercase tracking-wide">Notizen</p>
+          <p class="text-xs font-medium text-ink-soft uppercase tracking-wide">Notizen</p>
           <p class="text-sm text-ink/70 mt-0.5 whitespace-pre-wrap">{data.company.notizen || '—'}</p>
         </div>
       </div>
@@ -195,7 +195,7 @@
       <div class="mt-4">
         <button
           onclick={startEdit}
-          class="flex items-center gap-1.5 px-3 py-1.5 border border-line text-ink/60 rounded-lg text-sm hover:bg-cream hover:text-terracotta transition-colors"
+          class="flex items-center gap-1.5 px-3 py-1.5 border border-line text-ink-soft rounded-lg text-sm hover:bg-cream hover:text-terracotta transition-colors"
         >
           <Pencil class="w-3.5 h-3.5" /> Angaben bearbeiten
         </button>
@@ -211,7 +211,7 @@
     ] as [tab, label]}
       <button
         onclick={() => activeTab = tab as typeof activeTab}
-        class="px-3 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap {activeTab === tab ? 'bg-terracotta text-white font-medium' : 'text-ink/60 hover:text-ink hover:bg-cream'}"
+        class="px-3 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap {activeTab === tab ? 'bg-terracotta text-white font-medium' : 'text-ink-soft hover:text-ink hover:bg-cream'}"
       >
         {label}
       </button>
@@ -238,8 +238,8 @@
       {#if data.timeline.length === 0}
         <div class="py-16 text-center">
           <MessagesSquare class="w-8 h-8 text-ink/15 mx-auto mb-2" />
-          <p class="text-sm text-ink/40">Noch keine Einträge in der Timeline</p>
-          <p class="text-xs text-ink/30 mt-1">Service-Anrufe, Notizen, Mails — ohne Dummy-Kontakt</p>
+          <p class="text-sm text-ink-soft">Noch keine Einträge in der Timeline</p>
+          <p class="text-xs text-ink-soft mt-1">Service-Anrufe, Notizen, Mails — ohne Dummy-Kontakt</p>
         </div>
       {:else}
         <div class="px-5 py-2 divide-y divide-line">
@@ -264,7 +264,7 @@
       {#if data.contacts.length === 0}
         <div class="py-12 text-center">
           <User class="w-8 h-8 text-ink/15 mx-auto mb-2" />
-          <p class="text-sm text-ink/40">Noch keine Kontakte zugeordnet</p>
+          <p class="text-sm text-ink-soft">Noch keine Kontakte zugeordnet</p>
         </div>
       {:else}
         <div class="divide-y divide-line">
@@ -282,15 +282,15 @@
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-ink truncate">{contact.name}</p>
                 {#if contact.rolle}
-                  <p class="text-xs text-ink/50 truncate">{contact.rolle}</p>
+                  <p class="text-xs text-ink-soft truncate">{contact.rolle}</p>
                 {/if}
               </div>
               <div class="flex items-center gap-2 flex-shrink-0">
                 {#if contact.email}
-                  <span class="text-ink/30" title={contact.email}><Mail class="w-3.5 h-3.5" /></span>
+                  <span class="text-ink-soft" title={contact.email}><Mail class="w-3.5 h-3.5" /></span>
                 {/if}
                 {#if contact.telefon}
-                  <span class="text-ink/30" title={contact.telefon}><Phone class="w-3.5 h-3.5" /></span>
+                  <span class="text-ink-soft" title={contact.telefon}><Phone class="w-3.5 h-3.5" /></span>
                 {/if}
               </div>
             </a>

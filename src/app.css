@@ -4,6 +4,7 @@
   --color-cream:          var(--background);
   --color-surface:        var(--card);
   --color-ink:            var(--foreground);
+  --color-ink-soft:       var(--foreground-dim);
   --color-terracotta:     var(--primary);
   --color-terracotta-200: var(--primary-dark);
   --color-sage:           var(--accent-sand);
@@ -95,7 +96,7 @@
   --card-hover: #f5f6f8;
   --card-foreground: #333333;
   --foreground: #333333;
-  --foreground-dim: #667088;
+  --foreground-dim: #616b83;
   --primary: #7c9cff;
   --primary-dark: #5b7cff;
   --accent-sand: #99a3c2;

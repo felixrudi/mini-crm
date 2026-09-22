@@ -164,7 +164,7 @@
   </div>
 {:else if errorMsg || !contact}
   <div class="px-5 py-16 text-center">
-    <p class="text-sm text-ink/50">{errorMsg || 'Nicht gefunden'}</p>
+    <p class="text-sm text-ink-soft">{errorMsg || 'Nicht gefunden'}</p>
   </div>
 {:else}
   <div class="px-4 py-4 space-y-4">
@@ -187,10 +187,10 @@
       </button>
       <div class="min-w-0 flex-1">
         <h2 class="font-display font-bold text-lg text-ink truncate">{contact.name}</h2>
-        <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-sm text-ink/55">
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-sm text-ink-soft">
           {#if contact.rolle}<span>{contact.rolle}</span>{/if}
           {#if contact.company_name}
-            {#if contact.rolle}<span class="text-ink/25">·</span>{/if}
+            {#if contact.rolle}<span class="text-ink-soft">·</span>{/if}
             <button
               type="button"
               class="inline-flex items-center gap-1 text-terracotta hover:underline"
@@ -202,10 +202,10 @@
         </div>
       </div>
       <div class="flex items-center gap-1 flex-shrink-0">
-        <a href="/contacts/{contact.id}/vcard" class="p-1.5 text-ink/40 hover:text-terracotta border border-line rounded-lg" title="vCard">
+        <a href="/contacts/{contact.id}/vcard" class="p-1.5 text-ink-soft hover:text-terracotta border border-line rounded-lg" title="vCard">
           <Download class="w-3.5 h-3.5" />
         </a>
-        <button type="button" onclick={() => (showEditContact = true)} class="p-1.5 text-ink/40 hover:text-terracotta border border-line rounded-lg" title="Bearbeiten">
+        <button type="button" onclick={() => (showEditContact = true)} class="p-1.5 text-ink-soft hover:text-terracotta border border-line rounded-lg" title="Bearbeiten">
           <Pencil class="w-3.5 h-3.5" />
         </button>
       </div>
@@ -217,7 +217,7 @@
         <a href="mailto:{contact.email}" class="inline-flex items-center gap-1 text-xs text-terracotta hover:underline"><Mail class="w-3 h-3" /> {contact.email}</a>
       {/if}
       {#if contact.telefon}
-        <a href="tel:{contact.telefon}" class="inline-flex items-center gap-1 text-xs text-ink/60 hover:text-terracotta"><Phone class="w-3 h-3" /> {contact.telefon}</a>
+        <a href="tel:{contact.telefon}" class="inline-flex items-center gap-1 text-xs text-ink-soft hover:text-terracotta"><Phone class="w-3 h-3" /> {contact.telefon}</a>
       {/if}
       {#if contact.whatsapp}
         <a href="https://wa.me/{contact.whatsapp.replace(/[\s\-\+]/g, '')}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-xs text-green-600"><MessageCircle class="w-3 h-3" /> WhatsApp</a>
@@ -231,23 +231,23 @@
     </div>
 
     {#if contact.strasse || contact.ort || contact.geburtstag || contact.tags?.length || contact.notizen}
-      <div class="space-y-1.5 text-sm text-ink/55 border-t border-line pt-3">
+      <div class="space-y-1.5 text-sm text-ink-soft border-t border-line pt-3">
         {#if contact.strasse || contact.ort}
           {@const karte = karteUrl(contact)}
           {#if karte}
             <a href={karte} target="_blank" rel="noopener" class="flex items-start gap-1.5 hover:text-terracotta hover:underline">
-              <MapPin class="w-3.5 h-3.5 mt-0.5 text-ink/30 flex-shrink-0" />
+              <MapPin class="w-3.5 h-3.5 mt-0.5 text-ink-soft flex-shrink-0" />
               {adresseText(contact)}
             </a>
           {:else}
             <div class="flex items-start gap-1.5">
-              <MapPin class="w-3.5 h-3.5 mt-0.5 text-ink/30" />
+              <MapPin class="w-3.5 h-3.5 mt-0.5 text-ink-soft" />
               {adresseText(contact)}
             </div>
           {/if}
         {/if}
         {#if contact.geburtstag}
-          <div class="flex items-center gap-1.5"><CalendarDays class="w-3.5 h-3.5 text-ink/30" /> {formatDate(contact.geburtstag)}</div>
+          <div class="flex items-center gap-1.5"><CalendarDays class="w-3.5 h-3.5 text-ink-soft" /> {formatDate(contact.geburtstag)}</div>
         {/if}
         {#if contact.tags?.length}
           <div class="flex flex-wrap gap-1">
@@ -257,7 +257,7 @@
           </div>
         {/if}
         {#if contact.notizen}
-          <p class="text-xs text-ink/50 whitespace-pre-wrap leading-relaxed">{contact.notizen}</p>
+          <p class="text-xs text-ink-soft whitespace-pre-wrap leading-relaxed">{contact.notizen}</p>
         {/if}
       </div>
     {/if}
@@ -268,7 +268,7 @@
         <button
           type="button"
           onclick={() => (activeTab = tab as typeof activeTab)}
-          class="flex-1 px-2 py-1.5 text-xs rounded-md transition-colors {activeTab === tab ? 'bg-terracotta text-white font-medium' : 'text-ink/60 hover:text-ink'}"
+          class="flex-1 px-2 py-1.5 text-xs rounded-md transition-colors {activeTab === tab ? 'bg-terracotta text-white font-medium' : 'text-ink-soft hover:text-ink'}"
         >{label}</button>
       {/each}
     </div>
@@ -285,7 +285,7 @@
       <div class="bg-cream/40 rounded-xl border border-line">
         {#if timeline.length === 0}
           <div class="py-10 text-center">
-            <p class="text-xs text-ink/40">Noch keine Einträge</p>
+            <p class="text-xs text-ink-soft">Noch keine Einträge</p>
           </div>
         {:else}
           <div class="px-3 py-1 divide-y divide-line">
@@ -314,13 +314,13 @@
           ] as [label, value]}
             {#if value}
               <div class="min-w-0">
-                <dt class="text-[10px] font-medium text-ink/40 uppercase tracking-wide">{label}</dt>
+                <dt class="text-[10px] font-medium text-ink-soft uppercase tracking-wide">{label}</dt>
                 <dd class="text-sm text-ink mt-0.5 break-all">{value}</dd>
               </div>
             {/if}
           {/each}
         </dl>
-        <button type="button" onclick={() => (showEditContact = true)} class="flex items-center gap-1.5 px-2.5 py-1.5 border border-line rounded-lg text-xs text-ink/60 hover:bg-cream">
+        <button type="button" onclick={() => (showEditContact = true)} class="flex items-center gap-1.5 px-2.5 py-1.5 border border-line rounded-lg text-xs text-ink-soft hover:bg-cream">
           <Pencil class="w-3 h-3" /> Bearbeiten
         </button>
       </div>
@@ -328,7 +328,7 @@
     {:else}
       <input bind:this={fileInputEl} type="file" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt" class="hidden" onchange={uploadFile} />
       <div class="flex items-center justify-between">
-        <p class="text-xs text-ink/45">{files.length} Datei{files.length === 1 ? '' : 'en'}</p>
+        <p class="text-xs text-ink-soft">{files.length} Datei{files.length === 1 ? '' : 'en'}</p>
         <button type="button" onclick={() => fileInputEl.click()} disabled={filesUploading} class="flex items-center gap-1 px-2.5 py-1.5 bg-terracotta text-white rounded-lg text-xs font-medium disabled:opacity-50">
           {#if filesUploading}<Loader class="w-3 h-3 animate-spin" />{:else}<Paperclip class="w-3 h-3" />{/if}
           Hinzufügen
@@ -337,7 +337,7 @@
       {#if files.length === 0}
         <div class="py-10 text-center border border-line rounded-xl">
           <Paperclip class="w-6 h-6 text-ink/15 mx-auto mb-1" />
-          <p class="text-xs text-ink/40">Keine Dateien</p>
+          <p class="text-xs text-ink-soft">Keine Dateien</p>
         </div>
       {:else}
         <div class="space-y-2">
@@ -348,10 +348,10 @@
                   <img src={f.data} alt="" class="w-full h-full object-cover" />
                 </button>
               {:else}
-                <FileText class="w-4 h-4 text-ink/30 flex-shrink-0" />
+                <FileText class="w-4 h-4 text-ink-soft flex-shrink-0" />
               {/if}
               <span class="text-xs text-ink truncate flex-1">{f.filename}</span>
-              <button type="button" onclick={() => deleteFile(f.id)} class="p-1 text-ink/30 hover:text-red-500"><X class="w-3.5 h-3.5" /></button>
+              <button type="button" onclick={() => deleteFile(f.id)} class="p-1 text-ink-soft hover:text-red-500"><X class="w-3.5 h-3.5" /></button>
             </div>
           {/each}
         </div>

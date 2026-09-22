@@ -29,7 +29,7 @@
     class="flex-shrink-0 mt-0.5"
   >
     <input type="hidden" name="id" value={action.id} />
-    <button type="submit" class="text-ink/30 hover:text-terracotta transition-colors">
+    <button type="submit" class="text-ink-soft hover:text-terracotta transition-colors">
       {#if action.status === 'erledigt'}
         <CheckCircle2 class="w-5 h-5 text-sage" />
       {:else}
@@ -38,10 +38,10 @@
     </button>
   </form>
   <div class="flex-1 min-w-0">
-    <p class="text-sm font-medium {action.status === 'erledigt' ? 'line-through text-ink/40' : 'text-ink'}">{action.titel}</p>
+    <p class="text-sm font-medium {action.status === 'erledigt' ? 'line-through text-ink-soft' : 'text-ink'}">{action.titel}</p>
     <div class="flex flex-wrap gap-3 mt-0.5">
       {#if action.faellig_am}
-        <span class="flex items-center gap-1 text-xs {overdue ? 'text-red-500 font-medium' : 'text-ink/50'}">
+        <span class="flex items-center gap-1 text-xs {overdue ? 'text-red-500 font-medium' : 'text-ink-soft'}">
           <CalendarClock class="w-3 h-3" />
           {formatDate(action.faellig_am)}
           {#if overdue}<span>(überfällig)</span>{/if}
@@ -55,7 +55,7 @@
       {/if}
     </div>
     {#if action.notizen}
-      <p class="text-xs text-ink/50 mt-1">{action.notizen}</p>
+      <p class="text-xs text-ink-soft mt-1">{action.notizen}</p>
     {/if}
   </div>
 </div>
