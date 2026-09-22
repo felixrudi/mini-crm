@@ -1,5 +1,6 @@
 import { listRecords, createRecord, updateRecord, deleteRecord, linkId } from '$lib/server/teable';
 import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS } from '$lib/server/teable-schema';
+import { findFirmaId } from '$lib/firma-match';
 import { mapContact } from '$lib/server/teable-map';
 import { matchesContactFilters, sortContacts } from '$lib/server/contact-filters';
 import type { TagMode, SortKey } from '$lib/server/contact-filters';
@@ -97,7 +98,19 @@ function parseTags(d: FormData): string[] {
   return raw.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean);
 }
 
-function extractContactFields(d: FormData) {
+async function resolveCompanyId(d: FormData): Promise<string | null> {
+  const direct = d.get('company_id') as string | null;
+  if (direct) return direct;
+  const name = ((d.get('firma_name') as string) || '').trim();
+  if (!name) return null;
+  const companies = await listRecords(TABLES.firmen);
+  const hit = findFirmaId(companies, FIRMEN_FIELDS.name, name);
+  if (hit) return hit;
+  const created = await createRecord(TABLES.firmen, { [FIRMEN_FIELDS.name]: name });
+  return created.id;
+}
+
+function extractContactFields(d: FormData, companyId: string | null) {
   const name = (d.get('name') as string)?.trim() || 'Unbekannt';
   return {
     [KONTAKTE_FIELDS.name]: name,
@@ -109,7 +122,7 @@ function extractContactFields(d: FormData) {
     [KONTAKTE_FIELDS.plz]: d.get('plz') || null,
     [KONTAKTE_FIELDS.ort]: d.get('ort') || null,
     [KONTAKTE_FIELDS.geburtstag]: d.get('geburtstag') || null,
-    [KONTAKTE_FIELDS.firma]: d.get('company_id') ? [{ id: d.get('company_id') as string }] : null,
+    [KONTAKTE_FIELDS.firma]: companyId ? [{ id: companyId }] : null,
     [KONTAKTE_FIELDS.rolle]: d.get('rolle') || null,
     [KONTAKTE_FIELDS.email]: d.get('email') || null,
     [KONTAKTE_FIELDS.telefon]: d.get('telefon') || null,
@@ -126,13 +139,14 @@ function extractContactFields(d: FormData) {
 export const actions: Actions = {
   create: async ({ request }) => {
     const d = await request.formData();
-    const rec = await createRecord(TABLES.kontakteReal, extractContactFields(d));
+    const companyId = await resolveCompanyId(d);
+    const rec = await createRecord(TABLES.kontakteReal, extractContactFields(d, companyId));
     return { success: true, id: rec.id };
   },
   update: async ({ request }) => {
     const d = await request.formData();
     const id = d.get('id') as string;
-    await updateRecord(TABLES.kontakteReal, id, extractContactFields(d));
+    await updateRecord(TABLES.kontakteReal, id, extractContactFields(d, (d.get('company_id') as string) || null));
     return { success: true };
   },
   delete: async ({ request }) => {
