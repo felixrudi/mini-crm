@@ -244,13 +244,15 @@
     <td class="px-3 py-2 hidden lg:table-cell">
       <span class="text-xs text-ink-soft">{formatDate(contact.last_activity)}</span>
     </td>
+    <td class="px-3 py-2 text-right">
+      {#if contact.telefon}
+        <a href="tel:{contact.telefon}" title={contact.telefon} class="inline-flex items-center justify-center w-7 h-7 rounded-full text-terracotta hover:bg-cream transition-colors">
+          <Phone class="w-3.5 h-3.5" />
+        </a>
+      {/if}
+    </td>
     <td class="px-3 py-2">
       <div class="flex items-center justify-end gap-1.5">
-        {#if contact.telefon}
-          <a href="tel:{contact.telefon}" class="px-2 py-1 border border-line rounded text-xs font-mono font-bold text-terracotta hover:bg-cream transition-colors whitespace-nowrap">
-            📞 {contact.telefon}
-          </a>
-        {/if}
         <button onclick={() => { editContact = contact; showForm = true; }} class="p-1.5 text-ink-soft hover:text-terracotta transition-colors rounded" title="Bearbeiten">
           <Pencil class="w-3.5 h-3.5" />
         </button>
@@ -431,7 +433,8 @@
                 <th class="text-left text-xs font-medium text-ink-soft px-3 py-2 hidden md:table-cell w-[22%]">Rolle</th>
                 <th class="text-left text-xs font-medium text-ink-soft px-3 py-2 hidden lg:table-cell w-[18%]">Tags</th>
                 <th class="text-left text-xs font-medium text-ink-soft px-3 py-2 hidden lg:table-cell">Letzte Info / Kontakt</th>
-                <th class="px-3 py-2 text-right text-xs font-medium text-ink-soft w-[76px]">Aktion</th>
+                <th class="px-3 py-2 text-right text-xs font-medium text-ink-soft w-11"><span class="sr-only">Telefon</span></th>
+                <th class="px-3 py-2 text-right text-xs font-medium text-ink-soft w-16">Aktion</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-line">
