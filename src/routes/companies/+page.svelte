@@ -8,6 +8,7 @@
   import { openCompany } from '$lib/detail-panel';
   import type { Company, ViewFilter } from '$lib/types';
   import { groupByTags, tagColor, DEFAULT_TAGS_EXCLUDE } from '$lib/tags';
+  import { activeFilterCount } from '$lib/filter-count';
   import TagInput from '$lib/components/TagInput.svelte';
   import ViewTabs from '$lib/components/ViewTabs.svelte';
   import EditableTagChip from '$lib/components/EditableTagChip.svelte';
@@ -77,6 +78,9 @@
       excludedTags.length !== DEFAULT_TAGS_EXCLUDE.length ||
       DEFAULT_TAGS_EXCLUDE.some((t) => !excludedTags.includes(t))
   );
+
+  let filterCount = $derived(activeFilterCount({ tags: selectedTags, tagsExclude: excludedTags, ort, group }));
+  let filterOpen = $state(activeFilterCount({ tags: selectedTags, tagsExclude: excludedTags, ort, group }) > 0);
 
   // Eingeklappte Gruppen (nur clientseitig, kein Teable-Persist nötig).
   let collapsedGroups = $state<Set<string>>(new Set());
@@ -275,77 +279,92 @@
 
     <!-- Filterleiste -->
     <div class="bg-surface rounded-xl border border-line p-3 mb-3">
-      <div class="mb-2">
-        <p class="text-[11px] font-bold text-ink-soft uppercase tracking-wide mb-1">🔍 Live-Suche</p>
-        <div class="relative max-w-sm">
-          <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-soft" />
-          <input type="text" bind:value={searchValue} oninput={handleCrmSearch}
-            placeholder="Name, Website, Telefon, Notiz, Kontakt…"
-            class="w-full pl-8 pr-3 py-1 bg-cream border border-line rounded-lg text-xs text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+      <div class="flex items-start gap-3">
+        <div class="flex-1 max-w-sm">
+          <p class="text-[11px] font-bold text-ink-soft uppercase tracking-wide mb-1">🔍 Live-Suche</p>
+          <div class="relative">
+            <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-soft" />
+            <input type="text" bind:value={searchValue} oninput={handleCrmSearch}
+              placeholder="Name, Website, Telefon, Notiz, Kontakt…"
+              class="w-full pl-8 pr-3 py-1 bg-cream border border-line rounded-lg text-xs text-ink placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta" />
+          </div>
         </div>
+        <button type="button" onclick={() => (filterOpen = !filterOpen)}
+          class="flex items-center gap-1 px-2.5 py-1.5 mt-4 border border-line rounded-lg text-xs text-ink-soft hover:text-ink hover:border-ink/30 transition-colors">
+          Filter
+          {#if filterCount > 0}
+            <span class="px-1.5 py-0.5 rounded-full bg-terracotta text-white text-[10px] font-bold">{filterCount}</span>
+          {/if}
+          <ChevronDown class="w-3.5 h-3.5 transition-transform {filterOpen ? 'rotate-180' : ''}" />
+        </button>
       </div>
-      {#if data.allTags.length > 0}
-        <p class="text-[11px] font-bold text-ink-soft uppercase tracking-wide mb-1">🏷 Tags</p>
-        <div class="flex flex-wrap gap-1">
-          {#each data.allTags as tag}
-            <EditableTagChip
-              tag={tag}
-              active={selectedTags.includes(tag)}
-              activeClass={tagColor(tag) + ' ring-2 ring-offset-1 ring-terracotta/40'}
-              inactiveClass="bg-cream text-ink-soft border-line hover:border-ink/30"
-              onToggle={() => toggleTag(tag)}
-              onRename={(newTag) => renameTag(tag, newTag)}
-            />
-          {/each}
-        </div>
-        <p class="text-[11px] font-bold text-red-400/70 uppercase tracking-wide mb-1 mt-1.5">🚫 Tags ausschließen</p>
-        <div class="flex flex-wrap gap-1">
-          {#each data.allTags as tag}
-            <EditableTagChip
-              tag={tag}
-              active={excludedTags.includes(tag)}
-              activeClass="bg-red-50 text-red-600 border-red-300 ring-2 ring-offset-1 ring-red-300/50"
-              inactiveClass="bg-cream text-ink-soft border-line hover:border-red-300/50"
-              onToggle={() => toggleExcludeTag(tag)}
-              onRename={(newTag) => renameTag(tag, newTag)}
-            />
-          {/each}
+
+      {#if filterOpen}
+        <div class="mt-3 pt-3 border-t border-line">
+          {#if data.allTags.length > 0}
+            <p class="text-[11px] font-bold text-ink-soft uppercase tracking-wide mb-1">🏷 Tags</p>
+            <div class="flex flex-wrap gap-1">
+              {#each data.allTags as tag}
+                <EditableTagChip
+                  tag={tag}
+                  active={selectedTags.includes(tag)}
+                  activeClass={tagColor(tag) + ' ring-2 ring-offset-1 ring-terracotta/40'}
+                  inactiveClass="bg-cream text-ink-soft border-line hover:border-ink/30"
+                  onToggle={() => toggleTag(tag)}
+                  onRename={(newTag) => renameTag(tag, newTag)}
+                />
+              {/each}
+            </div>
+            <p class="text-[11px] font-bold text-red-400/70 uppercase tracking-wide mb-1 mt-1.5">🚫 Tags ausschließen</p>
+            <div class="flex flex-wrap gap-1">
+              {#each data.allTags as tag}
+                <EditableTagChip
+                  tag={tag}
+                  active={excludedTags.includes(tag)}
+                  activeClass="bg-red-50 text-red-600 border-red-300 ring-2 ring-offset-1 ring-red-300/50"
+                  inactiveClass="bg-cream text-ink-soft border-line hover:border-red-300/50"
+                  onToggle={() => toggleExcludeTag(tag)}
+                  onRename={(newTag) => renameTag(tag, newTag)}
+                />
+              {/each}
+            </div>
+          {/if}
+
+          <!-- Sortierung/Gruppierung/Ort — dünne, immer sichtbare Zeile -->
+          <div class="mt-2 pt-2 border-t border-line flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+            <label class="flex items-center gap-1 text-ink-soft">
+              Sortieren
+              <select value={sortBy} onchange={(e) => setSort((e.currentTarget as HTMLSelectElement).value as 'name' | 'contacts' | 'tags')}
+                class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
+                <option value="name">Name (A-Z)</option>
+                <option value="contacts">Anzahl Kontakte</option>
+                <option value="tags">Anzahl Tags</option>
+              </select>
+            </label>
+            <label class="flex items-center gap-1 text-ink-soft">
+              Gruppieren
+              <select value={group} onchange={(e) => setGroup((e.currentTarget as HTMLSelectElement).value as '' | 'tags')}
+                class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
+                <option value="">Keine</option>
+                <option value="tags">Nach Tags</option>
+              </select>
+            </label>
+            {#if data.allOrte.length > 0}
+              <label class="flex items-center gap-1 text-ink-soft">
+                Ort
+                <select value={ort} onchange={(e) => setOrt((e.currentTarget as HTMLSelectElement).value)}
+                  class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
+                  <option value="">Alle</option>
+                  {#each data.allOrte as o}<option value={o}>{o}</option>{/each}
+                </select>
+              </label>
+            {/if}
+            {#if hasFilter}
+              <button onclick={clearFilter} class="text-ink-soft hover:text-terracotta transition-colors ml-auto">Filter löschen</button>
+            {/if}
+          </div>
         </div>
       {/if}
-
-      <!-- Sortierung/Gruppierung/Ort — dünne, immer sichtbare Zeile -->
-      <div class="mt-2 pt-2 border-t border-line flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-        <label class="flex items-center gap-1 text-ink-soft">
-          Sortieren
-          <select value={sortBy} onchange={(e) => setSort((e.currentTarget as HTMLSelectElement).value as 'name' | 'contacts' | 'tags')}
-            class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
-            <option value="name">Name (A-Z)</option>
-            <option value="contacts">Anzahl Kontakte</option>
-            <option value="tags">Anzahl Tags</option>
-          </select>
-        </label>
-        <label class="flex items-center gap-1 text-ink-soft">
-          Gruppieren
-          <select value={group} onchange={(e) => setGroup((e.currentTarget as HTMLSelectElement).value as '' | 'tags')}
-            class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
-            <option value="">Keine</option>
-            <option value="tags">Nach Tags</option>
-          </select>
-        </label>
-        {#if data.allOrte.length > 0}
-          <label class="flex items-center gap-1 text-ink-soft">
-            Ort
-            <select value={ort} onchange={(e) => setOrt((e.currentTarget as HTMLSelectElement).value)}
-              class="px-1.5 py-0.5 bg-cream border border-line rounded-md text-xs text-ink focus:outline-none focus:ring-1 focus:ring-terracotta/40">
-              <option value="">Alle</option>
-              {#each data.allOrte as o}<option value={o}>{o}</option>{/each}
-            </select>
-          </label>
-        {/if}
-        {#if hasFilter}
-          <button onclick={clearFilter} class="text-ink-soft hover:text-terracotta transition-colors ml-auto">Filter löschen</button>
-        {/if}
-      </div>
     </div>
 
     <!-- Create form -->
