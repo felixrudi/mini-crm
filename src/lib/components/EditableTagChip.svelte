@@ -111,9 +111,9 @@
       type="button"
       onclick={startEdit}
       title="Tag umbenennen"
-      class="absolute -right-1.5 -top-1.5 w-4 h-4 rounded-full bg-surface border border-line flex items-center justify-center opacity-0 pointer-events-none group-hover/chip:opacity-100 group-hover/chip:pointer-events-auto transition-opacity hover:border-terracotta hover:text-terracotta text-ink-soft"
+      class="absolute -right-2 -top-2 w-5 h-5 rounded-full bg-surface border border-line flex items-center justify-center opacity-70 hover:opacity-100 hover:border-terracotta hover:text-terracotta text-ink-soft transition-opacity"
     >
-      <Pencil class="w-2.5 h-2.5" />
+      <Pencil class="w-3 h-3" />
     </button>
   </div>
 {/if}

@@ -130,11 +130,11 @@
           {view.name}
         </button>
         <span class="hidden group-hover:flex items-center gap-0.5 absolute -right-1 -top-1 bg-surface rounded-full border border-line shadow-sm">
-          <button type="button" title="Umbenennen" onclick={() => { renaming = view.id; renameValue = view.name; }} class="p-0.5 text-ink-soft hover:text-terracotta">
-            <Pencil class="w-2.5 h-2.5" />
+          <button type="button" title="Umbenennen" onclick={() => { renaming = view.id; renameValue = view.name; }} class="p-1.5 text-ink-soft hover:text-terracotta transition-colors rounded">
+            <Pencil class="w-3.5 h-3.5" />
           </button>
-          <button type="button" title="Löschen" onclick={() => (deleteConfirm = view.id)} class="p-0.5 text-ink-soft hover:text-red-500">
-            <Trash2 class="w-2.5 h-2.5" />
+          <button type="button" title="Löschen" onclick={() => (deleteConfirm = view.id)} class="p-1.5 text-ink-soft hover:text-red-500 transition-colors rounded">
+            <Trash2 class="w-3.5 h-3.5" />
           </button>
         </span>
       </div>

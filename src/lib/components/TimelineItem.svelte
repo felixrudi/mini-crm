@@ -169,7 +169,7 @@
           <button
             type="button"
             onclick={startEdit}
-            class="p-1 text-ink-soft hover:text-terracotta transition-colors opacity-0 group-hover:opacity-100"
+            class="p-1 text-ink-soft hover:text-terracotta transition-colors opacity-60 hover:opacity-100"
             title="Bearbeiten"
           >
             <Pencil class="w-3.5 h-3.5" />
@@ -185,7 +185,7 @@
             onsubmit={(e) => { if (!confirm('Eintrag löschen?')) e.preventDefault(); }}
           >
             <input type="hidden" name="id" value={entry.eintrag_id} />
-            <button type="submit" class="p-1 text-ink-soft hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100" title="Löschen">
+            <button type="submit" class="p-1 text-ink-soft hover:text-red-500 transition-colors opacity-60 hover:opacity-100" title="Löschen">
               <Trash2 class="w-3.5 h-3.5" />
             </button>
           </form>
