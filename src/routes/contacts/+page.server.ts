@@ -5,7 +5,7 @@ import { mapContact } from '$lib/server/teable-map';
 import { matchesContactFilters, sortContacts } from '$lib/server/contact-filters';
 import type { TagMode, SortKey } from '$lib/server/contact-filters';
 import { listViews } from '$lib/server/views';
-import { renameTagBulk } from '$lib/server/tag-rename';
+import { renameTagBulk, removeTagBulk } from '$lib/server/tag-rename';
 import { isRecordId } from '$lib/server/validation';
 import { addArchivTag } from '$lib/server/archive';
 import { fail } from '@sveltejs/kit';
@@ -168,6 +168,13 @@ export const actions: Actions = {
     const newTag = ((d.get('newTag') as string) || '').trim().toLowerCase();
     if (!oldTag || !newTag) return fail(400, { error: 'Alter und neuer Tag-Name erforderlich' });
     const count = await renameTagBulk(TABLES.kontakteReal, KONTAKTE_FIELDS.tags, oldTag, newTag);
+    return { success: true, count };
+  },
+  delete_tag: async ({ request }) => {
+    const d = await request.formData();
+    const tag = ((d.get('tag') as string) || '').trim().toLowerCase();
+    if (!tag) return fail(400, { error: 'Tag-Name erforderlich' });
+    const count = await removeTagBulk(TABLES.kontakteReal, KONTAKTE_FIELDS.tags, tag);
     return { success: true, count };
   }
 };

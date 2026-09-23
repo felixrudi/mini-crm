@@ -3,7 +3,7 @@ import { TABLES, FIRMEN_FIELDS, KONTAKTE_FIELDS } from '$lib/server/teable-schem
 import { matchesCompanyFilters, sortCompanies } from '$lib/server/company-filters';
 import type { TagMode, CompanySortKey } from '$lib/server/company-filters';
 import { listViews } from '$lib/server/views';
-import { renameTagBulk } from '$lib/server/tag-rename';
+import { renameTagBulk, removeTagBulk } from '$lib/server/tag-rename';
 import { isRecordId } from '$lib/server/validation';
 import { addArchivTag } from '$lib/server/archive';
 import { fail } from '@sveltejs/kit';
@@ -161,6 +161,13 @@ export const actions: Actions = {
     const newTag = ((d.get('newTag') as string) || '').trim().toLowerCase();
     if (!oldTag || !newTag) return fail(400, { error: 'Alter und neuer Tag-Name erforderlich' });
     const count = await renameTagBulk(TABLES.firmen, FIRMEN_FIELDS.tags, oldTag, newTag);
+    return { success: true, count };
+  },
+  delete_tag: async ({ request }) => {
+    const d = await request.formData();
+    const tag = ((d.get('tag') as string) || '').trim().toLowerCase();
+    if (!tag) return fail(400, { error: 'Tag-Name erforderlich' });
+    const count = await removeTagBulk(TABLES.firmen, FIRMEN_FIELDS.tags, tag);
     return { success: true, count };
   }
 };

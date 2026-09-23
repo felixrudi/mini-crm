@@ -130,6 +130,23 @@
     }
   }
 
+  // Entfernt einen Tag komplett aus allen CRM-Firmen. War er gerade als
+  // Include- oder Exclude-Filter aktiv, wird er aus dem Filter-State entfernt.
+  async function deleteTag(tag: string) {
+    const fd = new FormData();
+    fd.append('tag', tag);
+    const res = await fetch('?/delete_tag', { method: 'POST', body: fd });
+    if (res.ok) {
+      toast.success(`Tag „${tag}" entfernt`);
+      selectedTags = selectedTags.filter((t) => t !== tag);
+      excludedTags = excludedTags.filter((t) => t !== tag);
+      updateUrl();
+    } else {
+      toast.error('Löschen fehlgeschlagen');
+      throw new Error('delete failed');
+    }
+  }
+
   function toggleTag(tag: string) {
     selectedTags = selectedTags.includes(tag) ? selectedTags.filter((t) => t !== tag) : [...selectedTags, tag];
     if (excludedTags.includes(tag)) excludedTags = excludedTags.filter((t) => t !== tag);
@@ -314,6 +331,7 @@
                   inactiveClass="bg-cream text-ink-soft border-line hover:border-ink/30"
                   onToggle={() => toggleTag(tag)}
                   onRename={(newTag) => renameTag(tag, newTag)}
+                  onDelete={(t) => deleteTag(t)}
                 />
               {/each}
             </div>
@@ -327,6 +345,7 @@
                   inactiveClass="bg-cream text-ink-soft border-line hover:border-red-300/50"
                   onToggle={() => toggleExcludeTag(tag)}
                   onRename={(newTag) => renameTag(tag, newTag)}
+                  onDelete={(t) => deleteTag(t)}
                 />
               {/each}
             </div>

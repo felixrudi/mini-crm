@@ -29,3 +29,21 @@ export async function renameTagBulk(
 
   return affected.length;
 }
+
+export async function removeTagBulk(tableId: string, tagsField: string, tagRaw: string): Promise<number> {
+  const tag = tagRaw.trim().toLowerCase();
+  if (!tag) return 0;
+
+  const recs = await listRecords(tableId);
+  const affected = recs.filter((r) => ((r.fields[tagsField] as string[] | undefined) ?? []).includes(tag));
+
+  await Promise.all(
+    affected.map((r) => {
+      const tags = (r.fields[tagsField] as string[] | undefined) ?? [];
+      const updated = tags.filter((t) => t !== tag);
+      return updateRecord(tableId, r.id, { [tagsField]: updated });
+    })
+  );
+
+  return affected.length;
+}

@@ -1,5 +1,6 @@
 <script lang="ts">
   import Pencil from '@lucide/svelte/icons/pencil';
+  import Trash2 from '@lucide/svelte/icons/trash-2';
 
   let {
     tag,
@@ -7,7 +8,8 @@
     activeClass,
     inactiveClass,
     onToggle,
-    onRename
+    onRename,
+    onDelete
   }: {
     tag: string;
     active: boolean;
@@ -15,9 +17,12 @@
     inactiveClass: string;
     onToggle: () => void;
     onRename: (newTag: string) => Promise<void>;
+    onDelete: (tag: string) => Promise<void>;
   } = $props();
 
   let editing = $state(false);
+  let confirmingDelete = $state(false);
+  let deleting = $state(false);
   // Wird bei jedem startEdit() frisch aus der aktuellen tag-Prop befüllt —
   // kein $state(tag) hier, das würde nur den Initialwert beim Erstmount
   // einfrieren (Svelte-Warnung state_referenced_locally).
@@ -61,9 +66,53 @@
       cancel();
     }
   }
+
+  function startDelete(e: MouseEvent) {
+    e.stopPropagation();
+    confirmingDelete = true;
+  }
+  function cancelDelete(e: MouseEvent) {
+    e.stopPropagation();
+    confirmingDelete = false;
+  }
+  async function confirmDelete(e: MouseEvent) {
+    e.stopPropagation();
+    if (deleting) return;
+    deleting = true;
+    try {
+      await onDelete(tag);
+      confirmingDelete = false;
+    } catch {
+      // Fehler-Toast kommt vom Aufrufer — Bestätigung offen lassen zum erneuten Versuch.
+    } finally {
+      deleting = false;
+    }
+  }
 </script>
 
-{#if editing}
+{#if confirmingDelete}
+  <div class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border border-red-300 bg-red-50 shadow-sm">
+    <span class="text-xs text-red-600">„{tag}" löschen?</span>
+    <button
+      type="button"
+      onclick={confirmDelete}
+      disabled={deleting}
+      title="Ja, löschen"
+      class="text-xs text-red-600 font-bold px-0.5 disabled:opacity-40"
+    >
+      Ja
+    </button>
+    <button
+      type="button"
+      onclick={cancelDelete}
+      disabled={deleting}
+      title="Abbrechen"
+      class="text-xs text-ink-soft px-0.5 disabled:opacity-40"
+    >
+      Nein
+    </button>
+  </div>
+{:else if editing}
   <div class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border border-terracotta/40 bg-surface shadow-sm">
     <input
       bind:this={inputEl}
@@ -107,13 +156,23 @@
     >
       {tag}
     </button>
-    <button
-      type="button"
-      onclick={startEdit}
-      title="Tag umbenennen"
-      class="absolute -right-2 -top-2 w-5 h-5 rounded-full bg-surface border border-line flex items-center justify-center opacity-70 hover:opacity-100 hover:border-terracotta hover:text-terracotta text-ink-soft transition-opacity"
-    >
-      <Pencil class="w-3 h-3" />
-    </button>
+    <span class="absolute -right-2 -top-2 flex items-center gap-0.5 rounded-full bg-surface border border-line shadow-sm opacity-70 hover:opacity-100 transition-opacity">
+      <button
+        type="button"
+        onclick={startEdit}
+        title="Tag umbenennen"
+        class="w-5 h-5 rounded-full flex items-center justify-center hover:text-terracotta text-ink-soft"
+      >
+        <Pencil class="w-3 h-3" />
+      </button>
+      <button
+        type="button"
+        onclick={startDelete}
+        title="Tag löschen"
+        class="w-5 h-5 rounded-full flex items-center justify-center hover:text-red-500 text-ink-soft"
+      >
+        <Trash2 class="w-3 h-3" />
+      </button>
+    </span>
   </div>
 {/if}
