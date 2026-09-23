@@ -41,6 +41,7 @@
 
   let editName = $state('');
   let editWebsite = $state('');
+  let editDomain = $state('');
   let editTelefon = $state('');
   let editStrasse = $state('');
   let editPlz = $state('');
@@ -85,6 +86,7 @@
     if (!company) return;
     editName = company.name;
     editWebsite = company.website ?? '';
+    editDomain = company.domain ?? '';
     editTelefon = company.telefon ?? '';
     editStrasse = company.strasse ?? '';
     editPlz = company.plz ?? '';
@@ -118,6 +120,7 @@
       >
         <input name="name" bind:value={editName} required placeholder="Name" class="w-full px-2.5 py-1.5 bg-cream border border-line rounded-lg text-sm" />
         <input name="website" bind:value={editWebsite} placeholder="Website" class="w-full px-2.5 py-1.5 bg-cream border border-line rounded-lg text-sm" />
+        <input name="domain" bind:value={editDomain} placeholder="Domain" class="w-full px-2.5 py-1.5 bg-cream border border-line rounded-lg text-sm" />
         <input name="telefon" bind:value={editTelefon} placeholder="Telefon" class="w-full px-2.5 py-1.5 bg-cream border border-line rounded-lg text-sm" />
         <input name="strasse" bind:value={editStrasse} placeholder="Straße" class="w-full px-2.5 py-1.5 bg-cream border border-line rounded-lg text-sm" />
         <div class="grid grid-cols-2 gap-2">
