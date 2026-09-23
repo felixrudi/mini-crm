@@ -268,7 +268,7 @@ export function contactMatchesEmail(
 - [ ] **Step 4: Test laufen lassen, sicherstellen dass er besteht**
 
 Run: `npm test 2>&1 | grep -A3 "contact-email-match"`
-Expected: alle 8 Assertions grün, `0 fail`.
+Expected: alle Assertions grün, `0 fail`. (Nachtrag nach Ausführung: es sind 7 `test()`-Blöcke mit 11 Assertions, nicht 8 — die Zahl 8 hier war eine falsche Vorab-Schätzung, siehe Ganzbranch-Review Minor #6.)
 
 - [ ] **Step 5: In die Route verdrahten**
 
@@ -492,7 +492,7 @@ Zusätzlich manuell im Browser prüfen: `https://crm.hirschfeld.at/companies` ve
 - [ ] **Step 1: Alle Tests**
 
 Run: `npm test`
-Expected: alle grün (94 vorherige + 8 contact-email-match neue = 102), Integrationstest weiterhin übersprungen, 0 fail.
+Expected: alle grün, Integrationstest weiterhin übersprungen, 0 fail. (Tatsächlicher Stand nach Ausführung: 94 vorherige + 7 contact-email-match neue = 101, davon 100 grün + 1 übersprungen.)
 
 - [ ] **Step 2: Build läuft durch**
 
