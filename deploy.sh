@@ -45,3 +45,29 @@ else
   echo "⚠ HTTP $STATUS — Logs prüfen:"
   ssh "$HETZNER" "docker logs ${APP_ID}-155625765478 2>&1 | tail -20"
 fi
+
+# 6. Kritische Env-Variablen im laufenden Container prüfen
+# deploy.sh baut/startet den Container direkt per SSH+docker, komplett an
+# Coolifys eigener Deploy-Pipeline vorbei. Env-Änderungen, die nur über die
+# Coolify-UI/API gesetzt werden, landen dadurch NIE in der echten Server-.env
+# (die der Container per env_file lädt) — sie bleiben in Coolifys Datenbank
+# stecken, ohne dass hier irgendwas fehlschlägt (Vorfall 23.09.2026: SESSION_SECRET
+# fehlte, Login gab 503, "/" antwortete trotzdem 302 und sah "gesund" aus).
+# Diese Prüfung macht genau das laut, statt es erst beim nächsten Login-Versuch
+# zu bemerken.
+echo "→ kritische Env-Variablen prüfen..."
+MISSING=$(ssh "$HETZNER" "docker exec ${APP_ID}-155625765478 sh -c '
+  for v in SESSION_SECRET CRM_PASSWORD CRM_API_KEY TEABLE_API_KEY; do
+    eval val=\\\$\$v
+    [ -z \"\$val\" ] && echo \$v
+  done
+  true
+'")
+if [ -n "$MISSING" ]; then
+  echo "⚠ Fehlende Env-Variable(n) im laufenden Container:"
+  echo "$MISSING" | sed 's/^/    /'
+  echo "  → vermutlich in Coolify gesetzt, aber nie in $COMPOSE_PATH's env_file (.env) gelandet."
+  echo "  → von Hand nachtragen: ssh $HETZNER \"nano \$(dirname $COMPOSE_PATH)/.env\" und neu starten."
+else
+  echo "✓ SESSION_SECRET, CRM_PASSWORD, CRM_API_KEY, TEABLE_API_KEY alle gesetzt"
+fi
