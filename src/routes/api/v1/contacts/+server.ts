@@ -1,14 +1,16 @@
 import { listRecords, createRecord, linkId } from '$lib/server/teable';
 import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS } from '$lib/server/teable-schema';
 import { checkApiAuth, jsonOk, jsonError } from '$lib/api-auth';
+import { contactMatchesEmail } from '$lib/contact-email-match';
 import type { RequestHandler } from './$types';
 
-// GET /api/v1/contacts?q=...&tag=...&limit=50
+// GET /api/v1/contacts?q=...&tag=...&email=...&limit=50
 export const GET: RequestHandler = async ({ request, url }) => {
   const denied = checkApiAuth(request);
   if (denied) return denied;
 
   const q = (url.searchParams.get('q') || '').toLowerCase();
+  const email = (url.searchParams.get('email') || '').trim();
   const tag = url.searchParams.get('tag') || '';
   const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 200);
 
@@ -19,7 +21,11 @@ export const GET: RequestHandler = async ({ request, url }) => {
   const firmaNameById = new Map(firmenRecs.map((f) => [f.id, f.fields[FIRMEN_FIELDS.name]]));
 
   let filtered = kontakteRecs;
-  if (q) {
+  if (email) {
+    // Exaktes Lookup hat Vorrang vor der Teilstring-Suche — für "Wer ist das?" (Emma Mail)
+    // ist ein einzelner Absender gemeint, kein unscharfer Treffer.
+    filtered = filtered.filter((r) => contactMatchesEmail(r.fields[KONTAKTE_FIELDS.email] as string | null, email));
+  } else if (q) {
     filtered = filtered.filter((r) => `${r.fields[KONTAKTE_FIELDS.name] ?? ''} ${r.fields[KONTAKTE_FIELDS.email] ?? ''}`.toLowerCase().includes(q));
   }
   if (tag) {
