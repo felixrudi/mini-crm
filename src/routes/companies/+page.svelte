@@ -297,6 +297,9 @@
           {/if}
           <ChevronDown class="w-3.5 h-3.5 transition-transform {filterOpen ? 'rotate-180' : ''}" />
         </button>
+        {#if hasFilter}
+          <button onclick={clearFilter} class="text-ink-soft hover:text-terracotta transition-colors ml-auto">Filter löschen</button>
+        {/if}
       </div>
 
       {#if filterOpen}
@@ -358,9 +361,6 @@
                   {#each data.allOrte as o}<option value={o}>{o}</option>{/each}
                 </select>
               </label>
-            {/if}
-            {#if hasFilter}
-              <button onclick={clearFilter} class="text-ink-soft hover:text-terracotta transition-colors ml-auto">Filter löschen</button>
             {/if}
           </div>
         </div>
