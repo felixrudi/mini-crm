@@ -433,8 +433,8 @@
                 <th class="text-left text-xs font-medium text-ink-soft px-3 py-2 hidden md:table-cell w-[22%]">Rolle</th>
                 <th class="text-left text-xs font-medium text-ink-soft px-3 py-2 hidden lg:table-cell w-[18%]">Tags</th>
                 <th class="text-left text-xs font-medium text-ink-soft px-3 py-2 hidden lg:table-cell">Letzte Info / Kontakt</th>
-                <th class="px-3 py-2 text-right text-xs font-medium text-ink-soft w-11"><span class="sr-only">Telefon</span></th>
-                <th class="px-3 py-2 text-right text-xs font-medium text-ink-soft w-16">Aktion</th>
+                <th class="px-3 py-2 text-right text-xs font-medium text-ink-soft w-14"><span class="sr-only">Telefon</span></th>
+                <th class="px-3 py-2 text-right text-xs font-medium text-ink-soft w-[76px]">Aktion</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-line">
