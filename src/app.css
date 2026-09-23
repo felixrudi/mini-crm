@@ -189,3 +189,22 @@ body {
 aside {
   transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1), padding 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease;
 }
+
+/*
+ * Aus TimelineItem.svelte verschoben (23.09.2026): das war der einzige Svelte-Komponenten-
+ * <style>-Block im ganzen Projekt, alle Regeln waren bereits :global() (also ohne echte
+ * Scoping-Kapselung) — Tailwind v4s Dev-Transform liefert für Svelte-Komponenten-Style-Module
+ * ein undefined statt CSS-Text zurück, was SvelteKits Dev-SSR mit "css is not a function"
+ * zum Absturz bringt (nur im Dev-Modus, Build/Preview waren nie betroffen). Als globales CSS
+ * verhält sich das identisch, ohne den Fehler.
+ */
+.md-body h1 { font-size: 1.25rem; font-weight: 700; color: #2c2416; margin: 1.25rem 0 0.5rem; }
+.md-body h2 { font-size: 1rem; font-weight: 600; color: #2c2416; margin: 1rem 0 0.4rem; border-bottom: 1px solid #e8e2d9; padding-bottom: 0.25rem; }
+.md-body h3 { font-size: 0.875rem; font-weight: 600; color: #2c2416; margin: 0.75rem 0 0.25rem; }
+.md-body p { font-size: 0.875rem; color: rgba(44,36,22,0.8); line-height: 1.6; margin: 0.5rem 0; }
+.md-body ul, .md-body ol { padding-left: 1.25rem; margin: 0.5rem 0; }
+.md-body li { font-size: 0.875rem; color: rgba(44,36,22,0.8); line-height: 1.6; margin: 0.2rem 0; }
+.md-body strong { font-weight: 600; color: #2c2416; }
+.md-body hr { border: none; border-top: 1px solid #e8e2d9; margin: 1rem 0; }
+.md-body blockquote { border-left: 3px solid #c17c5a; padding-left: 0.75rem; color: rgba(44,36,22,0.6); font-style: italic; margin: 0.75rem 0; }
+.md-body code { background: #f0ebe3; padding: 0.1rem 0.3rem; border-radius: 4px; font-size: 0.8rem; font-family: monospace; }

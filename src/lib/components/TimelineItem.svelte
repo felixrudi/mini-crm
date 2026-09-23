@@ -230,16 +230,3 @@
     </div>
   </div>
 {/if}
-
-<style>
-  .md-body :global(h1) { font-size: 1.25rem; font-weight: 700; color: #2c2416; margin: 1.25rem 0 0.5rem; }
-  .md-body :global(h2) { font-size: 1rem; font-weight: 600; color: #2c2416; margin: 1rem 0 0.4rem; border-bottom: 1px solid #e8e2d9; padding-bottom: 0.25rem; }
-  .md-body :global(h3) { font-size: 0.875rem; font-weight: 600; color: #2c2416; margin: 0.75rem 0 0.25rem; }
-  .md-body :global(p) { font-size: 0.875rem; color: rgba(44,36,22,0.8); line-height: 1.6; margin: 0.5rem 0; }
-  .md-body :global(ul), .md-body :global(ol) { padding-left: 1.25rem; margin: 0.5rem 0; }
-  .md-body :global(li) { font-size: 0.875rem; color: rgba(44,36,22,0.8); line-height: 1.6; margin: 0.2rem 0; }
-  .md-body :global(strong) { font-weight: 600; color: #2c2416; }
-  .md-body :global(hr) { border: none; border-top: 1px solid #e8e2d9; margin: 1rem 0; }
-  .md-body :global(blockquote) { border-left: 3px solid #c17c5a; padding-left: 0.75rem; color: rgba(44,36,22,0.6); font-style: italic; margin: 0.75rem 0; }
-  .md-body :global(code) { background: #f0ebe3; padding: 0.1rem 0.3rem; border-radius: 4px; font-size: 0.8rem; font-family: monospace; }
-</style>
