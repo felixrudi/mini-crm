@@ -242,3 +242,7 @@
   line-height: 1.1;
   color: inherit;
 }
+.modul-titel .tld {
+  font-weight: 500;
+  color: var(--dach-text-still);
+}
