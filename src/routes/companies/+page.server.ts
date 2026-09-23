@@ -1,4 +1,4 @@
-import { listRecords, createRecord, updateRecord, deleteRecord, getRecord, linkId } from '$lib/server/teable';
+import { listRecords, createRecord, updateRecord, getRecord, linkId } from '$lib/server/teable';
 import { TABLES, FIRMEN_FIELDS, KONTAKTE_FIELDS } from '$lib/server/teable-schema';
 import { matchesCompanyFilters, sortCompanies } from '$lib/server/company-filters';
 import type { TagMode, CompanySortKey } from '$lib/server/company-filters';
@@ -150,6 +150,7 @@ export const actions: Actions = {
     const id = d.get('id');
     if (!isRecordId(id)) return fail(400, { error: 'Ungültige ID' });
     const record = await getRecord<Record<string, unknown>>(TABLES.firmen, id);
+    if (!record) return fail(404, { error: 'Firma nicht gefunden' });
     const tags = addArchivTag(record?.fields[FIRMEN_FIELDS.tags]);
     await updateRecord(TABLES.firmen, id, { [FIRMEN_FIELDS.tags]: tags });
     return { success: true };

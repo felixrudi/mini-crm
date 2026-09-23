@@ -18,7 +18,6 @@
   import Pencil from '@lucide/svelte/icons/pencil';
   import Check from '@lucide/svelte/icons/check';
   import X from '@lucide/svelte/icons/x';
-  import Trash2 from '@lucide/svelte/icons/trash-2';
   import Archive from '@lucide/svelte/icons/archive';
   import Users from '@lucide/svelte/icons/users';
   import Phone from '@lucide/svelte/icons/phone';
@@ -298,7 +297,7 @@
           <ChevronDown class="w-3.5 h-3.5 transition-transform {filterOpen ? 'rotate-180' : ''}" />
         </button>
         {#if hasFilter}
-          <button onclick={clearFilter} class="text-ink-soft hover:text-terracotta transition-colors ml-auto">Filter löschen</button>
+          <button onclick={clearFilter} class="text-ink-soft hover:text-terracotta transition-colors ml-auto mt-4">Filter löschen</button>
         {/if}
       </div>
 

@@ -1,4 +1,4 @@
-import { listRecords, createRecord, updateRecord, deleteRecord, getRecord, linkId } from '$lib/server/teable';
+import { listRecords, createRecord, updateRecord, getRecord, linkId } from '$lib/server/teable';
 import { TABLES, KONTAKTE_FIELDS, FIRMEN_FIELDS, INTERAKTIONEN_FIELDS } from '$lib/server/teable-schema';
 import { findFirmaId } from '$lib/firma-match';
 import { mapContact } from '$lib/server/teable-map';
@@ -157,6 +157,7 @@ export const actions: Actions = {
     const id = d.get('id');
     if (!isRecordId(id)) return fail(400, { error: 'Ungültige ID' });
     const record = await getRecord<Record<string, unknown>>(TABLES.kontakteReal, id);
+    if (!record) return fail(404, { error: 'Kontakt nicht gefunden' });
     const tags = addArchivTag(record?.fields[KONTAKTE_FIELDS.tags]);
     await updateRecord(TABLES.kontakteReal, id, { [KONTAKTE_FIELDS.tags]: tags });
     return { success: true };

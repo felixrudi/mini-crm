@@ -17,7 +17,6 @@
   import Building2 from '@lucide/svelte/icons/building-2';
   import Mail from '@lucide/svelte/icons/mail';
   import Phone from '@lucide/svelte/icons/phone';
-  import Trash2 from '@lucide/svelte/icons/trash-2';
   import Archive from '@lucide/svelte/icons/archive';
   import Pencil from '@lucide/svelte/icons/pencil';
   import CalendarClock from '@lucide/svelte/icons/calendar-clock';
@@ -316,7 +315,7 @@
 
     {#if filterOpen}
       <div class="mt-3 pt-3 border-t border-line">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
           <div>
             <p class="text-[11px] font-bold text-ink-soft uppercase tracking-wide mb-1">🏷 Tags (Mehrfachauswahl)</p>
             <div class="flex flex-wrap gap-1">

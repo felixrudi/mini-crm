@@ -129,7 +129,7 @@
         >
           {view.name}
         </button>
-        <span class="flex opacity-70 hover:opacity-100 transition-opacity items-center gap-0.5 absolute -right-1 -top-1 bg-surface rounded-full border border-line shadow-sm">
+        <span class="flex opacity-70 hover:opacity-100 transition-opacity items-center gap-0.5 ml-1 bg-surface rounded-full border border-line shadow-sm">
           <button type="button" title="Umbenennen" onclick={() => { renaming = view.id; renameValue = view.name; }} class="p-1.5 text-ink-soft hover:text-terracotta transition-colors rounded">
             <Pencil class="w-3.5 h-3.5" />
           </button>
