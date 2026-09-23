@@ -18,6 +18,7 @@
   import Check from '@lucide/svelte/icons/check';
   import X from '@lucide/svelte/icons/x';
   import Trash2 from '@lucide/svelte/icons/trash-2';
+  import Archive from '@lucide/svelte/icons/archive';
   import Users from '@lucide/svelte/icons/users';
   import Phone from '@lucide/svelte/icons/phone';
   import MapPin from '@lucide/svelte/icons/map-pin';
@@ -240,13 +241,15 @@
         <div class="flex items-center justify-end gap-1">
           <button onclick={() => startEdit(company)} class="p-1.5 text-ink-soft hover:text-terracotta transition-colors rounded"><Pencil class="w-3.5 h-3.5" /></button>
           {#if deleteConfirm === company.id}
-            <form method="POST" action="?/delete" use:enhance={() => async ({ result, update }) => { if (result.type === 'success') toast.success('Gelöscht'); deleteConfirm = null; await update(); }} class="flex items-center gap-1">
+            <form method="POST" action="?/delete" use:enhance={() => async ({ result, update }) => { if (result.type === 'success') toast.success('Firma archiviert'); deleteConfirm = null; await update(); }} class="flex items-center gap-1">
               <input type="hidden" name="id" value={company.id} />
-              <button type="submit" class="px-2 py-1 bg-red-500 text-white rounded text-xs">Ja</button>
+              <button type="submit" class="px-2 py-1 bg-ink text-white rounded text-xs">Ja</button>
               <button type="button" onclick={() => (deleteConfirm = null)} class="px-2 py-1 border border-line rounded text-xs">Nein</button>
             </form>
           {:else}
-            <button onclick={() => (deleteConfirm = company.id)} class="p-1.5 text-ink-soft hover:text-red-500 transition-colors rounded"><Trash2 class="w-3.5 h-3.5" /></button>
+            <button onclick={() => (deleteConfirm = company.id)} class="p-1.5 text-ink-soft hover:text-terracotta transition-colors rounded" title="Archivieren">
+              <Archive class="w-3.5 h-3.5" />
+            </button>
           {/if}
         </div>
       </td>

@@ -1,10 +1,11 @@
-import { listRecords, createRecord, updateRecord, deleteRecord, linkId } from '$lib/server/teable';
+import { listRecords, createRecord, updateRecord, deleteRecord, getRecord, linkId } from '$lib/server/teable';
 import { TABLES, FIRMEN_FIELDS, KONTAKTE_FIELDS } from '$lib/server/teable-schema';
 import { matchesCompanyFilters, sortCompanies } from '$lib/server/company-filters';
 import type { TagMode, CompanySortKey } from '$lib/server/company-filters';
 import { listViews } from '$lib/server/views';
 import { renameTagBulk } from '$lib/server/tag-rename';
 import { isRecordId } from '$lib/server/validation';
+import { addArchivTag } from '$lib/server/archive';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -148,7 +149,9 @@ export const actions: Actions = {
     const d = await request.formData();
     const id = d.get('id');
     if (!isRecordId(id)) return fail(400, { error: 'Ungültige ID' });
-    await deleteRecord(TABLES.firmen, id);
+    const record = await getRecord<Record<string, unknown>>(TABLES.firmen, id);
+    const tags = addArchivTag(record?.fields[FIRMEN_FIELDS.tags]);
+    await updateRecord(TABLES.firmen, id, { [FIRMEN_FIELDS.tags]: tags });
     return { success: true };
   },
   rename_tag: async ({ request }) => {
