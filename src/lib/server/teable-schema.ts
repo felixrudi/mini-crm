@@ -33,7 +33,8 @@ export const FIRMEN_FIELDS = {
   ort: 'Ort',
   land: 'Land',
   notizen: 'Notizen',
-  tags: 'Tags'
+  tags: 'Tags',
+  domain: 'Domain'
 } as const;
 
 export const KONTAKTE_FIELDS = {

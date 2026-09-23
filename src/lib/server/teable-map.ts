@@ -17,6 +17,7 @@ export function mapCompany(r: TeableRecord, contactCount = 0) {
     id: r.id,
     name: f[FIRMEN_FIELDS.name] as string,
     website: (f[FIRMEN_FIELDS.website] as string) ?? null,
+    domain: (f[FIRMEN_FIELDS.domain] as string) ?? null,
     telefon: (f[FIRMEN_FIELDS.telefon] as string) ?? null,
     strasse: (f[FIRMEN_FIELDS.strasse] as string) ?? null,
     plz: (f[FIRMEN_FIELDS.plz] as string) ?? null,

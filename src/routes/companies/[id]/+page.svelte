@@ -27,6 +27,7 @@
   let editing = $state(false);
   let editName = $state('');
   let editWebsite = $state('');
+  let editDomain = $state('');
   let editTelefon = $state('');
   let editStrasse = $state('');
   let editPlz = $state('');
@@ -41,6 +42,7 @@
   function startEdit() {
     editName = data.company.name;
     editWebsite = data.company.website ?? '';
+    editDomain = data.company.domain ?? '';
     editTelefon = data.company.telefon ?? '';
     editStrasse = data.company.strasse ?? '';
     editPlz = data.company.plz ?? '';
@@ -80,6 +82,12 @@
             <input name="website" type="text" bind:value={editWebsite}
               class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
               placeholder="https://…" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-ink-soft mb-1">Domain</label>
+            <input name="domain" type="text" bind:value={editDomain}
+              class="w-full px-3 py-2 bg-cream border border-line rounded-lg text-base text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              placeholder="kanzlei.at" />
           </div>
           <div>
             <label class="block text-xs font-medium text-ink-soft mb-1">Telefon</label>

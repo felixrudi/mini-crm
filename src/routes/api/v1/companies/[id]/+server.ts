@@ -41,6 +41,7 @@ export const PATCH: RequestHandler = async ({ request, params }) => {
   await updateRecord(TABLES.firmen, params.id, {
     [FIRMEN_FIELDS.name]: (body.name !== undefined ? (body.name as string)?.trim() : undefined) || existing.fields[FIRMEN_FIELDS.name],
     [FIRMEN_FIELDS.website]: pick('website', FIRMEN_FIELDS.website),
+    [FIRMEN_FIELDS.domain]: pick('domain', FIRMEN_FIELDS.domain),
     [FIRMEN_FIELDS.telefon]: pick('telefon', FIRMEN_FIELDS.telefon),
     [FIRMEN_FIELDS.strasse]: pick('strasse', FIRMEN_FIELDS.strasse),
     [FIRMEN_FIELDS.plz]: pick('plz', FIRMEN_FIELDS.plz),

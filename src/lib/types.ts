@@ -9,6 +9,7 @@ export type Company = {
   land: string | null;
   notizen: string | null;
   tags: string[];
+  domain: string | null;
   created_at: string;
   contact_count?: number;
 }
