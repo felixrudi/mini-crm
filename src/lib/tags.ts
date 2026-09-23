@@ -7,7 +7,7 @@ export const DEFAULT_TAGS_EXCLUDE = ['archiv'] as const;
 
 const TAG_COLORS = [
   'bg-terracotta/10 text-terracotta border-terracotta/20',
-  'bg-sage/10 text-sage border-sage/20',
+  'bg-sage/10 text-ink border-sage/40',
   'bg-blue-50 text-blue-600 border-blue-200',
   'bg-amber-50 text-amber-700 border-amber-200',
   'bg-purple-50 text-purple-700 border-purple-200',

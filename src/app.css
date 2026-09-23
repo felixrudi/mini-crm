@@ -23,27 +23,27 @@
 
 /* Theme 1: Hirschfeld Cream (Mockup 1:1) - Default */
 :root, [data-theme='light-hybrid'] {
-  --background: #f9f6f2;
-  --bg-elevated: #f0e6db;
-  --card: #ffffff;
-  --card-hover: #f0e6db;
-  --card-foreground: #2b221d;
-  --foreground: #2b221d;
-  --foreground-dim: #70625a;
+  --background: #fbf1c7;
+  --bg-elevated: #f2e5bc;
+  --card: #f6e9c6;
+  --card-hover: #eeddb4;
+  --card-foreground: #2a201c;
+  --foreground: #2a201c;
+  --foreground-dim: #6b5a4e;
   --primary: #904446;
   --primary-dark: #904446;
   --accent-sand: #e6c5a8;
   --border: #e6c5a8;
   --border-bright: #d9686a;
 
-  --popover: #ffffff;
-  --popover-foreground: #2b221d;
+  --popover: #f6e9c6;
+  --popover-foreground: #2a201c;
   --primary-foreground: #ffffff;
-  --secondary: #f0e6db;
+  --secondary: #f2e5bc;
   --secondary-foreground: #904446;
-  --muted: #f0e6db;
-  --muted-foreground: #70625a;
-  --accent: #f0e6db;
+  --muted: #f2e5bc;
+  --muted-foreground: #6b5a4e;
+  --accent: #f2e5bc;
   --accent-foreground: #904446;
   --destructive: #904446;
   --destructive-foreground: #ffffff;

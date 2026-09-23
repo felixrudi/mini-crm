@@ -47,3 +47,27 @@ test('light-neumorphic: foreground-dim #616b83 hält 4,5:1 auf Theme-Grund und K
   assert.ok(contrastRatio('#616b83', '#eef0f3') >= 4.5);
   assert.ok(contrastRatio('#616b83', '#ffffff') >= 4.5);
 });
+
+test('Bernstein-Angleichung: Text #2a201c auf neuem Grund/Karte besteht 4,5:1', () => {
+  const BERNSTEIN_BG = '#fbf1c7';
+  const BERNSTEIN_CARD = '#f6e9c6';
+  const BERNSTEIN_TEXT = '#2a201c';
+  assert.ok(contrastRatio(BERNSTEIN_TEXT, BERNSTEIN_BG) >= 4.5);
+  assert.ok(contrastRatio(BERNSTEIN_TEXT, BERNSTEIN_CARD) >= 4.5);
+});
+
+test('Bernstein-Angleichung: gedämpfter Text #6b5a4e auf neuem Grund/Karte besteht 4,5:1', () => {
+  const BERNSTEIN_BG = '#fbf1c7';
+  const BERNSTEIN_CARD = '#f6e9c6';
+  const BERNSTEIN_TEXT_DIM = '#6b5a4e';
+  assert.ok(contrastRatio(BERNSTEIN_TEXT_DIM, BERNSTEIN_BG) >= 4.5);
+  assert.ok(contrastRatio(BERNSTEIN_TEXT_DIM, BERNSTEIN_CARD) >= 4.5);
+});
+
+test('Tag-Farbe "sage": Text auf 10%-Sand-Hintergrund bestand vorher nicht 4,5:1, jetzt schon', () => {
+  const SAGE = '#e6c5a8';
+  const CARD = '#ffffff';
+  const blended = mixOver(SAGE, CARD, 0.1);
+  assert.ok(contrastRatio(SAGE, blended) < 3, 'Beleg: Sand-Text auf Sand-Hintergrund war der Fehler');
+  assert.ok(contrastRatio('#2a201c', blended) >= 4.5, 'ink als Tag-Text besteht auf demselben Hintergrund');
+});
